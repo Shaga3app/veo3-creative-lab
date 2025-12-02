@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Veo3 Creative Lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #050816;
+      color: #f9fafb;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 800px;
+      background: #0b1020;
+      border-radius: 18px;
+      padding: 18px 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.04em;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.18);
+      font-size: 0.75rem;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      margin: 0 0 6px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #d1d5db;
+    }
+
+    .section {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(148,163,184,0.25);
+    }
+
+    .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+
+    .base-prompt-box {
+      background: #020617;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      border: 1px dashed rgba(148,163,184,0.5);
+      color: #e5e7eb;
+      white-space: pre-wrap;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid rgba(148,163,184,0.5);
+      margin-top: 8px;
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(120deg, #2563eb, #7c3aed);
+      color: #f9fafb;
+    }
+
+    .mode-btn span.icon {
+      font-size: 0.9rem;
+    }
+
+    .fields {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+
+    input[type="text"],
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: #020617;
+      color: #e5e7eb;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #6b7280;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .left-actions,
+    .right-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button.primary {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 25px rgba(22,163,74,0.4);
+    }
+
+    button.primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    button.secondary {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: transparent;
+      color: #9ca3af;
+      cursor: pointer;
+    }
+
+    .trials {
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+
+    .trials strong {
+      color: #f59e0b;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .status.error {
+      color: #f97373;
+    }
+
+    .output {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid rgba(148,163,184,0.4);
+      font-size: 0.8rem;
+    }
+
+    .output a {
+      color: #38bdf8;
+      word-break: break-all;
+    }
+
+    .saved-list {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .saved-item {
+      border-radius: 10px;
+      background: #020617;
+      border: 1px solid rgba(148,163,184,0.3);
+      padding: 6px 8px;
+      font-size: 0.78rem;
+    }
+
+    .saved-item-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .saved-item-title {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .saved-item-time {
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 14px 12px;
+        border-radius: 16px;
+      }
+
+      h1 {
+        font-size: 1.1rem;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="header">
+        <div>
+          <div class="logo">Veo3 Creative Playground</div>
+          <h1>Play with our guided video prompt</h1>
+          <p>You get up to 3 free tries. The core concept is fixed by us; you just add your creative twist ✨</p>
+        </div>
+        <div class="badge">Beta · Veo3 powered</div>
+      </div>
+
+      <!-- Fixed main prompt -->
+      <div class="section">
+        <div class="label">Base Concept (locked)</div>
+        <div class="base-prompt-box" id="basePromptBox">
+YOUR_BASE_PROMPT_GOES_HERE
+
+Example:
+Create a vertical 9:16 cinematic video, 8 seconds long, with smooth camera moves and rich realistic lighting. The scene follows this concept, and we will inject the user details below.
+        </div>
+      </div>
+
+      <!-- Mode selection -->
+      <div class="section">
+        <div class="label">Choose input mode</div>
+        <div class="mode-toggle">
+          <button class="mode-btn active" data-mode="text" id="btnTextMode">
+            <span class="icon">📝</span> Text prompt
+          </button>
+          <button class="mode-btn" data-mode="images" id="btnImageMode">
+            <span class="icon">🖼️</span> Start + End images
+          </button>
+        </div>
+
+        <!-- Text mode fields -->
+        <div class="fields" id="textModeFields">
+          <div class="field-group">
+            <label for="fieldCharacter">Main subject / character</label>
+            <input type="text" id="fieldCharacter"
+                   placeholder="e.g. A young Egyptian filmmaker after a workout" />
+          </div>
+          <div class="field-group">
+            <label for="fieldLocation">Location / environment</label>
+            <input type="text" id="fieldLocation"
+                   placeholder="e.g. Rooftop gym in Cairo at sunset" />
+          </div>
+          <div class="field-group">
+            <label for="fieldExtra">Extra creative twist (optional)</label>
+            <textarea id="fieldExtra"
+                      placeholder="e.g. Smooth dolly-in shot, slow motion at the end, warm glowing lights..."></textarea>
+          </div>
+          <div class="hint">
+            These fields are the only editable parts. The base concept above stays fixed.
+          </div>
+        </div>
+
+        <!-- Image mode fields -->
+        <div class="fields" id="imageModeFields" style="display:none;">
+          <div class="field-group">
+            <label for="startImage">Start frame image</label>
+            <input type="file" id="startImage" accept="image/*" />
+            <div class="hint">Upload an image for how the video starts.</div>
+          </div>
+          <div class="field-group">
+            <label for="endImage">End frame image</label>
+            <input type="file" id="endImage" accept="image/*" />
+            <div class="hint">Upload an image for how the video ends.</div>
+          </div>
+          <div class="field-group">
+            <label for="imageExtra">Extra description (optional)</label>
+            <textarea id="imageExtra"
+                      placeholder="e.g. Camera pushes from start frame into motion and lands on the end frame..."></textarea>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <div class="left-actions">
+            <button class="primary" id="btnGenerate">
+              ▶ Generate video
+            </button>
+            <button class="secondary" id="btnSaveResult" disabled>
+              Save this result
+            </button>
+          </div>
+          <div class="right-actions">
+            <div class="trials">
+              Trials left: <strong id="trialsLeft"></strong> / 3
+            </div>
+          </div>
+        </div>
+
+        <div class="status" id="statusText"></div>
+
+        <!-- Output -->
+        <div class="output" id="outputBox" style="display:none;">
+          <div><strong>Generated request:</strong></div>
+          <div id="outputPrompt"></div>
+          <div style="margin-top:6px;" id="outputVideoWrapper"></div>
+        </div>
+      </div>
+
+      <!-- Saved results -->
+      <div class="section">
+        <div class="label">Saved attempts</div>
+        <div class="hint">These are stored only in your browser (local to this device).</div>
+        <div class="saved-list" id="savedList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // CONFIG
+    // =========================
+    const BASE_PROMPT = document.getElementById("basePromptBox").innerText.trim();
+    const MAX_TRIALS = 3;
+    const TRIALS_KEY = "veo3_trials_used";
+    const SAVED_KEY = "veo3_saved_results";
+
+    // =========================
+    // STATE
+    // =========================
+    let currentMode = "text"; // "text" or "images"
+    let lastResult = null;
+
+    // =========================
+    // ELEMENTS
+    // =========================
+    const btnTextMode = document.getElementById("btnTextMode");
+    const btnImageMode = document.getElementById("btnImageMode");
+    const textModeFields = document.getElementById("textModeFields");
+    const imageModeFields = document.getElementById("imageModeFields");
+    const trialsLeftEl = document.getElementById("trialsLeft");
+    const statusText = document.getElementById("statusText");
+    const btnGenerate = document.getElementById("btnGenerate");
+    const btnSaveResult = document.getElementById("btnSaveResult");
+    const outputBox = document.getElementById("outputBox");
+    const outputPrompt = document.getElementById("outputPrompt");
+    const outputVideoWrapper = document.getElementById("outputVideoWrapper");
+    const savedList = document.getElementById("savedList");
+
+    // Input elements
+    const fieldCharacter = document.getElementById("fieldCharacter");
+    const fieldLocation = document.getElementById("fieldLocation");
+    const fieldExtra = document.getElementById("fieldExtra");
+    const startImageInput = document.getElementById("startImage");
+    const endImageInput = document.getElementById("endImage");
+    const imageExtra = document.getElementById("imageExtra");
+
+    // =========================
+    // UTIL
+    // =========================
+    function getTrialsUsed() {
+      return Number(localStorage.getItem(TRIALS_KEY) || "0");
+    }
+
+    function setTrialsUsed(val) {
+      localStorage.setItem(TRIALS_KEY, String(val));
+    }
+
+    function updateTrialsUI() {
+      const used = getTrialsUsed();
+      const left = Math.max(0, MAX_TRIALS - used);
+      trialsLeftEl.textContent = left;
+      btnGenerate.disabled = left <= 0;
+    }
+
+    function setStatus(message, isError = false) {
+      statusText.textContent = message || "";
+      statusText.className = "status" + (isError ? " error" : "");
+    }
+
+    function loadSaved() {
+      try {
+        const data = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
+        return Array.isArray(data) ? data : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveSaved(data) {
+      localStorage.setItem(SAVED_KEY, JSON.stringify(data));
+    }
+
+    function renderSavedList() {
+      const saved = loadSaved();
+      savedList.innerHTML = "";
+      if (saved.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "hint";
+        empty.textContent = "No saved attempts yet.";
+        savedList.appendChild(empty);
+        return;
+      }
+      saved.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "saved-item";
+
+        const header = document.createElement("div");
+        header.className = "saved-item-header";
+
+        const title = document.createElement("div");
+        title.className = "saved-item-title";
+        title.textContent = item.mode === "text" ? "Text prompt" : "Images prompt";
+
+        const time = document.createElement("div");
+        time.className = "saved-item-time";
+        time.textContent = new Date(item.timestamp).toLocaleString();
+
+        header.appendChild(title);
+        header.appendChild(time);
+
+        const body = document.createElement("div");
+        body.textContent = item.promptPreview || "";
+
+        const linkWrapper = document.createElement("div");
+        if (item.videoUrl) {
+          const link = document.createElement("a");
+          link.href = item.videoUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "Open video";
+          linkWrapper.appendChild(link);
+        }
+
+        div.appendChild(header);
+        div.appendChild(body);
+        if (item.videoUrl) div.appendChild(linkWrapper);
+
+        savedList.appendChild(div);
+      });
+    }
+
+    function base64FromFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // =========================
+    // MODE SWITCH
+    // =========================
+    function setMode(mode) {
+      currentMode = mode;
+      if (mode === "text") {
+        btnTextMode.classList.add("active");
+        btnImageMode.classList.remove("active");
+        textModeFields.style.display = "flex";
+        imageModeFields.style.display = "none";
+      } else {
+        btnTextMode.classList.remove("active");
+        btnImageMode.classList.add("active");
+        textModeFields.style.display = "none";
+        imageModeFields.style.display = "flex";
+      }
+      setStatus("");
+      outputBox.style.display = "none";
+      btnSaveResult.disabled = true;
+      lastResult = null;
+    }
+
+    btnTextMode.addEventListener("click", () => setMode("text"));
+    btnImageMode.addEventListener("click", () => setMode("images"));
+
+    // =========================
+    // GENERATE HANDLER
+    // =========================
+    async function handleGenerate() {
+      const used = getTrialsUsed();
+      if (used >= MAX_TRIALS) {
+        setStatus("You have used all 3 trials.", true);
+        return;
+      }
+
+      setStatus("Sending your request to the server...", false);
+      btnGenerate.disabled = true;
+      btnSaveResult.disabled = true;
+      outputBox.style.display = "none";
+
+      try {
+        let payload = {
+          mode: currentMode,
+          basePrompt: BASE_PROMPT,
+        };
+
+        if (currentMode === "text") {
+          const character = fieldCharacter.value.trim();
+          const location = fieldLocation.value.trim();
+          const extra = fieldExtra.value.trim();
+
+          if (!character || !location) {
+            setStatus("Please fill at least the subject and location.", true);
+            btnGenerate.disabled = false;
+            return;
+          }
+
+          const composedPrompt = `
+${BASE_PROMPT}
+
+User details:
+- Main subject / character: ${character}
+- Location / environment: ${location}
+- Extra creative twist: ${extra || "None"}
+          `.trim();
+
+          payload.textPrompt = composedPrompt;
+
+        } else {
+          const startFile = startImageInput.files[0];
+          const endFile = endImageInput.files[0];
+
+          if (!startFile || !endFile) {
+            setStatus("Please upload both start and end images.", true);
+            btnGenerate.disabled = false;
+            return;
+          }
+
+          const [startBase64, endBase64] = await Promise.all([
+            base64FromFile(startFile),
+            base64FromFile(endFile),
+          ]);
+
+          payload.startImage = startBase64;
+          payload.endImage = endBase64;
+          payload.imageExtra = imageExtra.value.trim();
+        }
+
+        // Call your backend (Node/Express) at /api/generate
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          throw new Error("Server error: " + res.status);
+        }
+
+        const data = await res.json();
+
+        // data is expected like: { promptUsed: "...", videoUrl: "https://..." }
+        const promptUsed = data.promptUsed || (payload.textPrompt || "[Prompt sent]");
+        const videoUrl = data.videoUrl || "";
+
+        outputPrompt.textContent = promptUsed;
+        outputVideoWrapper.innerHTML = "";
+        if (videoUrl) {
+          const link = document.createElement("a");
+          link.href = videoUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = "Open generated video";
+          outputVideoWrapper.appendChild(link);
+        } else {
+          outputVideoWrapper.textContent = "The server did not return a video URL. Ask your developer to connect Veo3 here.";
+        }
+        outputBox.style.display = "block";
+
+        // Update trials
+        setTrialsUsed(used + 1);
+        updateTrialsUI();
+
+        // Store last result in memory for "save" button
+        lastResult = {
+          mode: currentMode,
+          promptPreview: promptUsed.slice(0, 280) + (promptUsed.length > 280 ? "..." : ""),
+          videoUrl,
+          timestamp: Date.now(),
+        };
+
+        btnSaveResult.disabled = false;
+        setStatus("Done! You can save this result or try again (if you still have trials).", false);
+
+      } catch (err) {
+        console.error(err);
+        setStatus("Something went wrong. Please try again or contact support.", true);
+      } finally {
+        btnGenerate.disabled = getTrialsUsed() >= MAX_TRIALS;
+      }
+    }
+
+    btnGenerate.addEventListener("click", () => {
+      handleGenerate();
+    });
+
+    // =========================
+    // SAVE RESULT
+    // =========================
+    btnSaveResult.addEventListener("click", () => {
+      if (!lastResult) return;
+      const saved = loadSaved();
+      saved.unshift(lastResult); // newest first
+      saveSaved(saved);
+      renderSavedList();
+      btnSaveResult.disabled = true;
+      setStatus("Result saved on this device.", false);
+    });
+
+    // =========================
+    // INIT
+    // =========================
+    updateTrialsUI();
+    renderSavedList();
+  </script>
+</body>
+</html>
