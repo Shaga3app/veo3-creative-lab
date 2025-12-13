@@ -654,6 +654,69 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
       localStorage.setItem(TRIALS_KEY, String(val));
     }
 
+// ✅ Language Toggle (EN/AR)
+const LANG_KEY = "ui_lang";
+let currentLang = localStorage.getItem(LANG_KEY) || "en";
+
+const T = {
+  en: {
+    btn: "عربي",
+    badge: "Beta · Shaga3app powered",
+    h1: "Play with our guided video prompt",
+    p: "You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨",
+    loaderTitle: "Generating…",
+    loaderSub: "Please wait (demo loader • 20 seconds)"
+  },
+  ar: {
+    btn: "EN",
+    badge: "تجريبي · بدعم شجع٣",
+    h1: "جرّب البرومبت الموجّه للفيديو",
+    p: "لديك ٣ محاولات فقط. الفكرة الأساسية ثابتة من عندنا — وإنت تضيف لمستك الإبداعية ✨",
+    loaderTitle: "جارٍ التوليد…",
+    loaderSub: "انتظر قليلًا (تحميل تجريبي • ٢٠ ثانية)"
+  }
+};
+
+const btnLangToggle = document.getElementById("btnLangToggle");
+const betaBadge = document.getElementById("betaBadge");
+
+// If you added IDs to loader text, these will work:
+const loadingTitleEl = document.getElementById("loadingTitle");
+const loadingSubEl = document.getElementById("loadingSub");
+
+function applyLang(lang){
+  currentLang = lang;
+  localStorage.setItem(LANG_KEY, lang);
+
+  document.body.classList.toggle("lang-ar", lang === "ar");
+
+  // badge
+  if (betaBadge) betaBadge.textContent = T[lang].badge;
+
+  // header title + intro
+  const h1El = document.querySelector(".header h1");
+  const pEl = document.querySelector(".header p");
+  if (h1El) h1El.textContent = T[lang].h1;
+  if (pEl) pEl.textContent = T[lang].p;
+
+  // loader (optional if IDs exist)
+  if (loadingTitleEl) loadingTitleEl.textContent = T[lang].loaderTitle;
+  if (loadingSubEl) loadingSubEl.textContent = T[lang].loaderSub;
+
+  // button label
+  if (btnLangToggle) btnLangToggle.textContent = T[lang].btn;
+}
+
+if (btnLangToggle){
+  btnLangToggle.addEventListener("click", () => {
+    applyLang(currentLang === "en" ? "ar" : "en");
+  });
+}
+
+applyLang(currentLang);
+
+
+    
     function updateTrialsUI() {
       const used = getTrialsUsed();
       const left = Math.max(0, MAX_TRIALS - used);
