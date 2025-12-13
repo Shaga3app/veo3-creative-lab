@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Your Creative Lab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <style>
+  <style>
    /* ========================================================
    GLOBAL
 ======================================================== */
@@ -25,9 +25,8 @@ button.secondary:hover {
   background: rgba(15,23,42,0.9);
   color: #22ff88; /* <-- Color on hover */
 }
+*/
 
-
-        
 * {
   box-sizing: border-box;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -79,6 +78,13 @@ body {
    MAIN CARD
 ======================================================== */
 
+.app{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  padding: 0 14px 30px;
+}
+
 .card {
   width: 100%;
   max-width: 960px;
@@ -106,17 +112,19 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
-}
-
-.logo-title {
   font-size: 1.4rem;
   letter-spacing: 0.05em;
   font-weight: 700;
 }
 
-.logo-tagline {
-  font-size: 0.8rem;
-  color: #9ca3af;
+h1{
+  margin: 8px 0 6px;
+  font-size: 1.25rem;
+}
+p{
+  margin: 0;
+  color:#9ca3af;
+  line-height:1.4;
 }
 
 .badge {
@@ -144,6 +152,12 @@ body {
   letter-spacing: 0.13em;
   color: #9ca3af;
   margin-bottom: 8px;
+}
+
+.hint{
+  margin-top: 8px;
+  color:#9ca3af;
+  font-size:0.82rem;
 }
 
 /* ========================================================
@@ -225,6 +239,13 @@ body {
   gap: 12px;
 }
 
+.field-group label{
+  display:block;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  color:#e5e7eb;
+}
+
 input[type="text"],
 textarea,
 input[type="file"] {
@@ -243,8 +264,23 @@ textarea {
 }
 
 /* ========================================================
-   BUTTONS
+   BUTTONS + ACTIONS
 ======================================================== */
+
+.actions{
+  margin-top: 14px;
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.left-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
 
 button.primary {
   border: none;
@@ -263,6 +299,41 @@ button.primary:hover {
   transform: translateY(-1px);
 }
 
+button.secondary {
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 0.86rem;
+  border: 1px solid rgba(148,163,184,0.6);
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+button.secondary:hover {
+  background: rgba(15,23,42,0.9);
+  color: #22ff88;
+}
+
+button:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
+/* ========================================================
+   STATUS
+======================================================== */
+
+.status{
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color:#e5e7eb;
+}
+.status.error{
+  color:#fca5a5;
+}
+
 /* ========================================================
    OUTPUT + SAVED ATTEMPTS
 ======================================================== */
@@ -272,13 +343,92 @@ button.primary:hover {
   padding: 14px;
   border-radius: 12px;
   background: rgba(15,23,42,0.9);
+  border: 1px solid rgba(148,163,184,0.35);
+}
+
+.saved-list{
+  margin-top: 10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
 .saved-item {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 10px;
   background: rgba(15,23,42,0.8);
   border: 1px solid rgba(148,163,184,0.4);
+}
+.saved-item-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom: 6px;
+}
+.saved-item-title{
+  font-weight:700;
+}
+.saved-item-time{
+  color:#9ca3af;
+  font-size:0.8rem;
+}
+
+/* ========================================================
+   ✅ 20s LOADING OVERLAY (NEW)
+======================================================== */
+
+.loading-overlay{
+  position: fixed;
+  inset: 0;
+  display: none; /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.loading-card{
+  width: min(520px, 92vw);
+  background: rgba(10, 15, 30, 0.96);
+  border: 1px solid rgba(148,163,184,0.35);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 20px 55px rgba(0,0,0,0.65);
+  text-align: center;
+}
+
+.loading-title{
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.loading-sub{
+  font-size: 0.86rem;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.loading-progress{
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148,163,184,0.18);
+  overflow:hidden;
+  border: 1px solid rgba(148,163,184,0.25);
+}
+
+.loading-bar{
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #2563eb, #7c3aed);
+  transition: width 0.25s linear;
+}
+
+.loading-timer{
+  margin-top: 10px;
+  font-size: 0.84rem;
+  color:#e5e7eb;
 }
 
 /* ========================================================
@@ -289,14 +439,22 @@ button.primary:hover {
   .brand-logo { height: 36px; }
   .card { padding: 18px 14px; }
 }
-
   </style>
-
-
 </head>
+
 <body>
 
-  <body>
+  <!-- ✅ 20s Loading Overlay (NEW) -->
+  <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
+    <div class="loading-card" role="dialog" aria-modal="true" aria-label="Generating">
+      <div class="loading-title">Generating…</div>
+      <div class="loading-sub">Please wait (demo loader • 20 seconds)</div>
+      <div class="loading-progress">
+        <div class="loading-bar" id="loadingBar"></div>
+      </div>
+      <div class="loading-timer" id="loadingTimer">20s</div>
+    </div>
+  </div>
 
   <div class="brand-bar">
     <div class="brand-bar-inner">
@@ -425,6 +583,9 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     const TRIALS_KEY = "veo3_trials_used";
     const SAVED_KEY = "veo3_saved_results";
 
+    // ✅ Loader settings
+    const FAKE_LOADING_MS = 20000;
+
     // =========================
     // STATE
     // =========================
@@ -446,6 +607,11 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     const outputPrompt = document.getElementById("outputPrompt");
     const outputVideoWrapper = document.getElementById("outputVideoWrapper");
     const savedList = document.getElementById("savedList");
+
+    // ✅ Loader elements (NEW)
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const loadingBar = document.getElementById("loadingBar");
+    const loadingTimer = document.getElementById("loadingTimer");
 
     // Input elements
     const fieldCharacter = document.getElementById("fieldCharacter");
@@ -549,6 +715,50 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
       });
     }
 
+    // ✅ Wait helper
+    function wait(ms){
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    // ✅ 20s Loader (NEW)
+    let loaderInterval = null;
+
+    function showFakeLoader(durationMs = FAKE_LOADING_MS){
+      // reset
+      loadingOverlay.style.display = "flex";
+      loadingOverlay.setAttribute("aria-hidden", "false");
+      loadingBar.style.width = "0%";
+      loadingTimer.textContent = Math.ceil(durationMs/1000) + "s";
+
+      const start = Date.now();
+      const end = start + durationMs;
+
+      // update every 200ms
+      clearInterval(loaderInterval);
+      loaderInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = Math.max(0, end - now);
+        const progress = Math.min(1, (now - start) / durationMs);
+
+        loadingBar.style.width = Math.round(progress * 100) + "%";
+        loadingTimer.textContent = Math.ceil(remaining / 1000) + "s";
+
+        if (remaining <= 0){
+          clearInterval(loaderInterval);
+          loaderInterval = null;
+          loadingBar.style.width = "100%";
+          loadingTimer.textContent = "0s";
+        }
+      }, 200);
+    }
+
+    function hideFakeLoader(){
+      clearInterval(loaderInterval);
+      loaderInterval = null;
+      loadingOverlay.style.display = "none";
+      loadingOverlay.setAttribute("aria-hidden", "true");
+    }
+
     // =========================
     // MODE SWITCH
     // =========================
@@ -584,10 +794,13 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
         return;
       }
 
-      setStatus("Sending your request to the server...", false);
+      setStatus("", false);
       btnGenerate.disabled = true;
       btnSaveResult.disabled = true;
       outputBox.style.display = "none";
+
+      // ✅ show loader immediately
+      showFakeLoader(FAKE_LOADING_MS);
 
       try {
         let payload = {
@@ -601,6 +814,7 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
           const extra = fieldExtra.value.trim();
 
           if (!character || !location) {
+            hideFakeLoader();
             setStatus("Please fill at least the subject and location.", true);
             btnGenerate.disabled = false;
             return;
@@ -622,6 +836,7 @@ User details:
           const endFile = endImageInput.files[0];
 
           if (!startFile || !endFile) {
+            hideFakeLoader();
             setStatus("Please upload both start and end images.", true);
             btnGenerate.disabled = false;
             return;
@@ -637,12 +852,18 @@ User details:
           payload.imageExtra = imageExtra.value.trim();
         }
 
-        // Call your backend (Node/Express) at /api/generate
-        const res = await fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate", {
+        // ✅ Start the fetch immediately
+        const fetchPromise = fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+
+        // ✅ Force a minimum 20s wait before showing result
+        const [res] = await Promise.all([
+          fetchPromise,
+          wait(FAKE_LOADING_MS)
+        ]);
 
         if (!res.ok) {
           throw new Error("Server error: " + res.status);
@@ -653,6 +874,9 @@ User details:
         // data is expected like: { promptUsed: "...", videoUrl: "https://..." }
         const promptUsed = data.promptUsed || (payload.textPrompt || "[Prompt sent]");
         const videoUrl = data.videoUrl || "";
+
+        // hide loader now
+        hideFakeLoader();
 
         outputPrompt.textContent = promptUsed;
         outputVideoWrapper.innerHTML = "";
@@ -685,6 +909,7 @@ User details:
 
       } catch (err) {
         console.error(err);
+        hideFakeLoader();
         setStatus("Something went wrong. Please try again or contact support.", true);
       } finally {
         btnGenerate.disabled = getTrialsUsed() >= MAX_TRIALS;
