@@ -16,14 +16,14 @@ button.secondary {
   font-size: 0.78rem;
   border: 1px solid rgba(148,163,184,0.6);
   background: transparent;
-  color: #9ca3af; /* <-- CHANGE THIS TO WHATEVER COLOR YOU WANT */
+  color: #9ca3af; 
   cursor: pointer;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
 button.secondary:hover {
   background: rgba(15,23,42,0.9);
-  color: #22ff88; /* <-- Color on hover */
+  color: #22ff88;
 }
 */
 
@@ -374,13 +374,13 @@ button:disabled{
 }
 
 /* ========================================================
-   ✅ 20s LOADING OVERLAY (NEW)
+   ✅ 20s LOADING OVERLAY
 ======================================================== */
 
 .loading-overlay{
   position: fixed;
   inset: 0;
-  display: none; /* hidden by default */
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 9999;
@@ -432,6 +432,32 @@ button:disabled{
 }
 
 /* ========================================================
+   ✅ ARABIC MODE FIXES (RTL)
+======================================================== */
+
+body.lang-ar{
+  direction: rtl;
+  text-align: right;
+}
+
+body.lang-ar input,
+body.lang-ar textarea{
+  direction: rtl;
+  text-align: right;
+}
+
+/* Make header layout look correct in RTL */
+body.lang-ar .header{
+  flex-direction: row-reverse;
+}
+
+/* IMPORTANT: base prompt contains English; keep it LTR even in Arabic */
+body.lang-ar .base-prompt-box{
+  direction: ltr;
+  text-align: left;
+}
+
+/* ========================================================
    RESPONSIVE
 ======================================================== */
 
@@ -440,29 +466,15 @@ button:disabled{
   .card { padding: 18px 14px; }
 }
   </style>
-
-body.lang-ar {
-  direction: rtl;
-  text-align: right;
-}
-
-body.lang-ar input,
-body.lang-ar textarea {
-  direction: rtl;
-  text-align: right;
-}
-
-
-  
 </head>
 
 <body>
 
-  <!-- ✅ 20s Loading Overlay (NEW) -->
+  <!-- ✅ 20s Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
     <div class="loading-card" role="dialog" aria-modal="true" aria-label="Generating">
       <div class="loading-title" id="loadingTitle">Generating…</div>
-<div class="loading-sub" id="loadingSub">Please wait (demo loader • 20 seconds)</div>
+      <div class="loading-sub" id="loadingSub">Please wait (demo loader • 20 seconds)</div>
       <div class="loading-progress">
         <div class="loading-bar" id="loadingBar"></div>
       </div>
@@ -481,24 +493,20 @@ body.lang-ar textarea {
     <div class="card">
       <div class="header">
         <div>
-          <div class="logo">Your Creative Playground</div>
-          <h1>Play with our guided video prompt</h1>
-          <p>You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨</p>
+          <div class="logo" id="logoTitle">Your Creative Playground</div>
+          <h1 id="heroTitle">Play with our guided video prompt</h1>
+          <p id="heroDesc">You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨</p>
         </div>
+
         <div style="display:flex; gap:10px; align-items:center;">
-  <div class="badge" id="betaBadge">Beta · Shaga3app powered</div>
-
-  <!-- ✅ Language toggle -->
-  <button class="secondary" id="btnLangToggle" type="button" style="padding:8px 12px;">
-    عربي
-  </button>
-</div>
-
+          <div class="badge" id="betaBadge">Beta · Shaga3app powered</div>
+          <button class="secondary" id="btnLangToggle" type="button" style="padding:8px 12px;">عربي</button>
+        </div>
       </div>
 
       <!-- Fixed main prompt -->
       <div class="section">
-        <div class="label">Base Concept (locked)</div>
+        <div class="label" id="lblBaseConcept">Base Concept (locked)</div>
         <div class="base-prompt-box" id="basePromptBox">
 YOUR_BASE_PROMPT_GOES_HERE
 
@@ -509,7 +517,7 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
 
       <!-- Mode selection -->
       <div class="section">
-        <div class="label">Choose input mode</div>
+        <div class="label" id="lblChooseMode">Choose input mode</div>
         <div class="mode-toggle">
           <button class="mode-btn active" data-mode="text" id="btnTextMode">
             <span class="icon">📝</span> Text prompt
@@ -522,21 +530,21 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
         <!-- Text mode fields -->
         <div class="fields" id="textModeFields">
           <div class="field-group">
-            <label for="fieldCharacter">Main subject / character</label>
+            <label for="fieldCharacter" id="lblCharacter">Main subject / character</label>
             <input type="text" id="fieldCharacter"
                    placeholder="e.g. A young Egyptian filmmaker after a workout" />
           </div>
           <div class="field-group">
-            <label for="fieldLocation">Location / environment</label>
+            <label for="fieldLocation" id="lblLocation">Location / environment</label>
             <input type="text" id="fieldLocation"
                    placeholder="e.g. Rooftop gym in Cairo at sunset" />
           </div>
           <div class="field-group">
-            <label for="fieldExtra">Extra creative twist (optional)</label>
+            <label for="fieldExtra" id="lblExtra">Extra creative twist (optional)</label>
             <textarea id="fieldExtra"
                       placeholder="e.g. Smooth dolly-in shot, slow motion at the end, warm glowing lights..."></textarea>
           </div>
-          <div class="hint">
+          <div class="hint" id="hintLocked">
             These fields are the only editable parts. The base concept above stays fixed.
           </div>
         </div>
@@ -544,17 +552,17 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
         <!-- Image mode fields -->
         <div class="fields" id="imageModeFields" style="display:none;">
           <div class="field-group">
-            <label for="startImage">Start frame image</label>
+            <label for="startImage" id="lblStartImg">Start frame image</label>
             <input type="file" id="startImage" accept="image/*" />
-            <div class="hint">Upload an image for how the video starts.</div>
+            <div class="hint" id="hintStart">Upload an image for how the video starts.</div>
           </div>
           <div class="field-group">
-            <label for="endImage">End frame image</label>
+            <label for="endImage" id="lblEndImg">End frame image</label>
             <input type="file" id="endImage" accept="image/*" />
-            <div class="hint">Upload an image for how the video ends.</div>
+            <div class="hint" id="hintEnd">Upload an image for how the video ends.</div>
           </div>
           <div class="field-group">
-            <label for="imageExtra">Extra description (optional)</label>
+            <label for="imageExtra" id="lblImgExtra">Extra description (optional)</label>
             <textarea id="imageExtra"
                       placeholder="e.g. Camera pushes from start frame into motion and lands on the end frame..."></textarea>
           </div>
@@ -563,15 +571,11 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
         <!-- Actions -->
         <div class="actions">
           <div class="left-actions">
-            <button class="primary" id="btnGenerate">
-              ▶ Generate video
-            </button>
-            <button class="secondary" id="btnSaveResult" disabled>
-              Save this result
-            </button>
+            <button class="primary" id="btnGenerate">▶ Generate video</button>
+            <button class="secondary" id="btnSaveResult" disabled>Save this result</button>
           </div>
           <div class="right-actions">
-            <div class="trials">
+            <div class="trials" id="trialsWrap">
               Trials left: <strong id="trialsLeft"></strong> / 3
             </div>
           </div>
@@ -581,7 +585,7 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
 
         <!-- Output -->
         <div class="output" id="outputBox" style="display:none;">
-          <div><strong>Generated request:</strong></div>
+          <div><strong id="lblGeneratedReq">Generated request:</strong></div>
           <div id="outputPrompt"></div>
           <div style="margin-top:6px;" id="outputVideoWrapper"></div>
         </div>
@@ -589,8 +593,8 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
 
       <!-- Saved results -->
       <div class="section">
-        <div class="label">Saved attempts</div>
-        <div class="hint">These are stored only in your browser (local to this device).</div>
+        <div class="label" id="lblSaved">Saved attempts</div>
+        <div class="hint" id="hintSaved">These are stored only in your browser (local to this device).</div>
         <div class="saved-list" id="savedList"></div>
       </div>
     </div>
@@ -604,14 +608,12 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     const MAX_TRIALS = 3;
     const TRIALS_KEY = "veo3_trials_used";
     const SAVED_KEY = "veo3_saved_results";
-
-    // ✅ Loader settings
     const FAKE_LOADING_MS = 20000;
 
     // =========================
     // STATE
     // =========================
-    let currentMode = "text"; // "text" or "images"
+    let currentMode = "text";
     let lastResult = null;
 
     // =========================
@@ -622,6 +624,7 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     const textModeFields = document.getElementById("textModeFields");
     const imageModeFields = document.getElementById("imageModeFields");
     const trialsLeftEl = document.getElementById("trialsLeft");
+    const trialsWrap = document.getElementById("trialsWrap");
     const statusText = document.getElementById("statusText");
     const btnGenerate = document.getElementById("btnGenerate");
     const btnSaveResult = document.getElementById("btnSaveResult");
@@ -630,12 +633,14 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     const outputVideoWrapper = document.getElementById("outputVideoWrapper");
     const savedList = document.getElementById("savedList");
 
-    // ✅ Loader elements (NEW)
+    // Loader elements
     const loadingOverlay = document.getElementById("loadingOverlay");
     const loadingBar = document.getElementById("loadingBar");
     const loadingTimer = document.getElementById("loadingTimer");
+    const loadingTitleEl = document.getElementById("loadingTitle");
+    const loadingSubEl = document.getElementById("loadingSub");
 
-    // Input elements
+    // Inputs
     const fieldCharacter = document.getElementById("fieldCharacter");
     const fieldLocation = document.getElementById("fieldLocation");
     const fieldExtra = document.getElementById("fieldExtra");
@@ -649,79 +654,8 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     function getTrialsUsed() {
       return Number(localStorage.getItem(TRIALS_KEY) || "0");
     }
-
     function setTrialsUsed(val) {
       localStorage.setItem(TRIALS_KEY, String(val));
-    }
-
-// ✅ Language Toggle (EN/AR)
-const LANG_KEY = "ui_lang";
-let currentLang = localStorage.getItem(LANG_KEY) || "en";
-
-const T = {
-  en: {
-    btn: "عربي",
-    badge: "Beta · Shaga3app powered",
-    h1: "Play with our guided video prompt",
-    p: "You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨",
-    loaderTitle: "Generating…",
-    loaderSub: "Please wait (demo loader • 20 seconds)"
-  },
-  ar: {
-    btn: "EN",
-    badge: "تجريبي · بدعم شجع٣",
-    h1: "جرّب البرومبت الموجّه للفيديو",
-    p: "لديك ٣ محاولات فقط. الفكرة الأساسية ثابتة من عندنا — وإنت تضيف لمستك الإبداعية ✨",
-    loaderTitle: "جارٍ التوليد…",
-    loaderSub: "انتظر قليلًا (تحميل تجريبي • ٢٠ ثانية)"
-  }
-};
-
-const btnLangToggle = document.getElementById("btnLangToggle");
-const betaBadge = document.getElementById("betaBadge");
-
-// If you added IDs to loader text, these will work:
-const loadingTitleEl = document.getElementById("loadingTitle");
-const loadingSubEl = document.getElementById("loadingSub");
-
-function applyLang(lang){
-  currentLang = lang;
-  localStorage.setItem(LANG_KEY, lang);
-
-  document.body.classList.toggle("lang-ar", lang === "ar");
-
-  // badge
-  if (betaBadge) betaBadge.textContent = T[lang].badge;
-
-  // header title + intro
-  const h1El = document.querySelector(".header h1");
-  const pEl = document.querySelector(".header p");
-  if (h1El) h1El.textContent = T[lang].h1;
-  if (pEl) pEl.textContent = T[lang].p;
-
-  // loader (optional if IDs exist)
-  if (loadingTitleEl) loadingTitleEl.textContent = T[lang].loaderTitle;
-  if (loadingSubEl) loadingSubEl.textContent = T[lang].loaderSub;
-
-  // button label
-  if (btnLangToggle) btnLangToggle.textContent = T[lang].btn;
-}
-
-if (btnLangToggle){
-  btnLangToggle.addEventListener("click", () => {
-    applyLang(currentLang === "en" ? "ar" : "en");
-  });
-}
-
-applyLang(currentLang);
-
-
-    
-    function updateTrialsUI() {
-      const used = getTrialsUsed();
-      const left = Math.max(0, MAX_TRIALS - used);
-      trialsLeftEl.textContent = left;
-      btnGenerate.disabled = left <= 0;
     }
 
     function setStatus(message, isError = false) {
@@ -737,18 +671,176 @@ applyLang(currentLang);
         return [];
       }
     }
-
     function saveSaved(data) {
       localStorage.setItem(SAVED_KEY, JSON.stringify(data));
     }
 
+    function base64FromFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function wait(ms){
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    // =========================
+    // ✅ LANGUAGE (EN/AR)
+    // =========================
+    const LANG_KEY = "ui_lang";
+    let currentLang = localStorage.getItem(LANG_KEY) || "en";
+
+    const T = {
+      en: {
+        btn: "عربي",
+        badge: "Beta · Shaga3app powered",
+        logoTitle: "Your Creative Playground",
+        heroTitle: "Play with our guided video prompt",
+        heroDesc: "You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨",
+        lblBaseConcept: "Base Concept (locked)",
+        lblChooseMode: "Choose input mode",
+        btnTextMode: "📝 Text prompt",
+        btnImageMode: "🖼️ Start + End images",
+        lblCharacter: "Main subject / character",
+        lblLocation: "Location / environment",
+        lblExtra: "Extra creative twist (optional)",
+        hintLocked: "These fields are the only editable parts. The base concept above stays fixed.",
+        lblStartImg: "Start frame image",
+        hintStart: "Upload an image for how the video starts.",
+        lblEndImg: "End frame image",
+        hintEnd: "Upload an image for how the video ends.",
+        lblImgExtra: "Extra description (optional)",
+        btnGenerate: "▶ Generate video",
+        btnSave: "Save this result",
+        trials: (left) => `Trials left: <strong id="trialsLeft">${left}</strong> / 3`,
+        lblGeneratedReq: "Generated request:",
+        lblSaved: "Saved attempts",
+        hintSaved: "These are stored only in your browser (local to this device).",
+        emptySaved: "No saved attempts yet.",
+        loaderTitle: "Generating…",
+        loaderSub: "Please wait (demo loader • 20 seconds)",
+        statusFill: "Please fill at least the subject and location.",
+        statusImages: "Please upload both start and end images.",
+        statusDone: "Done! You can save this result or try again (if you still have trials).",
+        statusError: "Something went wrong. Please try again or contact support.",
+        openVideo: "Open video",
+        openGenerated: "Open generated video",
+        noVideo: "The server did not return a video URL. Ask your developer to connect Veo3 here."
+      },
+      ar: {
+        btn: "EN",
+        badge: "تجريبي · بدعم شجع٣",
+        logoTitle: "ساحة الإبداع",
+        heroTitle: "جرّب البرومبت الموجّه للفيديو",
+        heroDesc: "لديك ٣ محاولات فقط. الفكرة الأساسية ثابتة من عندنا — وإنت تضيف لمستك الإبداعية ✨",
+        lblBaseConcept: "الفكرة الأساسية (مقفولة)",
+        lblChooseMode: "اختار طريقة الإدخال",
+        btnTextMode: "📝 برومبت نصّي",
+        btnImageMode: "🖼️ صورتين (بداية + نهاية)",
+        lblCharacter: "الشخصية / العنصر الرئيسي",
+        lblLocation: "المكان / البيئة",
+        lblExtra: "إضافة إبداعية (اختياري)",
+        hintLocked: "هذه الحقول فقط هي القابلة للتعديل. الفكرة الأساسية بالأعلى ثابتة.",
+        lblStartImg: "صورة البداية",
+        hintStart: "ارفع صورة لبداية الفيديو.",
+        lblEndImg: "صورة النهاية",
+        hintEnd: "ارفع صورة لنهاية الفيديو.",
+        lblImgExtra: "وصف إضافي (اختياري)",
+        btnGenerate: "▶ توليد الفيديو",
+        btnSave: "احفظ النتيجة",
+        trials: (left) => `المحاولات المتبقية: <strong id="trialsLeft">${left}</strong> / ٣`,
+        lblGeneratedReq: "الطلب المُرسل:",
+        lblSaved: "المحاولات المحفوظة",
+        hintSaved: "يتم حفظها على هذا الجهاز فقط داخل المتصفح.",
+        emptySaved: "لا توجد محاولات محفوظة حتى الآن.",
+        loaderTitle: "جارٍ التوليد…",
+        loaderSub: "انتظر قليلًا (تحميل تجريبي • ٢٠ ثانية)",
+        statusFill: "من فضلك اكتب على الأقل الشخصية والمكان.",
+        statusImages: "من فضلك ارفع صورة البداية وصورة النهاية.",
+        statusDone: "تم! يمكنك حفظ النتيجة أو المحاولة مرة أخرى (إذا تبقى محاولات).",
+        statusError: "حدث خطأ. جرّب مرة أخرى أو تواصل مع الدعم.",
+        openVideo: "افتح الفيديو",
+        openGenerated: "افتح الفيديو الناتج",
+        noVideo: "الخادم لم يُرجع رابط فيديو. اطلب من المطور ربط Veo3 هنا."
+      }
+    };
+
+    const btnLangToggle = document.getElementById("btnLangToggle");
+    const betaBadge = document.getElementById("betaBadge");
+
+    function applyLang(lang){
+      currentLang = lang;
+      localStorage.setItem(LANG_KEY, lang);
+      document.body.classList.toggle("lang-ar", lang === "ar");
+
+      document.getElementById("logoTitle").textContent = T[lang].logoTitle;
+      document.getElementById("heroTitle").textContent = T[lang].heroTitle;
+      document.getElementById("heroDesc").textContent = T[lang].heroDesc;
+
+      document.getElementById("lblBaseConcept").textContent = T[lang].lblBaseConcept;
+      document.getElementById("lblChooseMode").textContent = T[lang].lblChooseMode;
+
+      document.getElementById("lblCharacter").textContent = T[lang].lblCharacter;
+      document.getElementById("lblLocation").textContent = T[lang].lblLocation;
+      document.getElementById("lblExtra").textContent = T[lang].lblExtra;
+      document.getElementById("hintLocked").textContent = T[lang].hintLocked;
+
+      document.getElementById("lblStartImg").textContent = T[lang].lblStartImg;
+      document.getElementById("hintStart").textContent = T[lang].hintStart;
+      document.getElementById("lblEndImg").textContent = T[lang].lblEndImg;
+      document.getElementById("hintEnd").textContent = T[lang].hintEnd;
+      document.getElementById("lblImgExtra").textContent = T[lang].lblImgExtra;
+
+      btnTextMode.innerHTML = `<span class="icon">📝</span> ${T[lang].btnTextMode.replace("📝 ","").replace("📝","")}`.includes("span") ? btnTextMode.innerHTML : `<span class="icon">📝</span> ${T[lang].btnTextMode}`;
+      btnTextMode.innerHTML = T[lang].btnTextMode;
+      btnImageMode.innerHTML = T[lang].btnImageMode;
+
+      btnGenerate.textContent = T[lang].btnGenerate;
+      btnSaveResult.textContent = T[lang].btnSave;
+
+      document.getElementById("lblGeneratedReq").textContent = T[lang].lblGeneratedReq;
+      document.getElementById("lblSaved").textContent = T[lang].lblSaved;
+      document.getElementById("hintSaved").textContent = T[lang].hintSaved;
+
+      if (betaBadge) betaBadge.textContent = T[lang].badge;
+      if (loadingTitleEl) loadingTitleEl.textContent = T[lang].loaderTitle;
+      if (loadingSubEl) loadingSubEl.textContent = T[lang].loaderSub;
+      if (btnLangToggle) btnLangToggle.textContent = T[lang].btn;
+
+      updateTrialsUI();
+      renderSavedList();
+    }
+
+    if (btnLangToggle){
+      btnLangToggle.addEventListener("click", () => {
+        applyLang(currentLang === "en" ? "ar" : "en");
+      });
+    }
+
+    // =========================
+    // TRIALS UI
+    // =========================
+    function updateTrialsUI() {
+      const used = getTrialsUsed();
+      const left = Math.max(0, MAX_TRIALS - used);
+      trialsWrap.innerHTML = T[currentLang].trials(left);
+      btnGenerate.disabled = left <= 0;
+    }
+
+    // =========================
+    // SAVED LIST
+    // =========================
     function renderSavedList() {
       const saved = loadSaved();
       savedList.innerHTML = "";
       if (saved.length === 0) {
         const empty = document.createElement("div");
         empty.className = "hint";
-        empty.textContent = "No saved attempts yet.";
+        empty.textContent = T[currentLang].emptySaved;
         savedList.appendChild(empty);
         return;
       }
@@ -761,7 +853,7 @@ applyLang(currentLang);
 
         const title = document.createElement("div");
         title.className = "saved-item-title";
-        title.textContent = item.mode === "text" ? "Text prompt" : "Images prompt";
+        title.textContent = item.mode === "text" ? (currentLang === "ar" ? "برومبت نصّي" : "Text prompt") : (currentLang === "ar" ? "برومبت صور" : "Images prompt");
 
         const time = document.createElement("div");
         time.className = "saved-item-time";
@@ -779,7 +871,7 @@ applyLang(currentLang);
           link.href = item.videoUrl;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = "Open video";
+          link.textContent = T[currentLang].openVideo;
           linkWrapper.appendChild(link);
         }
 
@@ -791,25 +883,12 @@ applyLang(currentLang);
       });
     }
 
-    function base64FromFile(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // ✅ Wait helper
-    function wait(ms){
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    // ✅ 20s Loader (NEW)
+    // =========================
+    // LOADER
+    // =========================
     let loaderInterval = null;
 
     function showFakeLoader(durationMs = FAKE_LOADING_MS){
-      // reset
       loadingOverlay.style.display = "flex";
       loadingOverlay.setAttribute("aria-hidden", "false");
       loadingBar.style.width = "0%";
@@ -818,7 +897,6 @@ applyLang(currentLang);
       const start = Date.now();
       const end = start + durationMs;
 
-      // update every 200ms
       clearInterval(loaderInterval);
       loaderInterval = setInterval(() => {
         const now = Date.now();
@@ -875,7 +953,7 @@ applyLang(currentLang);
     async function handleGenerate() {
       const used = getTrialsUsed();
       if (used >= MAX_TRIALS) {
-        setStatus("You have used all 3 trials.", true);
+        setStatus(currentLang === "ar" ? "لقد استخدمت كل المحاولات." : "You have used all 3 trials.", true);
         return;
       }
 
@@ -884,7 +962,6 @@ applyLang(currentLang);
       btnSaveResult.disabled = true;
       outputBox.style.display = "none";
 
-      // ✅ show loader immediately
       showFakeLoader(FAKE_LOADING_MS);
 
       try {
@@ -900,7 +977,7 @@ applyLang(currentLang);
 
           if (!character || !location) {
             hideFakeLoader();
-            setStatus("Please fill at least the subject and location.", true);
+            setStatus(T[currentLang].statusFill, true);
             btnGenerate.disabled = false;
             return;
           }
@@ -922,7 +999,7 @@ User details:
 
           if (!startFile || !endFile) {
             hideFakeLoader();
-            setStatus("Please upload both start and end images.", true);
+            setStatus(T[currentLang].statusImages, true);
             btnGenerate.disabled = false;
             return;
           }
@@ -937,51 +1014,44 @@ User details:
           payload.imageExtra = imageExtra.value.trim();
         }
 
-        // ✅ Start the fetch immediately
         const fetchPromise = fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
 
-        // ✅ Force a minimum 20s wait before showing result
         const [res] = await Promise.all([
           fetchPromise,
           wait(FAKE_LOADING_MS)
         ]);
 
-        if (!res.ok) {
-          throw new Error("Server error: " + res.status);
-        }
+        if (!res.ok) throw new Error("Server error: " + res.status);
 
         const data = await res.json();
-
-        // data is expected like: { promptUsed: "...", videoUrl: "https://..." }
         const promptUsed = data.promptUsed || (payload.textPrompt || "[Prompt sent]");
         const videoUrl = data.videoUrl || "";
 
-        // hide loader now
         hideFakeLoader();
 
         outputPrompt.textContent = promptUsed;
         outputVideoWrapper.innerHTML = "";
+
         if (videoUrl) {
           const link = document.createElement("a");
           link.href = videoUrl;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = "Open generated video";
+          link.textContent = T[currentLang].openGenerated;
           outputVideoWrapper.appendChild(link);
         } else {
-          outputVideoWrapper.textContent = "The server did not return a video URL. Ask your developer to connect Veo3 here.";
+          outputVideoWrapper.textContent = T[currentLang].noVideo;
         }
+
         outputBox.style.display = "block";
 
-        // Update trials
         setTrialsUsed(used + 1);
         updateTrialsUI();
 
-        // Store last result in memory for "save" button
         lastResult = {
           mode: currentMode,
           promptPreview: promptUsed.slice(0, 280) + (promptUsed.length > 280 ? "..." : ""),
@@ -990,20 +1060,18 @@ User details:
         };
 
         btnSaveResult.disabled = false;
-        setStatus("Done! You can save this result or try again (if you still have trials).", false);
+        setStatus(T[currentLang].statusDone, false);
 
       } catch (err) {
         console.error(err);
         hideFakeLoader();
-        setStatus("Something went wrong. Please try again or contact support.", true);
+        setStatus(T[currentLang].statusError, true);
       } finally {
         btnGenerate.disabled = getTrialsUsed() >= MAX_TRIALS;
       }
     }
 
-    btnGenerate.addEventListener("click", () => {
-      handleGenerate();
-    });
+    btnGenerate.addEventListener("click", () => handleGenerate());
 
     // =========================
     // SAVE RESULT
@@ -1011,11 +1079,11 @@ User details:
     btnSaveResult.addEventListener("click", () => {
       if (!lastResult) return;
       const saved = loadSaved();
-      saved.unshift(lastResult); // newest first
+      saved.unshift(lastResult);
       saveSaved(saved);
       renderSavedList();
       btnSaveResult.disabled = true;
-      setStatus("Result saved on this device.", false);
+      setStatus(currentLang === "ar" ? "تم حفظ النتيجة على هذا الجهاز." : "Result saved on this device.", false);
     });
 
     // =========================
@@ -1023,6 +1091,7 @@ User details:
     // =========================
     updateTrialsUI();
     renderSavedList();
+    applyLang(currentLang);
   </script>
 </body>
 </html>
