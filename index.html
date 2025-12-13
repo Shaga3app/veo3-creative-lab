@@ -3,840 +3,312 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Creative Lab</title>
+  <title>Shaga3app · AI Creative Playground</title>
+
   <style>
     :root{
       --bg:#0b0f18;
       --text:#e5e7eb;
       --muted:#94a3b8;
-      --line:rgba(255,255,255,.08);
+      --line:rgba(255,255,255,.10);
+      --accent:#5b5cff;
       --ok:#22c55e;
     }
     *{box-sizing:border-box}
-    html, body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Roboto, Arial;
-      background: radial-gradient(1200px 900px at 30% -10%, rgba(91,92,255,.25), transparent 55%),
-                  radial-gradient(900px 700px at 80% 10%, rgba(34,197,94,.12), transparent 50%),
-                  var(--bg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1200px 900px at 30% -10%, rgba(91,92,255,.25), transparent 55%),
+        radial-gradient(900px 700px at 80% 10%, rgba(34,197,94,.12), transparent 50%),
+        var(--bg);
       color:var(--text);
-      overflow-x:hidden;
     }
-    .wrap{max-width:820px;margin:0 auto;padding:18px 16px 36px;}
+    .wrap{max-width:860px;margin:0 auto;padding:18px 16px 40px;}
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
       border:1px solid var(--line);
       border-radius:18px;
       padding:14px;
-      backdrop-filter: blur(10px);
+      backdrop-filter:blur(10px);
     }
-    .top{
-      display:flex;align-items:flex-start;justify-content:space-between;
-      gap:10px;margin-bottom:12px;flex-wrap:wrap;
+
+    /* Top Bar */
+    .topBar{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+      gap:12px;
     }
-    .title{
-      font-weight:700;letter-spacing:.2px;
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .logo{
+      width:34px;height:34px;border-radius:10px;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
     }
-    .badge{
-      font-size:12px;padding:4px 10px;border-radius:999px;
-      border:1px solid var(--line);color:var(--muted);
-      background: rgba(255,255,255,.04);
-      white-space:nowrap;
+    .logo svg{width:22px;height:22px}
+    .pill{
+      padding:7px 12px;
+      border-radius:999px;
+      border:1px solid rgba(91,92,255,.45);
+      background:rgba(91,92,255,.18);
+      font-size:12px;
+      font-weight:800;
     }
-    .topRight{
-      display:flex;gap:8px;align-items:center;flex-wrap:wrap;
-      justify-content:flex-end;margin-left:auto;
-    }
-    .langBtn{
-      font-size:12px;padding:7px 10px;border-radius:999px;
-      border:1px solid var(--line);color:var(--text);
-      background: rgba(255,255,255,.06);
-      font-weight:800;cursor:pointer;
-      -webkit-tap-highlight-color:transparent;
-    }
+
+    /* Hero */
+    .hero{margin:18px 0}
+    .hero h1{font-size:52px;line-height:1.05;margin:6px 0;font-weight:900}
+    .hero p{color:var(--muted);font-size:18px;max-width:520px}
 
     .sectionLabel{
-      margin:14px 0 8px;
-      font-size:12px;color:var(--muted);
-      letter-spacing:.14em;text-transform:uppercase;
+      margin:20px 0 10px;
+      font-size:12px;
+      letter-spacing:.14em;
+      color:var(--muted);
     }
 
+    /* Locked Base */
+    .lockedBox{
+      background:rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+    }
+    .lockedTop{display:flex;justify-content:space-between;align-items:center}
+    .lockedTag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+    }
+    .lockedPrompt{
+      margin-top:10px;
+      border:2px dashed rgba(255,255,255,.16);
+      border-radius:14px;
+      padding:16px;
+      font-family:ui-monospace,monospace;
+      white-space:pre-wrap;
+    }
+
+    /* Mode */
     .modeBar{
       display:flex;gap:10px;
-      background: rgba(0,0,0,.18);
       border:1px solid var(--line);
       border-radius:14px;
       padding:8px;
-      overflow:hidden;
-      flex-wrap:wrap;
+      background:rgba(0,0,0,.18);
     }
     .modeBtn{
-      flex:1 1 180px;
-      display:flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px;border-radius:12px;
+      flex:1;
+      padding:10px;
+      border-radius:12px;
+      background:transparent;
       border:1px solid transparent;
       color:var(--muted);
-      background:transparent;
-      font-weight:600;
       cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
-      min-width:150px;
+      font-weight:700;
     }
-    .modeBtn .ico{font-size:16px;opacity:.9}
     .modeBtn.on{
-      background: rgba(91,92,255,.22);
-      border-color: rgba(91,92,255,.45);
-      color: var(--text);
+      background:rgba(91,92,255,.22);
+      border-color:rgba(91,92,255,.45);
+      color:var(--text);
     }
 
-    .grid{display:grid;grid-template-columns:1fr;gap:10px;}
-    @media(min-width:720px){
-      .grid{grid-template-columns:1fr 1fr;}
-      .span2{grid-column:1/-1;}
-    }
+    .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+    @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
 
     .field{
-      background: rgba(0,0,0,.18);
+      background:rgba(0,0,0,.18);
       border:1px solid var(--line);
       border-radius:14px;
       padding:12px;
-      min-width:0;
-      position:relative;
     }
-    .field label{
-      display:block;
-      font-size:13px;
-      color:var(--text);
-      margin-bottom:8px;
-      opacity:.9;
-    }
-    .field input, .field textarea{
+    .field label{font-size:13px;margin-bottom:6px;display:block}
+    .field input{
       width:100%;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color:var(--text);
-      border-radius:12px;
       padding:12px;
-      outline:none;
-      font-size:15px;
-      min-width:0;
-    }
-    .field textarea{min-height:92px;resize:vertical}
-    .hint{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.35;}
-
-    /* LOCKED base prompt styling */
-    .lockedTag{
-      position:absolute;
-      top:10px;
-      right:10px;
-      font-size:12px;
-      padding:4px 10px;
-      border-radius:999px;
+      border-radius:12px;
       border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      color: var(--muted);
-      display:flex;
-      align-items:center;
-      gap:6px;
-      pointer-events:none;
-    }
-    body[dir="rtl"] .lockedTag{right:auto;left:10px;}
-
-    textarea[readonly]{
-      opacity:.92;
-      filter:saturate(.95);
-      cursor:not-allowed;
+      background:rgba(255,255,255,.04);
+      color:var(--text);
     }
 
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0;}
     .btn{
-      border:none;border-radius:14px;
-      padding:12px 14px;
-      font-weight:800;
+      padding:12px 16px;
+      border-radius:14px;
+      border:none;
+      font-weight:900;
       cursor:pointer;
+      background:linear-gradient(180deg,#22c55e,#1ea84d);
       color:#07120a;
-      background: linear-gradient(180deg, rgba(34,197,94,1), rgba(34,197,94,.85));
-      display:inline-flex;align-items:center;gap:10px;
-      -webkit-tap-highlight-color:transparent;
-      max-width:100%;
     }
     .btn.secondary{
-      color:var(--text);
-      background: rgba(255,255,255,.06);
+      background:rgba(255,255,255,.06);
       border:1px solid var(--line);
-      font-weight:700;
+      color:var(--text);
       text-decoration:none;
     }
-    .btn:disabled{opacity:.5;cursor:not-allowed;}
-    .small{font-size:12px;color:var(--muted);word-break:break-word;}
 
     .result{
-      margin-top:12px;
-      background: rgba(0,0,0,.18);
+      display:none;
+      margin-top:14px;
       border:1px solid var(--line);
       border-radius:16px;
       padding:12px;
-      display:none;
-    }
-    .resultTop{
-      display:flex;justify-content:space-between;align-items:center;gap:10px;
-      margin-bottom:10px;
-      flex-wrap:wrap;
-    }
-    .pill{
-      font-size:12px;padding:6px 10px;border-radius:999px;
-      border:1px solid var(--line);color:var(--muted);
-      background: rgba(255,255,255,.04);
-      white-space:nowrap;
+      background:rgba(0,0,0,.18);
     }
     .progress{
-      height:10px;border-radius:999px;overflow:hidden;
+      height:10px;border-radius:999px;
+      background:rgba(255,255,255,.04);
+      overflow:hidden;
       border:1px solid var(--line);
-      background: rgba(255,255,255,.04);
     }
     .bar{
       height:100%;width:0%;
-      background: linear-gradient(90deg, rgba(91,92,255,.9), rgba(34,197,94,.9));
-      transition: width .25s ease;
+      background:linear-gradient(90deg,#5b5cff,#22c55e);
     }
     video{
       width:100%;
+      margin-top:10px;
       border-radius:14px;
       border:1px solid var(--line);
-      background:#000;
       display:none;
     }
-
-    .saved{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;}
-    .attempts{display:flex;flex-direction:column;gap:10px;}
-    .attempt{
-      background: rgba(0,0,0,.14);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 12px;
-      display:flex;justify-content:space-between;gap:10px;
-      flex-wrap:wrap;
-    }
-    .attempt .meta{min-width:0;flex:1 1 220px;}
-    .attempt .meta .t{
-      font-size:13px;font-weight:800;margin-bottom:4px;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    }
-    .attempt .meta .s{
-      font-size:12px;color:var(--muted);
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    }
-    .attempt .actions{display:flex;gap:8px;align-items:center;flex:0 0 auto;}
-    .iconBtn{
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      color: var(--text);
-      border-radius:12px;
-      padding:8px 10px;
-      cursor:pointer;
-      font-weight:800;
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    .hidden{display:none !important;}
-
-    /* Arabic mode */
-    body[dir="rtl"] .sectionLabel{letter-spacing:.08em}
-    body[dir="rtl"] .topRight{margin-left:0;margin-right:auto}
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="top">
-        <div class="title">
-          <span id="appTitle">Creative Lab</span>
-          <span class="badge" id="betaBadge">Demo/Beta</span>
-        </div>
+<div class="wrap">
+<div class="card">
 
-        <div class="topRight">
-          <button class="langBtn" id="langToggle" type="button">AR</button>
-          <div class="badge" id="trialsBadge"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">2</b></div>
-        </div>
+  <!-- Top -->
+  <div class="topBar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3c2.5 2.8 4.8 4.2 7.5 4.9-1.3 5.6-4.3 9.6-7.5 13.2C8.8 17.5 5.8 13.5 4.5 7.9 7.2 7.2 9.5 5.8 12 3Z" fill="#5b5cff"/>
+          <path d="M9 9c-1.5 2.4-2.2 4.6-2.4 7.2 2.4-1.1 4.2-3 5.1-5.2-.7-.7-1.7-1.4-2.7-2Z" fill="#22c55e"/>
+        </svg>
       </div>
+      Shaga3app · AI Creative Playground
+    </div>
+    <div class="pill">Beta · Shaga3app powered</div>
+  </div>
 
-      <div class="sectionLabel" id="lblBaseSection">Your base prompt</div>
-      <div class="field">
-        <div class="lockedTag"><span>🔒</span><span id="lockedTxt">Locked</span></div>
-        <label id="lblBase">Base prompt</label>
-        <!-- LOCKED -->
-        <textarea id="basePrompt" readonly></textarea>
-        <div class="hint" id="hintBase">Tip: Keep this stable. We’ll inject the user details below.</div>
-      </div>
+  <!-- Hero -->
+  <div class="hero">
+    <h1>Play with our<br>guided video<br>prompt</h1>
+    <p>You get up to <b>3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
+  </div>
 
-      <div class="sectionLabel" id="lblModeSection">Choose input mode</div>
-      <div class="modeBar" role="tablist" aria-label="Input mode">
-        <button class="modeBtn on" id="modeText" type="button" aria-selected="true">
-          <span class="ico">📝</span> <span id="modeTextLbl">Text prompt</span>
-        </button>
-        <button class="modeBtn" id="modeImages" type="button" aria-selected="false">
-          <span class="ico">🖼️</span> <span id="modeImagesLbl">Start + End images</span>
-        </button>
-      </div>
+  <!-- Locked Base -->
+  <div class="sectionLabel">BASE CONCEPT (LOCKED)</div>
+  <div class="lockedBox">
+    <div class="lockedTop">
+      <div class="lockedTag">🔒 Locked</div>
+      <div class="lockedTag">Trials left: <b id="trialsLeft">3</b></div>
+    </div>
+    <div class="lockedPrompt" id="basePrompt">
+YOUR_BASE_PROMPT_GOES_HERE
 
-      <div class="grid" style="margin-top:10px;">
-        <div class="field">
-          <label id="lblSubject">Main subject / character</label>
-          <input id="subject" />
-        </div>
-
-        <div class="field">
-          <label id="lblLocation">Location / environment</label>
-          <input id="location" />
-        </div>
-
-        <div class="field span2" id="extraBox">
-          <label id="lblTwist">Extra creative twist (optional)</label>
-          <input id="twist" />
-        </div>
-
-        <div class="field span2 hidden" id="imagesBox">
-          <label id="lblImages">Start + End images</label>
-          <div class="row">
-            <input id="startImg" type="file" accept="image/*" />
-            <input id="endImg" type="file" accept="image/*" />
-          </div>
-          <div class="hint" id="hintImages">These stay on your device for demo. Later you can send them to your backend API.</div>
-        </div>
-      </div>
-
-      <div class="hint" style="margin-top:10px;" id="hintEditable">
-        These fields are the only editable parts. The base concept above stays fixed.
-      </div>
-
-      <div class="row" style="margin-top:12px;">
-        <button class="btn" id="generateBtn" type="button">▶ <span id="btnGenerate">Generate video</span></button>
-        <button class="btn secondary" id="saveBtn" type="button"><span id="btnSave">Save this attempt</span></button>
-        <span class="small" id="status"></span>
-      </div>
-
-      <!-- Result + Download area -->
-      <div class="result" id="resultBox">
-        <div class="resultTop">
-          <div class="pill" id="resultPill">Generating…</div>
-          <div class="small" id="timerText">~10s</div>
-        </div>
-
-        <div class="progress" aria-label="progress">
-          <div class="bar" id="bar"></div>
-        </div>
-
-        <div style="margin-top:10px;">
-          <video id="video" controls playsinline></video>
-        </div>
-
-        <div class="row" style="margin-top:10px;">
-          <a class="btn secondary hidden" id="downloadBtn" href="#" download="result.mp4">⬇ <span id="btnDownload">Download video</span></a>
-          <button class="btn secondary hidden" id="copyPromptBtn" type="button"><span id="btnCopy">Copy final prompt</span></button>
-        </div>
-
-        <div class="hint hidden" id="demoWarn"></div>
-      </div>
-
-      <!-- Saved Attempts area -->
-      <div class="saved">
-        <div class="sectionLabel" id="lblSaved">Saved attempts</div>
-        <div class="small" id="savedInfo">These are stored only in your browser (local to this device).</div>
-        <div class="attempts" id="attempts"></div>
-      </div>
+Example:
+Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera moves and rich realistic lighting. The scene follows this concept, and we will inject the user details below.
     </div>
   </div>
 
+  <!-- Mode -->
+  <div class="sectionLabel">CHOOSE INPUT MODE</div>
+  <div class="modeBar">
+    <button class="modeBtn on" id="modeText">📝 Text prompt</button>
+    <button class="modeBtn" id="modeImages">🖼️ Start + End images</button>
+  </div>
+
+  <!-- Inputs -->
+  <div class="grid">
+    <div class="field">
+      <label>Main subject / character</label>
+      <input id="subject">
+    </div>
+    <div class="field">
+      <label>Location / environment</label>
+      <input id="location">
+    </div>
+    <div class="field span2" id="extraBox">
+      <label>Extra creative twist</label>
+      <input id="twist">
+    </div>
+  </div>
+
+  <div style="margin-top:14px">
+    <button class="btn" id="generateBtn">▶ Generate video</button>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="resultBox">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <video id="video" controls playsinline></video>
+    <a class="btn secondary" id="downloadBtn" style="margin-top:10px" download>⬇ Download video</a>
+  </div>
+
+</div>
+</div>
+
 <script>
-  const $ = (id) => document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-  const state = {
-    mode: "text",
-    trialsLeft: 2,     // ✅ limit to 2 total
-    generating: false,
-    lang: "en",
-    lastVideoURL: null
+/* ===========================
+   AWS DEMO VIDEOS (CONNECTED)
+=========================== */
+const DEMO_VIDEOS = [
+  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1127%286%29.mp4",
+  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1127%281%29.mp4",
+  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1127%285%29.mp4",
+  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1st+vide..last+i+time+line.mp4"
+];
+
+let trials = 3;
+let generating = false;
+
+function fakeGenerate(){
+  if(generating || trials <= 0) return;
+  generating = true;
+  trials--;
+  $("trialsLeft").textContent = trials;
+
+  $("resultBox").style.display = "block";
+  $("video").style.display = "none";
+  $("bar").style.width = "0%";
+
+  const start = Date.now();
+  const total = 10000;
+
+  const tick = () => {
+    const p = Math.min(100, ((Date.now() - start) / total) * 100);
+    $("bar").style.width = p + "%";
+    if(p < 100) requestAnimationFrame(tick);
   };
-
-  const STORAGE_KEY = "creative_lab_attempts_v1";
-  const LANG_KEY = "creative_lab_lang_v1";
-
-  // ✅ Locked base prompt content (change this ONLY from code)
-  const LOCKED_BASE_PROMPT_EN =
-`Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich realistic lighting. The scene follows this concept, and we will inject the user details below.`;
-  const LOCKED_BASE_PROMPT_AR =
-`أنشئ فيديو سينمائي عمودي 9:16 مدته 5–8 ثوانٍ بحركات كاميرا ناعمة وإضاءة واقعية غنية. هذا هو المفهوم الأساسي، وسنضيف تفاصيل المستخدم بالأسفل.`;
-
-  const i18n = {
-    en: {
-      appTitle: "Creative Lab",
-      betaBadge: "Demo/Beta",
-      trialsLabel: "Trials left:",
-      locked: "Locked",
-      baseSection: "Your base prompt",
-      baseLabel: "Base prompt",
-      baseHint: "Tip: Keep this stable. We’ll inject the user details below.",
-      modeSection: "Choose input mode",
-      modeText: "Text prompt",
-      modeImages: "Start + End images",
-      subject: "Main subject / character",
-      location: "Location / environment",
-      twist: "Extra creative twist (optional)",
-      images: "Start + End images",
-      imagesHint: "These stay on your device for demo. Later you can send them to your backend API.",
-      editableHint: "These fields are the only editable parts. The base concept above stays fixed.",
-      btnGenerate: "Generate video",
-      btnSave: "Save this attempt",
-      btnDownload: "Download video",
-      btnCopy: "Copy final prompt",
-      savedTitle: "Saved attempts",
-      savedInfo: "These are stored only in your browser (local to this device).",
-      emptySaved: "No saved attempts yet.",
-      statusSaved: "Saved.",
-      statusGenerating: "Generating…",
-      statusDone: "Ready.",
-      statusNoTrials: "No trials left.",
-      statusCopied: "Final prompt copied.",
-      statusCopyFail: "Copy failed (permissions).",
-      pillGenerating: "Generating…",
-      pillReady: "Ready",
-      phSubject: "e.g. A young Egyptian filmmaker after a workout",
-      phLocation: "e.g. Rooftop gym in Cairo at sunset",
-      phTwist: "e.g. Smooth dolly-in shot, slow motion at the end...",
-      demoWarn: "Your browser couldn’t generate a demo MP4. You can still connect your real backend video URL later."
-    },
-    ar: {
-      appTitle: "المعمل الإبداعي",
-      betaBadge: "تجريبي / بيتا",
-      trialsLabel: "المحاولات المتبقية:",
-      locked: "مقفول",
-      baseSection: "البرومبت الأساسي",
-      baseLabel: "البرومبت الأساسي",
-      baseHint: "نصيحة: خليه ثابت. هنضيف تفاصيل المستخدم تحت.",
-      modeSection: "اختر طريقة الإدخال",
-      modeText: "نص فقط",
-      modeImages: "صورتان: بداية + نهاية",
-      subject: "الشخصية / العنصر الرئيسي",
-      location: "المكان / البيئة",
-      twist: "إضافة إبداعية (اختياري)",
-      images: "صورتان: بداية + نهاية",
-      imagesHint: "للـDemo فقط: الصور تظل على جهازك. لاحقًا يمكنك إرسالها للـAPI.",
-      editableHint: "هذه الحقول فقط قابلة للتعديل. البرومبت الأساسي ثابت.",
-      btnGenerate: "توليد فيديو",
-      btnSave: "حفظ المحاولة",
-      btnDownload: "تحميل الفيديو",
-      btnCopy: "نسخ البرومبت النهائي",
-      savedTitle: "المحاولات المحفوظة",
-      savedInfo: "تُحفظ محليًا على هذا الجهاز فقط (داخل المتصفح).",
-      emptySaved: "لا توجد محاولات محفوظة بعد.",
-      statusSaved: "تم الحفظ.",
-      statusGenerating: "جارٍ التوليد…",
-      statusDone: "جاهز.",
-      statusNoTrials: "لا توجد محاولات متبقية.",
-      statusCopied: "تم نسخ البرومبت النهائي.",
-      statusCopyFail: "فشل النسخ (صلاحيات).",
-      pillGenerating: "جارٍ التوليد…",
-      pillReady: "جاهز",
-      phSubject: "مثال: مخرج مصري شاب بعد التمرين",
-      phLocation: "مثال: جيم على روف في القاهرة وقت الغروب",
-      phTwist: "مثال: حركة كاميرا ناعمة + سلو موشن في النهاية...",
-      demoWarn: "متصفحك لم يقدر يولّد فيديو MP4 تجريبي. تقدر تربط فيديو الباك-إند الحقيقي لاحقًا."
-    }
-  };
-
-  function toArabicDigits(s){
-    const map = {"0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩"};
-    return String(s).replace(/[0-9]/g, d => map[d]);
-  }
-
-  function formatSeconds(n){
-    if(state.lang === "ar") return toArabicDigits(`${n} ث`);
-    return `~${n}s`;
-  }
-
-  function loadAttempts(){
-    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
-    catch(e){ return []; }
-  }
-  function saveAttempts(list){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  }
-
-  function setMode(mode){
-    state.mode = mode;
-    const isText = mode === "text";
-    $("modeText").classList.toggle("on", isText);
-    $("modeImages").classList.toggle("on", !isText);
-    $("modeText").setAttribute("aria-selected", String(isText));
-    $("modeImages").setAttribute("aria-selected", String(!isText));
-    $("imagesBox").classList.toggle("hidden", isText);
-    $("extraBox").classList.toggle("hidden", !isText);
-  }
-
-  function applyLang(lang){
-    state.lang = lang;
-    localStorage.setItem(LANG_KEY, lang);
-
-    const t = i18n[lang];
-    $("appTitle").textContent = t.appTitle;
-    $("betaBadge").textContent = t.betaBadge;
-    $("trialsLabel").textContent = t.trialsLabel;
-    $("lockedTxt").textContent = t.locked;
-
-    $("lblBaseSection").textContent = t.baseSection;
-    $("lblBase").textContent = t.baseLabel;
-    $("hintBase").textContent = t.baseHint;
-
-    $("lblModeSection").textContent = t.modeSection;
-    $("modeTextLbl").textContent = t.modeText;
-    $("modeImagesLbl").textContent = t.modeImages;
-
-    $("lblSubject").textContent = t.subject;
-    $("lblLocation").textContent = t.location;
-    $("lblTwist").textContent = t.twist;
-    $("lblImages").textContent = t.images;
-    $("hintImages").textContent = t.imagesHint;
-    $("hintEditable").textContent = t.editableHint;
-
-    $("btnGenerate").textContent = t.btnGenerate;
-    $("btnSave").textContent = t.btnSave;
-    $("btnDownload").textContent = t.btnDownload;
-    $("btnCopy").textContent = t.btnCopy;
-
-    $("lblSaved").textContent = t.savedTitle;
-    $("savedInfo").textContent = t.savedInfo;
-
-    $("subject").placeholder = t.phSubject;
-    $("location").placeholder = t.phLocation;
-    $("twist").placeholder = t.phTwist;
-
-    // ✅ locked base prompt changes by language (but still locked)
-    $("basePrompt").value = (lang === "ar") ? LOCKED_BASE_PROMPT_AR : LOCKED_BASE_PROMPT_EN;
-
-    document.body.dir = (lang === "ar") ? "rtl" : "ltr";
-    document.documentElement.lang = (lang === "ar") ? "ar" : "en";
-    $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
-
-    // refresh timer display
-    $("timerText").textContent = formatSeconds(10);
-  }
-
-  function setTrials(n){
-    state.trialsLeft = Math.max(0, n);
-    $("trialsLeft").textContent = String(state.trialsLeft);
-  }
-
-  function showResultBox(show){
-    $("resultBox").style.display = show ? "block" : "none";
-  }
-
-  function resetResultUI(){
-    $("bar").style.width = "0%";
-    $("resultPill").textContent = i18n[state.lang].pillGenerating;
-    $("timerText").textContent = formatSeconds(10);
-    $("video").style.display = "none";
-    $("video").removeAttribute("src");
-    $("downloadBtn").classList.add("hidden");
-    $("copyPromptBtn").classList.add("hidden");
-    $("demoWarn").classList.add("hidden");
-    $("demoWarn").textContent = "";
-  }
-
-  function buildFinalPrompt(){
-    const base = ($("basePrompt").value || "").trim();
-    const subject = ($("subject").value || "").trim();
-    const location = ($("location").value || "").trim();
-    const twist = ($("twist").value || "").trim();
-
-    const modeNote = state.mode === "images"
-      ? "Input mode: Start+End images (use provided reference images)."
-      : "Input mode: Text prompt only.";
-
-    let final = base;
-    if(final && !final.endsWith(".")) final += ".";
-    final += `\n\n${modeNote}\nMain subject: ${subject || "N/A"}\nLocation: ${location || "N/A"}`;
-    if(state.mode === "text" && twist) final += `\nExtra twist: ${twist}`;
-    return final.trim();
-  }
-
-  // ✅ Create REAL demo video (tries MP4 first, then WebM fallback)
-  async function createDemoVideoBlob(finalPrompt){
-    const canvas = document.createElement("canvas");
-    canvas.width = 720;
-    canvas.height = 1280;
-    const ctx = canvas.getContext("2d");
-
-    const stream = canvas.captureStream(30);
-
-    // Try best mime types (iOS may support MP4, if not fallback)
-    const candidates = [
-      "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
-      "video/mp4",
-      "video/webm;codecs=vp8",
-      "video/webm"
-    ];
-    const mimeType = candidates.find(t => (window.MediaRecorder && MediaRecorder.isTypeSupported(t)));
-
-    if(!mimeType) throw new Error("No supported MediaRecorder mimeType.");
-
-    const rec = new MediaRecorder(stream, { mimeType });
-    const chunks = [];
-
-    rec.ondataavailable = (e) => { if(e.data && e.data.size) chunks.push(e.data); };
-
-    const durationMs = 1200; // short demo clip
-    const start = performance.now();
-
-    // draw frames
-    function drawFrame(now){
-      const t = (now - start) / durationMs;
-      const p = Math.min(1, Math.max(0, t));
-
-      // background
-      ctx.fillStyle = "#0b0f18";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-
-      // subtle glow
-      const g = ctx.createRadialGradient(180, 200, 0, 180, 200, 900);
-      g.addColorStop(0, "rgba(91,92,255,0.25)");
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-
-      // title
-      ctx.fillStyle = "rgba(255,255,255,0.92)";
-      ctx.font = "700 54px system-ui, -apple-system, Segoe UI, Arial";
-      ctx.fillText(state.lang === "ar" ? "المعمل الإبداعي" : "Creative Lab", 48, 120);
-
-      // bar
-      const barW = Math.round((canvas.width - 96) * p);
-      ctx.fillStyle = "rgba(255,255,255,0.12)";
-      ctx.fillRect(48, 180, canvas.width - 96, 18);
-      ctx.fillStyle = "#22c55e";
-      ctx.fillRect(48, 180, barW, 18);
-
-      // prompt snippet
-      const snippet = finalPrompt.slice(0, 220).replace(/\s+/g," ").trim();
-      ctx.fillStyle = "rgba(229,231,235,0.9)";
-      ctx.font = "400 28px system-ui, -apple-system, Segoe UI, Arial";
-      wrapText(ctx, snippet || "—", 48, 260, canvas.width - 96, 36, 8);
-
-      // footer
-      ctx.fillStyle = "rgba(148,163,184,0.9)";
-      ctx.font = "500 24px system-ui, -apple-system, Segoe UI, Arial";
-      const foot = state.lang === "ar" ? "فيديو تجريبي" : "Demo Video";
-      ctx.fillText(foot, 48, canvas.height - 70);
-
-      if(p < 1) requestAnimationFrame(drawFrame);
-    }
-
-    function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
-      const words = text.split(" ");
-      let line = "";
-      let lines = 0;
-      for(let n=0;n<words.length;n++){
-        const testLine = line + words[n] + " ";
-        const metrics = ctx.measureText(testLine);
-        if(metrics.width > maxWidth && n > 0){
-          ctx.fillText(line, x, y);
-          line = words[n] + " ";
-          y += lineHeight;
-          lines++;
-          if(lines >= maxLines) break;
-        } else {
-          line = testLine;
-        }
-      }
-      if(lines < maxLines) ctx.fillText(line, x, y);
-    }
-
-    // start recording
-    rec.start(200);
-    requestAnimationFrame(drawFrame);
-
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        rec.stop();
-        resolve();
-      }, durationMs + 250);
-    });
-
-    await new Promise((resolve) => {
-      rec.onstop = resolve;
-    });
-
-    const blob = new Blob(chunks, { type: mimeType });
-    return { blob, mimeType };
-  }
-
-  async function fakeGenerate(){
-    state.generating = true;
-    $("status").textContent = i18n[state.lang].statusGenerating;
-    showResultBox(true);
-    resetResultUI();
-
-    const totalMs = 10000; // ✅ 10 seconds loader
-    const start = Date.now();
-
-    const tick = () => {
-      const elapsed = Date.now() - start;
-      const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
-      $("bar").style.width = pct + "%";
-      const remain = Math.max(0, Math.round((totalMs - elapsed) / 1000));
-      $("timerText").textContent = remain ? formatSeconds(remain) : (state.lang === "ar" ? "تم" : "Done");
-      if(elapsed < totalMs) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-
-    await new Promise(r => setTimeout(r, totalMs));
-
-    const finalPrompt = buildFinalPrompt();
-
-    $("resultPill").textContent = i18n[state.lang].pillReady;
-    $("status").textContent = i18n[state.lang].statusDone;
-
-    $("copyPromptBtn").classList.remove("hidden");
-
-    // ✅ Create playable + downloadable demo video
-    try{
-      const { blob, mimeType } = await createDemoVideoBlob(finalPrompt);
-
-      if(state.lastVideoURL) URL.revokeObjectURL(state.lastVideoURL);
-      const url = URL.createObjectURL(blob);
-      state.lastVideoURL = url;
-
-      const v = $("video");
-      v.src = url;
-      v.style.display = "block";
-      v.load();
-
-      // file extension
-      const ext = mimeType.includes("mp4") ? "mp4" : "webm";
-
-      const dl = $("downloadBtn");
-      dl.href = url;
-      dl.setAttribute("download", `result_demo.${ext}`);
-      dl.classList.remove("hidden");
-    }catch(e){
-      // If demo video can’t be generated on this device
-      $("demoWarn").textContent = i18n[state.lang].demoWarn;
-      $("demoWarn").classList.remove("hidden");
-      // Still show video area hidden; download stays hidden (better than downloading text)
-    }
-
-    state.generating = false;
-  }
-
-  function renderAttempts(){
-    const list = loadAttempts();
-    const box = $("attempts");
-    box.innerHTML = "";
-
-    if(!list.length){
-      const empty = document.createElement("div");
-      empty.className = "small";
-      empty.style.opacity = ".9";
-      empty.textContent = i18n[state.lang].emptySaved;
-      box.appendChild(empty);
-      return;
-    }
-
-    list.slice(0, 10).forEach((a, idx) => {
-      const row = document.createElement("div");
-      row.className = "attempt";
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      meta.innerHTML = `<div class="t">${a.title}</div><div class="s">${a.subtitle}</div>`;
-
-      const actions = document.createElement("div");
-      actions.className = "actions";
-
-      const loadBtn = document.createElement("button");
-      loadBtn.className = "iconBtn";
-      loadBtn.textContent = (state.lang === "ar") ? "تحميل" : "Load";
-      loadBtn.onclick = () => {
-        $("subject").value = a.subject || "";
-        $("location").value = a.location || "";
-        $("twist").value = a.twist || "";
-        setMode(a.mode || "text");
-        window.scrollTo({top:0, behavior:"smooth"});
-      };
-
-      const delBtn = document.createElement("button");
-      delBtn.className = "iconBtn";
-      delBtn.textContent = (state.lang === "ar") ? "حذف" : "Delete";
-      delBtn.onclick = () => {
-        const cur = loadAttempts();
-        cur.splice(idx, 1);
-        saveAttempts(cur);
-        renderAttempts();
-      };
-
-      actions.appendChild(loadBtn);
-      actions.appendChild(delBtn);
-      row.appendChild(meta);
-      row.appendChild(actions);
-      box.appendChild(row);
-    });
-  }
-
-  // events
-  $("modeText").addEventListener("click", () => setMode("text"));
-  $("modeImages").addEventListener("click", () => setMode("images"));
-
-  $("langToggle").addEventListener("click", () => {
-    applyLang(state.lang === "en" ? "ar" : "en");
-    renderAttempts();
-  });
-
-  $("generateBtn").addEventListener("click", async () => {
-    if(state.generating) return;
-    if(state.trialsLeft <= 0){
-      $("status").textContent = i18n[state.lang].statusNoTrials;
-      return;
-    }
-    setTrials(state.trialsLeft - 1);
-    await fakeGenerate();
-  });
-
-  $("saveBtn").addEventListener("click", () => {
-    const subject = ($("subject").value || "").trim();
-    const location = ($("location").value || "").trim();
-    const twist = ($("twist").value || "").trim();
-
-    const title = subject ? subject : (location ? location : (state.lang === "ar" ? "محاولة محفوظة" : "Saved attempt"));
-    const subtitle = `${(state.mode || "text").toUpperCase()} • ${location || (state.lang === "ar" ? "بدون مكان" : "No location")} • ${new Date().toLocaleString()}`;
-
-    const attempt = { mode: state.mode, subject, location, twist, title, subtitle };
-    const list = loadAttempts();
-    list.unshift(attempt);
-    saveAttempts(list.slice(0, 20));
-    renderAttempts();
-    $("status").textContent = i18n[state.lang].statusSaved;
-  });
-
-  $("copyPromptBtn").addEventListener("click", async () => {
-    const text = buildFinalPrompt();
-    try{
-      await navigator.clipboard.writeText(text);
-      $("status").textContent = i18n[state.lang].statusCopied;
-    }catch(e){
-      $("status").textContent = i18n[state.lang].statusCopyFail;
-    }
-  });
-
-  // init
-  setMode("text");
-  setTrials(2);
-
-  const savedLang = localStorage.getItem(LANG_KEY) || "en";
-  applyLang(savedLang);
-  renderAttempts();
+  tick();
+
+  setTimeout(() => {
+    const promptLen =
+      ($("subject").value + $("location").value + $("twist").value).length;
+    const videoURL = DEMO_VIDEOS[promptLen % DEMO_VIDEOS.length];
+
+    $("video").src = videoURL;
+    $("video").style.display = "block";
+    $("video").load();
+
+    $("downloadBtn").href = videoURL;
+    generating = false;
+  }, total);
+}
+
+$("generateBtn").onclick = fakeGenerate;
 </script>
 </body>
 </html>
