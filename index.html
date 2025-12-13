@@ -1,376 +1,551 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Shaga3app · AI Creative Playground</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Creative Lab</title>
+  <style>
+    :root{
+      --bg:#0b0f18;
+      --panel:#0f172a;
+      --panel2:#0b1226;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --line:rgba(255,255,255,.08);
+      --chip:#111c34;
+      --chipOn:#5b5cff;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 900px at 30% -10%, rgba(91,92,255,.25), transparent 55%),
+                  radial-gradient(900px 700px at 80% 10%, rgba(34,197,94,.12), transparent 50%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 18px 16px 36px;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      backdrop-filter: blur(10px);
+    }
+    .top{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; margin-bottom:12px;
+    }
+    .title{
+      font-weight:700; letter-spacing:.2px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .badge{
+      font-size:12px; padding:4px 10px; border-radius:999px;
+      border:1px solid var(--line); color:var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+    .sectionLabel{
+      margin: 14px 0 8px;
+      font-size:12px;
+      color: var(--muted);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
 
-<style>
-/* ================= GLOBAL ================= */
-*{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{
-  margin:0;
-  background:radial-gradient(circle at top,#1f2937 0,#020617 45%,#020617 100%);
-  color:#f9fafb;
-  min-height:100vh;
-}
+    /* Input mode switch (the circled part) */
+    .modeBar{
+      display:flex; gap:10px;
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 8px;
+      overflow:hidden;
+    }
+    .modeBtn{
+      flex:1;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 10px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      background: transparent;
+      font-weight:600;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modeBtn .ico{font-size:16px; opacity:.9}
+    .modeBtn.on{
+      background: rgba(91,92,255,.22);
+      border-color: rgba(91,92,255,.45);
+      color: var(--text);
+    }
 
-/* ================= BRAND ================= */
-.brand-bar{display:flex;justify-content:center;padding:18px 0}
-.brand-bar-inner{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 18px;
-  background:rgba(15,23,42,.92);
-  border-radius:20px;
-  border:1px solid rgba(148,163,184,.4)
-}
-.brand-logo{height:40px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    @media(min-width:720px){
+      .grid{grid-template-columns: 1fr 1fr;}
+      .span2{grid-column: 1 / -1;}
+    }
 
-/* ================= LAYOUT ================= */
-.app{display:flex;justify-content:center;padding:0 14px 40px}
-.card{
-  max-width:960px;width:100%;
-  background:rgba(10,15,30,.96);
-  border-radius:20px;
-  padding:24px;
-  border:1px solid rgba(148,163,184,.35)
-}
+    .field{
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .field label{
+      display:block;
+      font-size:13px;
+      color: var(--text);
+      margin-bottom: 8px;
+      opacity:.9;
+    }
+    .field input, .field textarea{
+      width:100%;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 12px;
+      outline:none;
+      font-size:15px;
+    }
+    .field textarea{min-height: 92px; resize: vertical}
+    .hint{
+      margin-top:8px;
+      font-size:12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
 
-/* ================= HEADER ================= */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:16px;
-  flex-wrap:wrap;
-}
-.header-left{flex:1 1 520px;min-width:0}
-.header-right{
-  display:flex;gap:10px;align-items:center;
-  flex:0 0 auto;justify-content:flex-end
-}
+    .row{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .btn{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight:800;
+      cursor:pointer;
+      color:#07120a;
+      background: linear-gradient(180deg, rgba(34,197,94,1), rgba(34,197,94,.85));
+      display:inline-flex; align-items:center; gap:10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn.secondary{
+      color: var(--text);
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      font-weight:700;
+    }
+    .btn:disabled{
+      opacity:.5; cursor:not-allowed;
+    }
+    .small{
+      font-size:12px; color: var(--muted);
+    }
 
-.logo{font-size:1.4rem;font-weight:700}
-h1{margin:6px 0;font-size:1.35rem}
-p{margin:0;color:#9ca3af}
+    /* Result + Download area (missing part) */
+    .result{
+      margin-top: 12px;
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      display:none;
+    }
+    .progress{
+      height:10px;
+      border-radius: 999px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(91,92,255,.9), rgba(34,197,94,.9));
+      transition: width .25s ease;
+    }
+    .resultTop{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      margin-bottom:10px;
+    }
+    .pill{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+    }
+    video{
+      width:100%;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background:#000;
+      display:none;
+    }
 
-.badge{
-  height:34px;
-  padding:0 12px;
-  display:inline-flex;
-  align-items:center;
-  border-radius:999px;
-  white-space:nowrap;
-  font-size:.8rem;
-  background:linear-gradient(135deg,#2563eb,#7c3aed)
-}
+    /* Saved Attempts area (missing part) */
+    .saved{
+      margin-top: 14px;
+      border-top: 1px dashed var(--line);
+      padding-top: 14px;
+    }
+    .attempts{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .attempt{
+      background: rgba(0,0,0,.14);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display:flex; justify-content:space-between; gap:10px;
+    }
+    .attempt .meta{
+      min-width:0;
+    }
+    .attempt .meta .t{
+      font-size:13px; font-weight:800; margin-bottom:4px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .attempt .meta .s{
+      font-size:12px; color: var(--muted);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .attempt .actions{
+      display:flex; gap:8px; align-items:center;
+    }
+    .iconBtn{
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font-weight:800;
+    }
 
-#btnLangToggle{
-  height:34px;
-  padding:0 12px;
-  border-radius:999px;
-  background:none;
-  border:1px solid rgba(148,163,184,.6);
-  color:#9ca3af;
-  cursor:pointer;
-}
-
-/* ================= SECTIONS ================= */
-.section{
-  margin-top:22px;
-  padding-top:16px;
-  border-top:1px solid rgba(148,163,184,.25)
-}
-.label{
-  font-size:.75rem;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  color:#9ca3af;
-  margin-bottom:8px
-}
-.hint{font-size:.82rem;color:#9ca3af}
-
-/* ================= BASE PROMPT ================= */
-.base-prompt-box{
-  border:1px dashed rgba(148,163,184,.6);
-  border-radius:14px;
-  padding:16px;
-  line-height:1.5
-}
-#baseLockedPrompt{direction:ltr;text-align:left}
-
-/* ================= INPUT MODE ================= */
-.mode-toggle{
-  display:inline-flex;
-  border-radius:999px;
-  background:#0f172a;
-  padding:3px
-}
-.mode-btn{
-  padding:8px 14px;
-  border:none;
-  background:none;
-  color:#9ca3af;
-  cursor:pointer;
-  border-radius:999px
-}
-.mode-btn.active{
-  background:linear-gradient(120deg,#2563eb,#7c3aed);
-  color:#fff
-}
-
-/* ================= INPUTS ================= */
-.fields{margin-top:12px;display:flex;flex-direction:column;gap:12px}
-input,textarea{
-  width:100%;
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid rgba(148,163,184,.6);
-  background:#0f172a;
-  color:#fff
-}
-
-/* ================= ACTIONS ================= */
-.actions{
-  margin-top:14px;
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap;
-  align-items:center
-}
-button.primary{
-  padding:10px 20px;
-  border:none;
-  border-radius:999px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  color:#fff;
-  cursor:pointer
-}
-button.secondary{
-  padding:10px 16px;
-  border-radius:999px;
-  background:none;
-  border:1px solid rgba(148,163,184,.6);
-  color:#9ca3af;
-  cursor:pointer
-}
-button:disabled{opacity:.5;cursor:not-allowed}
-
-/* ================= LOADER ================= */
-.loading-overlay{
-  position:fixed;inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(2,6,23,.8);
-  backdrop-filter:blur(10px);
-  z-index:9999
-}
-.loading-card{
-  background:#0a0f1e;
-  padding:18px;
-  border-radius:18px;
-  width:320px;
-  text-align:center
-}
-.loading-progress{
-  height:10px;
-  border-radius:999px;
-  background:#1e293b;
-  overflow:hidden;
-  margin:10px 0
-}
-.loading-bar{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#22c55e,#2563eb,#7c3aed);
-  transition:width .25s linear
-}
-
-/* ================= RTL ================= */
-body.lang-ar{direction:rtl;text-align:right}
-body.lang-ar input,body.lang-ar textarea{text-align:right}
-body.lang-ar .header{flex-direction:row-reverse}
-body.lang-ar #baseExample{direction:rtl;text-align:right}
-
-@media(max-width:700px){
-  .header{flex-direction:column}
-  body.lang-ar .header{flex-direction:column}
-}
-</style>
+    .hidden{display:none !important;}
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div class="title">
+          Creative Lab <span class="badge">Demo/Beta</span>
+        </div>
+        <div class="badge" id="trialsBadge">Trials left: <b id="trialsLeft">3</b></div>
+      </div>
 
-<!-- LOADER -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-card">
-    <div id="loadingTitle">Generating…</div>
-    <div id="loadingSub" style="color:#9ca3af;font-size:.85rem"></div>
-    <div class="loading-progress"><div class="loading-bar" id="loadingBar"></div></div>
-    <div id="loadingTimer"></div>
-  </div>
-</div>
+      <div class="sectionLabel">Your base prompt</div>
+      <div class="field">
+        <label>Base prompt</label>
+        <textarea id="basePrompt" placeholder="Create a vertical 9:16 cinematic video, 5–8 seconds long..."></textarea>
+        <div class="hint">Tip: Keep this stable. We’ll inject the user details below.</div>
+      </div>
 
-<div class="brand-bar">
-  <div class="brand-bar-inner">
-    <img src="logoshaga3app.png" class="brand-logo">
-    <div>Shaga3app · AI Creative Playground</div>
-  </div>
-</div>
+      <div class="sectionLabel">Choose input mode</div>
+      <div class="modeBar" role="tablist" aria-label="Input mode">
+        <button class="modeBtn on" id="modeText" type="button" aria-selected="true">
+          <span class="ico">📝</span> Text prompt
+        </button>
+        <button class="modeBtn" id="modeImages" type="button" aria-selected="false">
+          <span class="ico">🖼️</span> Start + End images
+        </button>
+      </div>
 
-<div class="app">
-<div class="card">
+      <div class="grid" style="margin-top:10px;">
+        <div class="field">
+          <label>Main subject / character</label>
+          <input id="subject" placeholder="e.g. A young Egyptian filmmaker after a workout" />
+        </div>
 
-<div class="header">
-  <div class="header-left">
-    <div class="logo" id="logoTitle"></div>
-    <h1 id="heroTitle"></h1>
-    <p id="heroDesc"></p>
-  </div>
-  <div class="header-right">
-    <div class="badge" id="betaBadge"></div>
-    <button id="btnLangToggle"></button>
-  </div>
-</div>
+        <div class="field">
+          <label>Location / environment</label>
+          <input id="location" placeholder="e.g. Rooftop gym in Cairo at sunset" />
+        </div>
 
-<div class="section">
-  <div class="label" id="lblBaseConcept"></div>
-  <div class="base-prompt-box">
-    <div id="baseLockedPrompt">YOUR_BASE_PROMPT_GOES_HERE</div>
-    <div id="baseExample" style="margin-top:12px">
-      <strong id="exTitle"></strong>
-      <div id="exBody"></div>
+        <div class="field span2" id="extraBox">
+          <label>Extra creative twist (optional)</label>
+          <input id="twist" placeholder="e.g. Smooth dolly-in shot, slow motion at the end..." />
+        </div>
+
+        <div class="field span2 hidden" id="imagesBox">
+          <label>Start + End images</label>
+          <div class="row">
+            <input id="startImg" type="file" accept="image/*" />
+            <input id="endImg" type="file" accept="image/*" />
+          </div>
+          <div class="hint">These stay on your device for demo. Later you can send them to your backend API.</div>
+        </div>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        These fields are the only editable parts. The base concept above stays fixed.
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="generateBtn" type="button">▶ Generate video</button>
+        <button class="btn secondary" id="saveBtn" type="button">Save this attempt</button>
+        <span class="small" id="status"></span>
+      </div>
+
+      <!-- Result + Download area -->
+      <div class="result" id="resultBox">
+        <div class="resultTop">
+          <div class="pill" id="resultPill">Generating…</div>
+          <div class="small" id="timerText">~20s</div>
+        </div>
+
+        <div class="progress" aria-label="progress">
+          <div class="bar" id="bar"></div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <video id="video" controls playsinline></video>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <a class="btn secondary hidden" id="downloadBtn" href="#" download="result.mp4">⬇ Download video</a>
+          <button class="btn secondary hidden" id="copyPromptBtn" type="button">Copy final prompt</button>
+        </div>
+      </div>
+
+      <!-- Saved Attempts area -->
+      <div class="saved">
+        <div class="sectionLabel">Saved attempts</div>
+        <div class="small" id="savedInfo">These are stored only in your browser (local to this device).</div>
+        <div class="attempts" id="attempts"></div>
+      </div>
     </div>
   </div>
-</div>
-
-<div class="section">
-  <div class="label" id="lblChooseMode"></div>
-  <div class="mode-toggle">
-    <button class="mode-btn active">📝</button>
-    <button class="mode-btn">🖼️</button>
-  </div>
-
-  <div class="fields">
-    <input id="fieldCharacter">
-    <input id="fieldLocation">
-    <textarea id="fieldExtra"></textarea>
-    <div class="hint" id="hintLocked"></div>
-  </div>
-
-  <div class="actions">
-    <button class="primary" id="btnGenerate"></button>
-    <button class="secondary" disabled id="btnSaveResult"></button>
-    <div id="trialsWrap"></div>
-  </div>
-</div>
-
-</div>
-</div>
 
 <script>
-/* ============== CONFIG ============== */
-const FAKE_LOADING_MS = 10000;
+  const $ = (id) => document.getElementById(id);
 
-/* Arabic digits */
-function toArabicDigits(n){
-  const m={0:"٠",1:"١",2:"٢",3:"٣",4:"٤",5:"٥",6:"٦",7:"٧",8:"٨",9:"٩"};
-  return String(n).replace(/\d/g,d=>m[d]);
-}
-function formatSec(s){
-  s=Math.ceil(s);
-  return currentLang==="ar"?toArabicDigits(s)+"ث":s+"s";
-}
+  const state = {
+    mode: "text", // "text" | "images"
+    trialsLeft: 3,
+    generating: false,
+  };
 
-/* ============== TRANSLATIONS ============== */
-const T={
-en:{
- btn:"عربي",logo:"Your Creative Playground",
- hero:"Play with our guided video prompt",
- desc:"You get up to 3 tries. The core concept is fixed by us.",
- badge:"Beta · Shaga3app powered",
- base:"Base Concept (locked)",choose:"Choose input mode",
- exT:"Example:",exB:"Create a vertical 9:16 cinematic video, 5–8 seconds long with smooth camera moves.",
- phC:"e.g. A young Egyptian filmmaker",
- phL:"e.g. Rooftop gym in Cairo",
- phE:"e.g. Slow dolly-in, warm light…",
- gen:"▶ Generate video",save:"Save result",
- loaderT:"Generating…",loaderS:"Please wait (demo loader • 10s)"
-},
-ar:{
- btn:"EN",logo:"ساحة الإبداع",
- hero:"جرّب البرومبت الموجّه للفيديو",
- desc:"لديك ٣ محاولات فقط — أضف لمستك الإبداعية",
- badge:"تجريبي · بدعم شجع٣",
- base:"الفكرة الأساسية (مقفولة)",choose:"اختار طريقة الإدخال",
- exT:"مثال:",exB:"أنشئ فيديو رأسي 9:16 مدته ٥–٨ ثوانٍ بحركة كاميرا ناعمة.",
- phC:"مثال: مخرج مصري شاب",
- phL:"مثال: جيم في القاهرة",
- phE:"مثال: حركة كاميرا ناعمة…",
- gen:"▶ توليد الفيديو",save:"احفظ النتيجة",
- loaderT:"جارٍ التوليد…",loaderS:"انتظر قليلًا (تحميل تجريبي • ١٠ ثواني)"
-}
-};
+  const STORAGE_KEY = "creative_lab_attempts_v1";
 
-let currentLang=localStorage.getItem("lang")||"en";
+  function loadAttempts(){
+    try{
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    }catch(e){ return []; }
+  }
+  function saveAttempts(list){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
 
-/* Apply language */
-function applyLang(){
-  const t=T[currentLang];
-  document.body.classList.toggle("lang-ar",currentLang==="ar");
-  logoTitle.textContent=t.logo;
-  heroTitle.textContent=t.hero;
-  heroDesc.textContent=t.desc;
-  betaBadge.textContent=t.badge;
-  lblBaseConcept.textContent=t.base;
-  lblChooseMode.textContent=t.choose;
-  exTitle.textContent=t.exT;
-  exBody.textContent=t.exB;
-  fieldCharacter.placeholder=t.phC;
-  fieldLocation.placeholder=t.phL;
-  fieldExtra.placeholder=t.phE;
-  btnGenerate.textContent=t.gen;
-  btnSaveResult.textContent=t.save;
-  btnLangToggle.textContent=t.btn;
-  loadingTitle.textContent=t.loaderT;
-  loadingSub.textContent=t.loaderS;
-}
-btnLangToggle.onclick=()=>{
-  currentLang=currentLang==="en"?"ar":"en";
-  localStorage.setItem("lang",currentLang);
-  applyLang();
-};
-applyLang();
+  function renderAttempts(){
+    const list = loadAttempts();
+    const box = $("attempts");
+    box.innerHTML = "";
 
-/* Loader */
-let interval;
-function showLoader(){
-  loadingOverlay.style.display="flex";
-  const start=Date.now();
-  interval=setInterval(()=>{
-    const elapsed=Date.now()-start;
-    const p=Math.min(elapsed/FAKE_LOADING_MS,1);
-    loadingBar.style.width=(p*100)+"%";
-    loadingTimer.textContent=formatSec((FAKE_LOADING_MS-elapsed)/1000);
-  },200);
-}
-function hideLoader(){
-  clearInterval(interval);
-  loadingBar.style.width="100%";
-  setTimeout(()=>loadingOverlay.style.display="none",200);
-}
+    if(!list.length){
+      const empty = document.createElement("div");
+      empty.className = "small";
+      empty.style.opacity = ".9";
+      empty.textContent = "No saved attempts yet.";
+      box.appendChild(empty);
+      return;
+    }
 
-/* Generate */
-btnGenerate.onclick=async()=>{
-  showLoader();
-  try{
-    await fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate",{method:"POST"});
-  }catch(e){}
-  hideLoader();
-};
+    list.slice(0, 10).forEach((a, idx) => {
+      const row = document.createElement("div");
+      row.className = "attempt";
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `
+        <div class="t">${a.title}</div>
+        <div class="s">${a.subtitle}</div>
+      `;
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const loadBtn = document.createElement("button");
+      loadBtn.className = "iconBtn";
+      loadBtn.textContent = "Load";
+      loadBtn.onclick = () => {
+        $("basePrompt").value = a.basePrompt || "";
+        $("subject").value = a.subject || "";
+        $("location").value = a.location || "";
+        $("twist").value = a.twist || "";
+        setMode(a.mode || "text");
+        window.scrollTo({top:0, behavior:"smooth"});
+      };
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "iconBtn";
+      delBtn.textContent = "Delete";
+      delBtn.onclick = () => {
+        const cur = loadAttempts();
+        cur.splice(idx, 1);
+        saveAttempts(cur);
+        renderAttempts();
+      };
+
+      actions.appendChild(loadBtn);
+      actions.appendChild(delBtn);
+
+      row.appendChild(meta);
+      row.appendChild(actions);
+      box.appendChild(row);
+    });
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    const isText = mode === "text";
+    $("modeText").classList.toggle("on", isText);
+    $("modeImages").classList.toggle("on", !isText);
+    $("modeText").setAttribute("aria-selected", String(isText));
+    $("modeImages").setAttribute("aria-selected", String(!isText));
+    $("imagesBox").classList.toggle("hidden", isText);
+    $("extraBox").classList.toggle("hidden", !isText); // keep twist only for text mode (optional)
+  }
+
+  function buildFinalPrompt(){
+    const base = ($("basePrompt").value || "").trim();
+    const subject = ($("subject").value || "").trim();
+    const location = ($("location").value || "").trim();
+    const twist = ($("twist").value || "").trim();
+
+    const modeNote = state.mode === "images"
+      ? "Input mode: Start+End images (use provided reference images)."
+      : "Input mode: Text prompt only.";
+
+    let final = base;
+    if(final && !final.endsWith(".")) final += ".";
+    final += `\n\n${modeNote}\nMain subject: ${subject || "N/A"}\nLocation: ${location || "N/A"}`;
+    if(state.mode === "text" && twist) final += `\nExtra twist: ${twist}`;
+    return final.trim();
+  }
+
+  function setTrials(n){
+    state.trialsLeft = Math.max(0, n);
+    $("trialsLeft").textContent = String(state.trialsLeft);
+  }
+
+  function showResultBox(show){
+    $("resultBox").style.display = show ? "block" : "none";
+  }
+
+  function resetResultUI(){
+    $("bar").style.width = "0%";
+    $("resultPill").textContent = "Generating…";
+    $("timerText").textContent = "~20s";
+    $("video").style.display = "none";
+    $("video").removeAttribute("src");
+    $("downloadBtn").classList.add("hidden");
+    $("copyPromptBtn").classList.add("hidden");
+  }
+
+  // Fake generation: replace this later with your real API call
+  async function fakeGenerate(){
+    state.generating = true;
+    $("status").textContent = "Generating…";
+    showResultBox(true);
+    resetResultUI();
+
+    const totalMs = 20000;
+    const start = Date.now();
+
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
+      $("bar").style.width = pct + "%";
+      const remain = Math.max(0, Math.round((totalMs - elapsed) / 1000));
+      $("timerText").textContent = remain ? `~${remain}s` : "Done";
+      if(elapsed < totalMs) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    await new Promise(r => setTimeout(r, totalMs));
+
+    // Demo "result"
+    $("resultPill").textContent = "Ready";
+    $("status").textContent = "Done.";
+
+    // If you have a real mp4 URL later, set: video.src = "<your-url>"
+    // For now, we keep video hidden; download will give a placeholder file.
+    $("copyPromptBtn").classList.remove("hidden");
+    $("downloadBtn").classList.remove("hidden");
+    $("downloadBtn").href = makeDemoDownloadFile();
+
+    state.generating = false;
+  }
+
+  function makeDemoDownloadFile(){
+    // Creates a tiny downloadable text file as placeholder.
+    const content = "Demo result. Replace this with the real MP4 URL returned from your backend.";
+    const blob = new Blob([content], {type: "text/plain"});
+    return URL.createObjectURL(blob);
+  }
+
+  $("modeText").addEventListener("click", () => setMode("text"));
+  $("modeImages").addEventListener("click", () => setMode("images"));
+
+  $("generateBtn").addEventListener("click", async () => {
+    if(state.generating) return;
+    if(state.trialsLeft <= 0){
+      $("status").textContent = "No trials left.";
+      return;
+    }
+    setTrials(state.trialsLeft - 1);
+    await fakeGenerate();
+  });
+
+  $("saveBtn").addEventListener("click", () => {
+    const base = ($("basePrompt").value || "").trim();
+    const subject = ($("subject").value || "").trim();
+    const location = ($("location").value || "").trim();
+    const twist = ($("twist").value || "").trim();
+
+    const title = subject ? subject : (location ? location : "Saved attempt");
+    const subtitle = `${state.mode.toUpperCase()} • ${location || "No location"} • ${new Date().toLocaleString()}`;
+
+    const attempt = { mode: state.mode, basePrompt: base, subject, location, twist, title, subtitle };
+    const list = loadAttempts();
+    list.unshift(attempt);
+    saveAttempts(list.slice(0, 20));
+    renderAttempts();
+    $("status").textContent = "Saved.";
+  });
+
+  $("copyPromptBtn").addEventListener("click", async () => {
+    const text = buildFinalPrompt();
+    try{
+      await navigator.clipboard.writeText(text);
+      $("status").textContent = "Final prompt copied.";
+    }catch(e){
+      $("status").textContent = "Copy failed (iOS permissions).";
+    }
+  });
+
+  // Init
+  setMode("text");
+  setTrials(3);
+  renderAttempts();
 </script>
-
 </body>
 </html>
