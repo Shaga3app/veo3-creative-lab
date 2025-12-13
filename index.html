@@ -1,233 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Shaga3app · AI Creative Playground</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8" />
+<title>Shaga3app · AI Creative Playground</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <style>
-/* ========================================================
-   GLOBAL
-======================================================== */
-* {
-  box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+<style>
+/* ================= GLOBAL ================= */
+*{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#1f2937 0,#020617 45%,#020617 100%);
+  color:#f9fafb;
+  min-height:100vh;
 }
 
-body {
-  margin: 0;
-  background: radial-gradient(circle at top, #1f2937 0, #020617 45%, #020617 100%);
-  color: #f9fafb;
-  min-height: 100vh;
-}
-
-/* ========================================================
-   BRAND BAR
-======================================================== */
-.brand-bar {
-  display:flex;
-  justify-content:center;
-  padding:20px 0;
-}
-
+/* ================= BRAND ================= */
+.brand-bar{display:flex;justify-content:center;padding:18px 0}
 .brand-bar-inner{
-  display:flex;
-  align-items:center;
-  gap:10px;
+  display:flex;align-items:center;gap:10px;
   padding:8px 18px;
-  background:rgba(15,23,42,0.92);
+  background:rgba(15,23,42,.92);
   border-radius:20px;
-  border:1px solid rgba(148,163,184,0.4);
+  border:1px solid rgba(148,163,184,.4)
 }
+.brand-logo{height:40px}
 
-.brand-logo{height:42px}
-
-/* ========================================================
-   CARD
-======================================================== */
+/* ================= LAYOUT ================= */
 .app{display:flex;justify-content:center;padding:0 14px 40px}
-
 .card{
-  max-width:960px;
-  width:100%;
+  max-width:960px;width:100%;
   background:rgba(10,15,30,.96);
   border-radius:20px;
   padding:24px;
-  border:1px solid rgba(148,163,184,.35);
+  border:1px solid rgba(148,163,184,.35)
 }
 
-/* ========================================================
-   HEADER
-======================================================== */
+/* ================= HEADER ================= */
 .header{
   display:flex;
   justify-content:space-between;
+  align-items:flex-start;
   gap:16px;
+  flex-wrap:wrap;
+}
+.header-left{flex:1 1 520px;min-width:0}
+.header-right{
+  display:flex;gap:10px;align-items:center;
+  flex:0 0 auto;justify-content:flex-end
 }
 
-.logo{
-  font-size:1.4rem;
-  font-weight:700;
-}
-
-h1{margin:6px 0}
+.logo{font-size:1.4rem;font-weight:700}
+h1{margin:6px 0;font-size:1.35rem}
 p{margin:0;color:#9ca3af}
 
 .badge{
-  padding:4px 12px;
+  height:34px;
+  padding:0 12px;
+  display:inline-flex;
+  align-items:center;
   border-radius:999px;
+  white-space:nowrap;
   font-size:.8rem;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  background:linear-gradient(135deg,#2563eb,#7c3aed)
 }
 
-/* ========================================================
-   SECTIONS
-======================================================== */
+#btnLangToggle{
+  height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  background:none;
+  border:1px solid rgba(148,163,184,.6);
+  color:#9ca3af;
+  cursor:pointer;
+}
+
+/* ================= SECTIONS ================= */
 .section{
   margin-top:22px;
   padding-top:16px;
-  border-top:1px solid rgba(148,163,184,.25);
+  border-top:1px solid rgba(148,163,184,.25)
 }
-
 .label{
   font-size:.75rem;
   letter-spacing:.12em;
   text-transform:uppercase;
   color:#9ca3af;
-  margin-bottom:8px;
+  margin-bottom:8px
 }
-
 .hint{font-size:.82rem;color:#9ca3af}
 
-/* ========================================================
-   BASE PROMPT
-======================================================== */
+/* ================= BASE PROMPT ================= */
 .base-prompt-box{
   border:1px dashed rgba(148,163,184,.6);
   border-radius:14px;
   padding:16px;
-  line-height:1.5;
+  line-height:1.5
 }
-
-/* Keep base prompt English */
 #baseLockedPrompt{direction:ltr;text-align:left}
 
-/* ========================================================
-   MODE TOGGLE
-======================================================== */
+/* ================= INPUT MODE ================= */
 .mode-toggle{
   display:inline-flex;
   border-radius:999px;
   background:#0f172a;
-  padding:3px;
+  padding:3px
 }
-
 .mode-btn{
   padding:8px 14px;
   border:none;
   background:none;
   color:#9ca3af;
   cursor:pointer;
-  border-radius:999px;
+  border-radius:999px
 }
-
 .mode-btn.active{
   background:linear-gradient(120deg,#2563eb,#7c3aed);
-  color:white;
+  color:#fff
 }
 
-/* ========================================================
-   INPUTS
-======================================================== */
+/* ================= INPUTS ================= */
 .fields{margin-top:12px;display:flex;flex-direction:column;gap:12px}
-
 input,textarea{
   width:100%;
   padding:10px 12px;
   border-radius:10px;
   border:1px solid rgba(148,163,184,.6);
   background:#0f172a;
-  color:white;
+  color:#fff
 }
 
-/* ========================================================
-   ACTIONS
-======================================================== */
+/* ================= ACTIONS ================= */
 .actions{
   margin-top:14px;
   display:flex;
   justify-content:space-between;
   gap:12px;
   flex-wrap:wrap;
+  align-items:center
 }
-
 button.primary{
   padding:10px 20px;
   border:none;
   border-radius:999px;
   background:linear-gradient(135deg,#22c55e,#16a34a);
-  color:white;
-  cursor:pointer;
+  color:#fff;
+  cursor:pointer
 }
-
 button.secondary{
   padding:10px 16px;
   border-radius:999px;
   background:none;
   border:1px solid rgba(148,163,184,.6);
   color:#9ca3af;
-  cursor:pointer;
+  cursor:pointer
 }
-
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* ========================================================
-   LOADER
-======================================================== */
+/* ================= LOADER ================= */
 .loading-overlay{
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   display:none;
   align-items:center;
   justify-content:center;
   background:rgba(2,6,23,.8);
   backdrop-filter:blur(10px);
-  z-index:9999;
+  z-index:9999
 }
-
 .loading-card{
   background:#0a0f1e;
   padding:18px;
   border-radius:18px;
   width:320px;
-  text-align:center;
+  text-align:center
 }
-
 .loading-progress{
   height:10px;
   border-radius:999px;
   background:#1e293b;
   overflow:hidden;
-  margin:10px 0;
+  margin:10px 0
 }
-
 .loading-bar{
   height:100%;
   width:0%;
   background:linear-gradient(90deg,#22c55e,#2563eb,#7c3aed);
-  transition:width .25s linear;
+  transition:width .25s linear
 }
 
-/* ========================================================
-   RTL
-======================================================== */
+/* ================= RTL ================= */
 body.lang-ar{direction:rtl;text-align:right}
 body.lang-ar input,body.lang-ar textarea{text-align:right}
-
 body.lang-ar .header{flex-direction:row-reverse}
 body.lang-ar #baseExample{direction:rtl;text-align:right}
 
-  </style>
+@media(max-width:700px){
+  .header{flex-direction:column}
+  body.lang-ar .header{flex-direction:column}
+}
+</style>
 </head>
 
 <body>
@@ -237,9 +208,7 @@ body.lang-ar #baseExample{direction:rtl;text-align:right}
   <div class="loading-card">
     <div id="loadingTitle">Generating…</div>
     <div id="loadingSub" style="color:#9ca3af;font-size:.85rem"></div>
-    <div class="loading-progress">
-      <div class="loading-bar" id="loadingBar"></div>
-    </div>
+    <div class="loading-progress"><div class="loading-bar" id="loadingBar"></div></div>
     <div id="loadingTimer"></div>
   </div>
 </div>
@@ -255,14 +224,14 @@ body.lang-ar #baseExample{direction:rtl;text-align:right}
 <div class="card">
 
 <div class="header">
-  <div>
-    <div class="logo" id="logoTitle">Your Creative Playground</div>
-    <h1 id="heroTitle">Play with our guided video prompt</h1>
+  <div class="header-left">
+    <div class="logo" id="logoTitle"></div>
+    <h1 id="heroTitle"></h1>
     <p id="heroDesc"></p>
   </div>
-  <div style="display:flex;gap:10px">
+  <div class="header-right">
     <div class="badge" id="betaBadge"></div>
-    <button class="secondary" id="btnLangToggle">عربي</button>
+    <button id="btnLangToggle"></button>
   </div>
 </div>
 
@@ -280,11 +249,11 @@ body.lang-ar #baseExample{direction:rtl;text-align:right}
 <div class="section">
   <div class="label" id="lblChooseMode"></div>
   <div class="mode-toggle">
-    <button class="mode-btn active" id="btnTextMode">📝</button>
-    <button class="mode-btn" id="btnImageMode">🖼️</button>
+    <button class="mode-btn active">📝</button>
+    <button class="mode-btn">🖼️</button>
   </div>
 
-  <div class="fields" id="textModeFields">
+  <div class="fields">
     <input id="fieldCharacter">
     <input id="fieldLocation">
     <textarea id="fieldExtra"></textarea>
@@ -293,25 +262,19 @@ body.lang-ar #baseExample{direction:rtl;text-align:right}
 
   <div class="actions">
     <button class="primary" id="btnGenerate"></button>
-    <button class="secondary" id="btnSaveResult" disabled></button>
+    <button class="secondary" disabled id="btnSaveResult"></button>
     <div id="trialsWrap"></div>
   </div>
-
-  <div id="statusText"></div>
 </div>
 
 </div>
 </div>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
+/* ============== CONFIG ============== */
 const FAKE_LOADING_MS = 10000;
 
-/* =========================
-   Arabic digits
-========================= */
+/* Arabic digits */
 function toArabicDigits(n){
   const m={0:"٠",1:"١",2:"٢",3:"٣",4:"٤",5:"٥",6:"٦",7:"٧",8:"٨",9:"٩"};
   return String(n).replace(/\d/g,d=>m[d]);
@@ -321,55 +284,39 @@ function formatSec(s){
   return currentLang==="ar"?toArabicDigits(s)+"ث":s+"s";
 }
 
-/* =========================
-   TRANSLATIONS
-========================= */
+/* ============== TRANSLATIONS ============== */
 const T={
 en:{
- btn:"عربي",
- logo:"Your Creative Playground",
+ btn:"عربي",logo:"Your Creative Playground",
  hero:"Play with our guided video prompt",
  desc:"You get up to 3 tries. The core concept is fixed by us.",
  badge:"Beta · Shaga3app powered",
- base:"Base Concept (locked)",
- choose:"Choose input mode",
- exT:"Example:",
- exB:"Create a vertical 9:16 cinematic video, 5–8 seconds long with smooth camera moves.",
+ base:"Base Concept (locked)",choose:"Choose input mode",
+ exT:"Example:",exB:"Create a vertical 9:16 cinematic video, 5–8 seconds long with smooth camera moves.",
  phC:"e.g. A young Egyptian filmmaker",
  phL:"e.g. Rooftop gym in Cairo",
  phE:"e.g. Slow dolly-in, warm light…",
- gen:"▶ Generate video",
- save:"Save result",
- trials:l=>`Trials left: ${l}/3`,
- loaderT:"Generating…",
- loaderS:"Please wait (demo loader • 10s)"
+ gen:"▶ Generate video",save:"Save result",
+ loaderT:"Generating…",loaderS:"Please wait (demo loader • 10s)"
 },
 ar:{
- btn:"EN",
- logo:"ساحة الإبداع",
+ btn:"EN",logo:"ساحة الإبداع",
  hero:"جرّب البرومبت الموجّه للفيديو",
  desc:"لديك ٣ محاولات فقط — أضف لمستك الإبداعية",
  badge:"تجريبي · بدعم شجع٣",
- base:"الفكرة الأساسية (مقفولة)",
- choose:"اختار طريقة الإدخال",
- exT:"مثال:",
- exB:"أنشئ فيديو رأسي 9:16 مدته ٥–٨ ثوانٍ بحركة كاميرا ناعمة.",
+ base:"الفكرة الأساسية (مقفولة)",choose:"اختار طريقة الإدخال",
+ exT:"مثال:",exB:"أنشئ فيديو رأسي 9:16 مدته ٥–٨ ثوانٍ بحركة كاميرا ناعمة.",
  phC:"مثال: مخرج مصري شاب",
  phL:"مثال: جيم في القاهرة",
  phE:"مثال: حركة كاميرا ناعمة…",
- gen:"▶ توليد الفيديو",
- save:"احفظ النتيجة",
- trials:l=>`المتبقي: ${toArabicDigits(l)}/٣`,
- loaderT:"جارٍ التوليد…",
- loaderS:"انتظر قليلًا (تحميل تجريبي • ١٠ ثواني)"
+ gen:"▶ توليد الفيديو",save:"احفظ النتيجة",
+ loaderT:"جارٍ التوليد…",loaderS:"انتظر قليلًا (تحميل تجريبي • ١٠ ثواني)"
 }
 };
 
 let currentLang=localStorage.getItem("lang")||"en";
 
-/* =========================
-   APPLY LANG
-========================= */
+/* Apply language */
 function applyLang(){
   const t=T[currentLang];
   document.body.classList.toggle("lang-ar",currentLang==="ar");
@@ -397,17 +344,16 @@ btnLangToggle.onclick=()=>{
 };
 applyLang();
 
-/* =========================
-   LOADER
-========================= */
+/* Loader */
 let interval;
 function showLoader(){
   loadingOverlay.style.display="flex";
   const start=Date.now();
   interval=setInterval(()=>{
-    const p=Math.min((Date.now()-start)/FAKE_LOADING_MS,1);
+    const elapsed=Date.now()-start;
+    const p=Math.min(elapsed/FAKE_LOADING_MS,1);
     loadingBar.style.width=(p*100)+"%";
-    loadingTimer.textContent=formatSec((FAKE_LOADING_MS-(Date.now()-start))/1000);
+    loadingTimer.textContent=formatSec((FAKE_LOADING_MS-elapsed)/1000);
   },200);
 }
 function hideLoader(){
@@ -416,18 +362,13 @@ function hideLoader(){
   setTimeout(()=>loadingOverlay.style.display="none",200);
 }
 
-/* =========================
-   GENERATE
-========================= */
+/* Generate */
 btnGenerate.onclick=async()=>{
   showLoader();
   try{
-    const res=await fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate",{method:"POST"});
-    await res.json();
-    hideLoader();
-  }catch{
-    hideLoader();
-  }
+    await fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate",{method:"POST"});
+  }catch(e){}
+  hideLoader();
 };
 </script>
 
