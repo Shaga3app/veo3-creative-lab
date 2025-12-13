@@ -440,6 +440,20 @@ button:disabled{
   .card { padding: 18px 14px; }
 }
   </style>
+
+body.lang-ar {
+  direction: rtl;
+  text-align: right;
+}
+
+body.lang-ar input,
+body.lang-ar textarea {
+  direction: rtl;
+  text-align: right;
+}
+
+
+  
 </head>
 
 <body>
@@ -471,7 +485,15 @@ button:disabled{
           <h1>Play with our guided video prompt</h1>
           <p>You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨</p>
         </div>
-        <div class="badge">Beta · Shaga3app powered</div>
+        <div style="display:flex; gap:10px; align-items:center;">
+  <div class="badge" id="betaBadge">Beta · Shaga3app powered</div>
+
+  <!-- ✅ Language toggle -->
+  <button class="secondary" id="btnLangToggle" type="button" style="padding:8px 12px;">
+    عربي
+  </button>
+</div>
+
       </div>
 
       <!-- Fixed main prompt -->
