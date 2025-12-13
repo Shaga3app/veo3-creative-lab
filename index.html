@@ -2,31 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Creative Lab</title>
+  <title>Shaga3app · AI Creative Playground</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
-   /* ========================================================
+/* ========================================================
    GLOBAL
 ======================================================== */
-/* My remark *this is the second bottom for saving videos 
-
-button.secondary {
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 0.78rem;
-  border: 1px solid rgba(148,163,184,0.6);
-  background: transparent;
-  color: #9ca3af; 
-  cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
-}
-
-button.secondary:hover {
-  background: rgba(15,23,42,0.9);
-  color: #22ff88;
-}
-*/
-
 * {
   box-sizing: border-box;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -40,1058 +22,414 @@ body {
 }
 
 /* ========================================================
-   TOP SHAGA3APP BRAND BAR
+   BRAND BAR
 ======================================================== */
-
 .brand-bar {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding-top: 20px;
-  margin-bottom: 20px;
-}
-
-.brand-bar-inner {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(15, 23, 42, 0.92);
-  padding: 8px 18px;
-  border-radius: 20px;
-  border: 1px solid rgba(148,163,184,0.4);
-  gap: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.brand-logo {
-  height: 46px;
-  width: auto;
-}
-
-.brand-text {
-  font-size: 0.8rem;
-  color: #e5e7eb;
-  opacity: 0.85;
-  letter-spacing: 0.12em;
-}
-
-/* ========================================================
-   MAIN CARD
-======================================================== */
-
-.app{
-  width:100%;
   display:flex;
   justify-content:center;
-  padding: 0 14px 30px;
+  padding:20px 0;
 }
 
-.card {
-  width: 100%;
-  max-width: 960px;
-  background: rgba(10, 15, 30, 0.96);
-  border-radius: 20px;
-  padding: 24px 22px;
-  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(148,163,184,0.35);
-  backdrop-filter: blur(14px);
-}
-
-/* ========================================================
-   HEADER / TITLE
-======================================================== */
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.logo {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 1.4rem;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-}
-
-h1{
-  margin: 8px 0 6px;
-  font-size: 1.25rem;
-}
-p{
-  margin: 0;
-  color:#9ca3af;
-  line-height:1.4;
-}
-
-.badge {
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(147,51,234,0.32));
-  font-size: 0.8rem;
-  border: 1px solid rgba(191, 219, 254, 0.5);
-  white-space: nowrap;
-}
-
-/* ========================================================
-   SECTIONS / LABELS
-======================================================== */
-
-.section {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(148,163,184,0.3);
-}
-
-.label {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
-  color: #9ca3af;
-  margin-bottom: 8px;
-}
-
-.hint{
-  margin-top: 8px;
-  color:#9ca3af;
-  font-size:0.82rem;
-}
-
-/* ========================================================
-   BASE PROMPT BOX
-======================================================== */
-
-.base-prompt-box {
-  background: radial-gradient(circle at top left, #111827 0, #020617 40%, #020617 100%);
-  border-radius: 14px;
-  padding: 16px;
-  font-size: 0.86rem;
-  border: 1px dashed rgba(148,163,184,0.7);
-  color: #e5e7eb;
-  white-space: pre-wrap;
-  line-height: 1.5;
-}
-
-/* ========================================================
-   MODE TOGGLE & ICON STYLES
-======================================================== */
-
-.mode-toggle {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 999px;
-  background: rgba(15,23,42,0.9);
-  border: 1px solid rgba(148,163,184,0.6);
-  margin-top: 8px;
-}
-
-.mode-btn {
-  border: none;
-  background: transparent;
-  padding: 8px 14px;
-  font-size: 0.8rem;
-  color: #9ca3af;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mode-btn.active {
-  background: linear-gradient(120deg, #2563eb, #7c3aed);
-  color: #f9fafb;
-  box-shadow: 0 6px 18px rgba(37,99,235,0.5);
-}
-
-/* ICON BASE STYLE */
-.icon-img {
-  width: 18px;
-  height: 18px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* ICONS USING YOUR .SVG FILES */
-.icon-flask-sparkles     { background-image: url("flask-sparkles.svg"); }
-.icon-image-arrow        { background-image: url("image-arrow.svg"); }
-.icon-image-frame        { background-image: url("image-frame.svg"); }
-.icon-image-plus         { background-image: url("image-plus.svg"); }
-.icon-lock-closed        { background-image: url("lock-closed.svg"); }
-.icon-play-bookmark      { background-image: url("play-bookmark.svg"); }
-.icon-sliders-horizontal { background-image: url("sliders-horizontal.svg"); }
-.icon-sparkle            { background-image: url("sparkle.svg"); }
-.icon-text-icon          { background-image: url("text-icon.svg"); }
-
-/* ========================================================
-   INPUT FIELDS
-======================================================== */
-
-.fields {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.field-group label{
-  display:block;
-  font-size: 0.85rem;
-  margin-bottom: 6px;
-  color:#e5e7eb;
-}
-
-input[type="text"],
-textarea,
-input[type="file"] {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid rgba(148,163,184,0.6);
-  background: rgba(15,23,42,0.95);
-  color: #e5e7eb;
-  padding: 10px 12px;
-  font-size: 0.86rem;
-  outline: none;
-}
-
-textarea {
-  min-height: 90px;
-}
-
-/* ========================================================
-   BUTTONS + ACTIONS
-======================================================== */
-
-.actions{
-  margin-top: 14px;
+.brand-bar-inner{
   display:flex;
-  justify-content: space-between;
   align-items:center;
+  gap:10px;
+  padding:8px 18px;
+  background:rgba(15,23,42,0.92);
+  border-radius:20px;
+  border:1px solid rgba(148,163,184,0.4);
+}
+
+.brand-logo{height:42px}
+
+/* ========================================================
+   CARD
+======================================================== */
+.app{display:flex;justify-content:center;padding:0 14px 40px}
+
+.card{
+  max-width:960px;
+  width:100%;
+  background:rgba(10,15,30,.96);
+  border-radius:20px;
+  padding:24px;
+  border:1px solid rgba(148,163,184,.35);
+}
+
+/* ========================================================
+   HEADER
+======================================================== */
+.header{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.logo{
+  font-size:1.4rem;
+  font-weight:700;
+}
+
+h1{margin:6px 0}
+p{margin:0;color:#9ca3af}
+
+.badge{
+  padding:4px 12px;
+  border-radius:999px;
+  font-size:.8rem;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+}
+
+/* ========================================================
+   SECTIONS
+======================================================== */
+.section{
+  margin-top:22px;
+  padding-top:16px;
+  border-top:1px solid rgba(148,163,184,.25);
+}
+
+.label{
+  font-size:.75rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#9ca3af;
+  margin-bottom:8px;
+}
+
+.hint{font-size:.82rem;color:#9ca3af}
+
+/* ========================================================
+   BASE PROMPT
+======================================================== */
+.base-prompt-box{
+  border:1px dashed rgba(148,163,184,.6);
+  border-radius:14px;
+  padding:16px;
+  line-height:1.5;
+}
+
+/* Keep base prompt English */
+#baseLockedPrompt{direction:ltr;text-align:left}
+
+/* ========================================================
+   MODE TOGGLE
+======================================================== */
+.mode-toggle{
+  display:inline-flex;
+  border-radius:999px;
+  background:#0f172a;
+  padding:3px;
+}
+
+.mode-btn{
+  padding:8px 14px;
+  border:none;
+  background:none;
+  color:#9ca3af;
+  cursor:pointer;
+  border-radius:999px;
+}
+
+.mode-btn.active{
+  background:linear-gradient(120deg,#2563eb,#7c3aed);
+  color:white;
+}
+
+/* ========================================================
+   INPUTS
+======================================================== */
+.fields{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+
+input,textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(148,163,184,.6);
+  background:#0f172a;
+  color:white;
+}
+
+/* ========================================================
+   ACTIONS
+======================================================== */
+.actions{
+  margin-top:14px;
+  display:flex;
+  justify-content:space-between;
   gap:12px;
   flex-wrap:wrap;
 }
 
-.left-actions{
-  display:flex;
-  gap:10px;
-  align-items:center;
+button.primary{
+  padding:10px 20px;
+  border:none;
+  border-radius:999px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
+  cursor:pointer;
 }
 
-button.primary {
-  border: none;
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 10px 28px rgba(22,163,74,0.4);
-}
-
-button.primary:hover {
-  box-shadow: 0 14px 34px rgba(22,163,74,0.5);
-  transform: translateY(-1px);
-}
-
-button.secondary {
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-size: 0.86rem;
-  border: 1px solid rgba(148,163,184,0.6);
-  background: transparent;
-  color: #9ca3af;
-  cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
-}
-
-button.secondary:hover {
-  background: rgba(15,23,42,0.9);
-  color: #22ff88;
-}
-
-button:disabled{
-  opacity:0.5;
-  cursor:not-allowed;
-  transform:none !important;
-}
-
-/* ========================================================
-   STATUS
-======================================================== */
-
-.status{
-  margin-top: 12px;
-  font-size: 0.9rem;
-  color:#e5e7eb;
-}
-.status.error{
-  color:#fca5a5;
-}
-
-/* ========================================================
-   OUTPUT + SAVED ATTEMPTS
-======================================================== */
-
-.output {
-  margin-top: 12px;
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(15,23,42,0.9);
-  border: 1px solid rgba(148,163,184,0.35);
-}
-
-.saved-list{
-  margin-top: 10px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.saved-item {
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: rgba(15,23,42,0.8);
-  border: 1px solid rgba(148,163,184,0.4);
-}
-.saved-item-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom: 6px;
-}
-.saved-item-title{
-  font-weight:700;
-}
-.saved-item-time{
+button.secondary{
+  padding:10px 16px;
+  border-radius:999px;
+  background:none;
+  border:1px solid rgba(148,163,184,.6);
   color:#9ca3af;
-  font-size:0.8rem;
+  cursor:pointer;
 }
 
-/* ========================================================
-   ✅ 20s LOADING OVERLAY
-======================================================== */
+button:disabled{opacity:.5;cursor:not-allowed}
 
+/* ========================================================
+   LOADER
+======================================================== */
 .loading-overlay{
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  background: rgba(2, 6, 23, 0.78);
-  backdrop-filter: blur(10px);
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(2,6,23,.8);
+  backdrop-filter:blur(10px);
+  z-index:9999;
 }
 
 .loading-card{
-  width: min(520px, 92vw);
-  background: rgba(10, 15, 30, 0.96);
-  border: 1px solid rgba(148,163,184,0.35);
-  border-radius: 18px;
-  padding: 18px 18px 16px;
-  box-shadow: 0 20px 55px rgba(0,0,0,0.65);
-  text-align: center;
-}
-
-.loading-title{
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.loading-sub{
-  font-size: 0.86rem;
-  color: #9ca3af;
-  margin-bottom: 12px;
+  background:#0a0f1e;
+  padding:18px;
+  border-radius:18px;
+  width:320px;
+  text-align:center;
 }
 
 .loading-progress{
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(148,163,184,0.18);
+  height:10px;
+  border-radius:999px;
+  background:#1e293b;
   overflow:hidden;
-  border: 1px solid rgba(148,163,184,0.25);
+  margin:10px 0;
 }
 
 .loading-bar{
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #22c55e, #2563eb, #7c3aed);
-  transition: width 0.25s linear;
-}
-
-.loading-timer{
-  margin-top: 10px;
-  font-size: 0.84rem;
-  color:#e5e7eb;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#22c55e,#2563eb,#7c3aed);
+  transition:width .25s linear;
 }
 
 /* ========================================================
-   ✅ ARABIC MODE FIXES (RTL)
+   RTL
 ======================================================== */
+body.lang-ar{direction:rtl;text-align:right}
+body.lang-ar input,body.lang-ar textarea{text-align:right}
 
-body.lang-ar{
-  direction: rtl;
-  text-align: right;
-}
+body.lang-ar .header{flex-direction:row-reverse}
+body.lang-ar #baseExample{direction:rtl;text-align:right}
 
-body.lang-ar input,
-body.lang-ar textarea{
-  direction: rtl;
-  text-align: right;
-}
-
-/* Make header layout look correct in RTL */
-body.lang-ar .header{
-  flex-direction: row-reverse;
-}
-
-/* IMPORTANT: base prompt contains English; keep it LTR even in Arabic */
-body.lang-ar .base-prompt-box{
-  direction: ltr;
-  text-align: left;
-}
-
-/* ========================================================
-   RESPONSIVE
-======================================================== */
-
-@media (max-width: 700px) {
-  .brand-logo { height: 36px; }
-  .card { padding: 18px 14px; }
-}
   </style>
 </head>
 
 <body>
 
-  <!-- ✅ 20s Loading Overlay -->
-  <div class="loading-overlay" id="loadingOverlay" aria-hidden="true">
-    <div class="loading-card" role="dialog" aria-modal="true" aria-label="Generating">
-      <div class="loading-title" id="loadingTitle">Generating…</div>
-      <div class="loading-sub" id="loadingSub">Please wait (demo loader • 20 seconds)</div>
-      <div class="loading-progress">
-        <div class="loading-bar" id="loadingBar"></div>
-      </div>
-      <div class="loading-timer" id="loadingTimer">20s</div>
+<!-- LOADER -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-card">
+    <div id="loadingTitle">Generating…</div>
+    <div id="loadingSub" style="color:#9ca3af;font-size:.85rem"></div>
+    <div class="loading-progress">
+      <div class="loading-bar" id="loadingBar"></div>
+    </div>
+    <div id="loadingTimer"></div>
+  </div>
+</div>
+
+<div class="brand-bar">
+  <div class="brand-bar-inner">
+    <img src="logoshaga3app.png" class="brand-logo">
+    <div>Shaga3app · AI Creative Playground</div>
+  </div>
+</div>
+
+<div class="app">
+<div class="card">
+
+<div class="header">
+  <div>
+    <div class="logo" id="logoTitle">Your Creative Playground</div>
+    <h1 id="heroTitle">Play with our guided video prompt</h1>
+    <p id="heroDesc"></p>
+  </div>
+  <div style="display:flex;gap:10px">
+    <div class="badge" id="betaBadge"></div>
+    <button class="secondary" id="btnLangToggle">عربي</button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label" id="lblBaseConcept"></div>
+  <div class="base-prompt-box">
+    <div id="baseLockedPrompt">YOUR_BASE_PROMPT_GOES_HERE</div>
+    <div id="baseExample" style="margin-top:12px">
+      <strong id="exTitle"></strong>
+      <div id="exBody"></div>
     </div>
   </div>
+</div>
 
-  <div class="brand-bar">
-    <div class="brand-bar-inner">
-      <img src="logoshaga3app.png" class="brand-logo" alt="Shaga3app logo">
-      <div class="brand-text">Shaga3app · AI Creative Playground</div>
-    </div>
+<div class="section">
+  <div class="label" id="lblChooseMode"></div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnTextMode">📝</button>
+    <button class="mode-btn" id="btnImageMode">🖼️</button>
   </div>
 
-  <div class="app">
-    <div class="card">
-      <div class="header">
-        <div>
-          <div class="logo" id="logoTitle">Your Creative Playground</div>
-          <h1 id="heroTitle">Play with our guided video prompt</h1>
-          <p id="heroDesc">You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨</p>
-        </div>
-
-        <div style="display:flex; gap:10px; align-items:center;">
-          <div class="badge" id="betaBadge">Beta · Shaga3app powered</div>
-          <button class="secondary" id="btnLangToggle" type="button" style="padding:8px 12px;">عربي</button>
-        </div>
-      </div>
-
-      <!-- Fixed main prompt -->
-      <div class="section">
-        <div class="label" id="lblBaseConcept">Base Concept (locked)</div>
-        <div class="base-prompt-box" id="basePromptBox">
-YOUR_BASE_PROMPT_GOES_HERE
-
-Example:
-Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera moves and rich realistic lighting. The scene follows this concept, and we will inject the user details below.
-        </div>
-      </div>
-
-      <!-- Mode selection -->
-      <div class="section">
-        <div class="label" id="lblChooseMode">Choose input mode</div>
-        <div class="mode-toggle">
-          <button class="mode-btn active" data-mode="text" id="btnTextMode">
-            <span class="icon">📝</span> Text prompt
-          </button>
-          <button class="mode-btn" data-mode="images" id="btnImageMode">
-            <span class="icon">🖼️</span> Start + End images
-          </button>
-        </div>
-
-        <!-- Text mode fields -->
-        <div class="fields" id="textModeFields">
-          <div class="field-group">
-            <label for="fieldCharacter" id="lblCharacter">Main subject / character</label>
-            <input type="text" id="fieldCharacter"
-                   placeholder="e.g. A young Egyptian filmmaker after a workout" />
-          </div>
-          <div class="field-group">
-            <label for="fieldLocation" id="lblLocation">Location / environment</label>
-            <input type="text" id="fieldLocation"
-                   placeholder="e.g. Rooftop gym in Cairo at sunset" />
-          </div>
-          <div class="field-group">
-            <label for="fieldExtra" id="lblExtra">Extra creative twist (optional)</label>
-            <textarea id="fieldExtra"
-                      placeholder="e.g. Smooth dolly-in shot, slow motion at the end, warm glowing lights..."></textarea>
-          </div>
-          <div class="hint" id="hintLocked">
-            These fields are the only editable parts. The base concept above stays fixed.
-          </div>
-        </div>
-
-        <!-- Image mode fields -->
-        <div class="fields" id="imageModeFields" style="display:none;">
-          <div class="field-group">
-            <label for="startImage" id="lblStartImg">Start frame image</label>
-            <input type="file" id="startImage" accept="image/*" />
-            <div class="hint" id="hintStart">Upload an image for how the video starts.</div>
-          </div>
-          <div class="field-group">
-            <label for="endImage" id="lblEndImg">End frame image</label>
-            <input type="file" id="endImage" accept="image/*" />
-            <div class="hint" id="hintEnd">Upload an image for how the video ends.</div>
-          </div>
-          <div class="field-group">
-            <label for="imageExtra" id="lblImgExtra">Extra description (optional)</label>
-            <textarea id="imageExtra"
-                      placeholder="e.g. Camera pushes from start frame into motion and lands on the end frame..."></textarea>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="actions">
-          <div class="left-actions">
-            <button class="primary" id="btnGenerate">▶ Generate video</button>
-            <button class="secondary" id="btnSaveResult" disabled>Save this result</button>
-          </div>
-          <div class="right-actions">
-            <div class="trials" id="trialsWrap">
-              Trials left: <strong id="trialsLeft"></strong> / 3
-            </div>
-          </div>
-        </div>
-
-        <div class="status" id="statusText"></div>
-
-        <!-- Output -->
-        <div class="output" id="outputBox" style="display:none;">
-          <div><strong id="lblGeneratedReq">Generated request:</strong></div>
-          <div id="outputPrompt"></div>
-          <div style="margin-top:6px;" id="outputVideoWrapper"></div>
-        </div>
-      </div>
-
-      <!-- Saved results -->
-      <div class="section">
-        <div class="label" id="lblSaved">Saved attempts</div>
-        <div class="hint" id="hintSaved">These are stored only in your browser (local to this device).</div>
-        <div class="saved-list" id="savedList"></div>
-      </div>
-    </div>
+  <div class="fields" id="textModeFields">
+    <input id="fieldCharacter">
+    <input id="fieldLocation">
+    <textarea id="fieldExtra"></textarea>
+    <div class="hint" id="hintLocked"></div>
   </div>
 
-  <script>
-    // =========================
-    // CONFIG
-    // =========================
-    const BASE_PROMPT = document.getElementById("basePromptBox").innerText.trim();
-    const MAX_TRIALS = 3;
-    const TRIALS_KEY = "veo3_trials_used";
-    const SAVED_KEY = "veo3_saved_results";
-    const FAKE_LOADING_MS = 20000;
+  <div class="actions">
+    <button class="primary" id="btnGenerate"></button>
+    <button class="secondary" id="btnSaveResult" disabled></button>
+    <div id="trialsWrap"></div>
+  </div>
+
+  <div id="statusText"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+/* =========================
+   CONFIG
+========================= */
+const FAKE_LOADING_MS = 10000;
+
+/* =========================
+   Arabic digits
+========================= */
+function toArabicDigits(n){
+  const m={0:"٠",1:"١",2:"٢",3:"٣",4:"٤",5:"٥",6:"٦",7:"٧",8:"٨",9:"٩"};
+  return String(n).replace(/\d/g,d=>m[d]);
+}
+function formatSec(s){
+  s=Math.ceil(s);
+  return currentLang==="ar"?toArabicDigits(s)+"ث":s+"s";
+}
+
+/* =========================
+   TRANSLATIONS
+========================= */
+const T={
+en:{
+ btn:"عربي",
+ logo:"Your Creative Playground",
+ hero:"Play with our guided video prompt",
+ desc:"You get up to 3 tries. The core concept is fixed by us.",
+ badge:"Beta · Shaga3app powered",
+ base:"Base Concept (locked)",
+ choose:"Choose input mode",
+ exT:"Example:",
+ exB:"Create a vertical 9:16 cinematic video, 5–8 seconds long with smooth camera moves.",
+ phC:"e.g. A young Egyptian filmmaker",
+ phL:"e.g. Rooftop gym in Cairo",
+ phE:"e.g. Slow dolly-in, warm light…",
+ gen:"▶ Generate video",
+ save:"Save result",
+ trials:l=>`Trials left: ${l}/3`,
+ loaderT:"Generating…",
+ loaderS:"Please wait (demo loader • 10s)"
+},
+ar:{
+ btn:"EN",
+ logo:"ساحة الإبداع",
+ hero:"جرّب البرومبت الموجّه للفيديو",
+ desc:"لديك ٣ محاولات فقط — أضف لمستك الإبداعية",
+ badge:"تجريبي · بدعم شجع٣",
+ base:"الفكرة الأساسية (مقفولة)",
+ choose:"اختار طريقة الإدخال",
+ exT:"مثال:",
+ exB:"أنشئ فيديو رأسي 9:16 مدته ٥–٨ ثوانٍ بحركة كاميرا ناعمة.",
+ phC:"مثال: مخرج مصري شاب",
+ phL:"مثال: جيم في القاهرة",
+ phE:"مثال: حركة كاميرا ناعمة…",
+ gen:"▶ توليد الفيديو",
+ save:"احفظ النتيجة",
+ trials:l=>`المتبقي: ${toArabicDigits(l)}/٣`,
+ loaderT:"جارٍ التوليد…",
+ loaderS:"انتظر قليلًا (تحميل تجريبي • ١٠ ثواني)"
+}
+};
+
+let currentLang=localStorage.getItem("lang")||"en";
+
+/* =========================
+   APPLY LANG
+========================= */
+function applyLang(){
+  const t=T[currentLang];
+  document.body.classList.toggle("lang-ar",currentLang==="ar");
+  logoTitle.textContent=t.logo;
+  heroTitle.textContent=t.hero;
+  heroDesc.textContent=t.desc;
+  betaBadge.textContent=t.badge;
+  lblBaseConcept.textContent=t.base;
+  lblChooseMode.textContent=t.choose;
+  exTitle.textContent=t.exT;
+  exBody.textContent=t.exB;
+  fieldCharacter.placeholder=t.phC;
+  fieldLocation.placeholder=t.phL;
+  fieldExtra.placeholder=t.phE;
+  btnGenerate.textContent=t.gen;
+  btnSaveResult.textContent=t.save;
+  btnLangToggle.textContent=t.btn;
+  loadingTitle.textContent=t.loaderT;
+  loadingSub.textContent=t.loaderS;
+}
+btnLangToggle.onclick=()=>{
+  currentLang=currentLang==="en"?"ar":"en";
+  localStorage.setItem("lang",currentLang);
+  applyLang();
+};
+applyLang();
+
+/* =========================
+   LOADER
+========================= */
+let interval;
+function showLoader(){
+  loadingOverlay.style.display="flex";
+  const start=Date.now();
+  interval=setInterval(()=>{
+    const p=Math.min((Date.now()-start)/FAKE_LOADING_MS,1);
+    loadingBar.style.width=(p*100)+"%";
+    loadingTimer.textContent=formatSec((FAKE_LOADING_MS-(Date.now()-start))/1000);
+  },200);
+}
+function hideLoader(){
+  clearInterval(interval);
+  loadingBar.style.width="100%";
+  setTimeout(()=>loadingOverlay.style.display="none",200);
+}
+
+/* =========================
+   GENERATE
+========================= */
+btnGenerate.onclick=async()=>{
+  showLoader();
+  try{
+    const res=await fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate",{method:"POST"});
+    await res.json();
+    hideLoader();
+  }catch{
+    hideLoader();
+  }
+};
+</script>
 
-    // =========================
-    // STATE
-    // =========================
-    let currentMode = "text";
-    let lastResult = null;
-
-    // =========================
-    // ELEMENTS
-    // =========================
-    const btnTextMode = document.getElementById("btnTextMode");
-    const btnImageMode = document.getElementById("btnImageMode");
-    const textModeFields = document.getElementById("textModeFields");
-    const imageModeFields = document.getElementById("imageModeFields");
-    const trialsLeftEl = document.getElementById("trialsLeft");
-    const trialsWrap = document.getElementById("trialsWrap");
-    const statusText = document.getElementById("statusText");
-    const btnGenerate = document.getElementById("btnGenerate");
-    const btnSaveResult = document.getElementById("btnSaveResult");
-    const outputBox = document.getElementById("outputBox");
-    const outputPrompt = document.getElementById("outputPrompt");
-    const outputVideoWrapper = document.getElementById("outputVideoWrapper");
-    const savedList = document.getElementById("savedList");
-
-    // Loader elements
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const loadingBar = document.getElementById("loadingBar");
-    const loadingTimer = document.getElementById("loadingTimer");
-    const loadingTitleEl = document.getElementById("loadingTitle");
-    const loadingSubEl = document.getElementById("loadingSub");
-
-    // Inputs
-    const fieldCharacter = document.getElementById("fieldCharacter");
-    const fieldLocation = document.getElementById("fieldLocation");
-    const fieldExtra = document.getElementById("fieldExtra");
-    const startImageInput = document.getElementById("startImage");
-    const endImageInput = document.getElementById("endImage");
-    const imageExtra = document.getElementById("imageExtra");
-
-    // =========================
-    // UTIL
-    // =========================
-    function getTrialsUsed() {
-      return Number(localStorage.getItem(TRIALS_KEY) || "0");
-    }
-    function setTrialsUsed(val) {
-      localStorage.setItem(TRIALS_KEY, String(val));
-    }
-
-    function setStatus(message, isError = false) {
-      statusText.textContent = message || "";
-      statusText.className = "status" + (isError ? " error" : "");
-    }
-
-    function loadSaved() {
-      try {
-        const data = JSON.parse(localStorage.getItem(SAVED_KEY) || "[]");
-        return Array.isArray(data) ? data : [];
-      } catch {
-        return [];
-      }
-    }
-    function saveSaved(data) {
-      localStorage.setItem(SAVED_KEY, JSON.stringify(data));
-    }
-
-    function base64FromFile(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function wait(ms){
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    // =========================
-    // ✅ LANGUAGE (EN/AR)
-    // =========================
-    const LANG_KEY = "ui_lang";
-    let currentLang = localStorage.getItem(LANG_KEY) || "en";
-
-    const T = {
-      en: {
-        btn: "عربي",
-        badge: "Beta · Shaga3app powered",
-        logoTitle: "Your Creative Playground",
-        heroTitle: "Play with our guided video prompt",
-        heroDesc: "You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨",
-        lblBaseConcept: "Base Concept (locked)",
-        lblChooseMode: "Choose input mode",
-        btnTextMode: "📝 Text prompt",
-        btnImageMode: "🖼️ Start + End images",
-        lblCharacter: "Main subject / character",
-        lblLocation: "Location / environment",
-        lblExtra: "Extra creative twist (optional)",
-        hintLocked: "These fields are the only editable parts. The base concept above stays fixed.",
-        lblStartImg: "Start frame image",
-        hintStart: "Upload an image for how the video starts.",
-        lblEndImg: "End frame image",
-        hintEnd: "Upload an image for how the video ends.",
-        lblImgExtra: "Extra description (optional)",
-        btnGenerate: "▶ Generate video",
-        btnSave: "Save this result",
-        trials: (left) => `Trials left: <strong id="trialsLeft">${left}</strong> / 3`,
-        lblGeneratedReq: "Generated request:",
-        lblSaved: "Saved attempts",
-        hintSaved: "These are stored only in your browser (local to this device).",
-        emptySaved: "No saved attempts yet.",
-        loaderTitle: "Generating…",
-        loaderSub: "Please wait (demo loader • 20 seconds)",
-        statusFill: "Please fill at least the subject and location.",
-        statusImages: "Please upload both start and end images.",
-        statusDone: "Done! You can save this result or try again (if you still have trials).",
-        statusError: "Something went wrong. Please try again or contact support.",
-        openVideo: "Open video",
-        openGenerated: "Open generated video",
-        noVideo: "The server did not return a video URL. Ask your developer to connect Veo3 here."
-      },
-      ar: {
-        btn: "EN",
-        badge: "تجريبي · بدعم شجع٣",
-        logoTitle: "ساحة الإبداع",
-        heroTitle: "جرّب البرومبت الموجّه للفيديو",
-        heroDesc: "لديك ٣ محاولات فقط. الفكرة الأساسية ثابتة من عندنا — وإنت تضيف لمستك الإبداعية ✨",
-        lblBaseConcept: "الفكرة الأساسية (مقفولة)",
-        lblChooseMode: "اختار طريقة الإدخال",
-        btnTextMode: "📝 برومبت نصّي",
-        btnImageMode: "🖼️ صورتين (بداية + نهاية)",
-        lblCharacter: "الشخصية / العنصر الرئيسي",
-        lblLocation: "المكان / البيئة",
-        lblExtra: "إضافة إبداعية (اختياري)",
-        hintLocked: "هذه الحقول فقط هي القابلة للتعديل. الفكرة الأساسية بالأعلى ثابتة.",
-        lblStartImg: "صورة البداية",
-        hintStart: "ارفع صورة لبداية الفيديو.",
-        lblEndImg: "صورة النهاية",
-        hintEnd: "ارفع صورة لنهاية الفيديو.",
-        lblImgExtra: "وصف إضافي (اختياري)",
-        btnGenerate: "▶ توليد الفيديو",
-        btnSave: "احفظ النتيجة",
-        trials: (left) => `المحاولات المتبقية: <strong id="trialsLeft">${left}</strong> / ٣`,
-        lblGeneratedReq: "الطلب المُرسل:",
-        lblSaved: "المحاولات المحفوظة",
-        hintSaved: "يتم حفظها على هذا الجهاز فقط داخل المتصفح.",
-        emptySaved: "لا توجد محاولات محفوظة حتى الآن.",
-        loaderTitle: "جارٍ التوليد…",
-        loaderSub: "انتظر قليلًا (تحميل تجريبي • ٢٠ ثانية)",
-        statusFill: "من فضلك اكتب على الأقل الشخصية والمكان.",
-        statusImages: "من فضلك ارفع صورة البداية وصورة النهاية.",
-        statusDone: "تم! يمكنك حفظ النتيجة أو المحاولة مرة أخرى (إذا تبقى محاولات).",
-        statusError: "حدث خطأ. جرّب مرة أخرى أو تواصل مع الدعم.",
-        openVideo: "افتح الفيديو",
-        openGenerated: "افتح الفيديو الناتج",
-        noVideo: "الخادم لم يُرجع رابط فيديو. اطلب من المطور ربط Veo3 هنا."
-      }
-    };
-
-    const btnLangToggle = document.getElementById("btnLangToggle");
-    const betaBadge = document.getElementById("betaBadge");
-
-    function applyLang(lang){
-      currentLang = lang;
-      localStorage.setItem(LANG_KEY, lang);
-      document.body.classList.toggle("lang-ar", lang === "ar");
-
-      document.getElementById("logoTitle").textContent = T[lang].logoTitle;
-      document.getElementById("heroTitle").textContent = T[lang].heroTitle;
-      document.getElementById("heroDesc").textContent = T[lang].heroDesc;
-
-      document.getElementById("lblBaseConcept").textContent = T[lang].lblBaseConcept;
-      document.getElementById("lblChooseMode").textContent = T[lang].lblChooseMode;
-
-      document.getElementById("lblCharacter").textContent = T[lang].lblCharacter;
-      document.getElementById("lblLocation").textContent = T[lang].lblLocation;
-      document.getElementById("lblExtra").textContent = T[lang].lblExtra;
-      document.getElementById("hintLocked").textContent = T[lang].hintLocked;
-
-      document.getElementById("lblStartImg").textContent = T[lang].lblStartImg;
-      document.getElementById("hintStart").textContent = T[lang].hintStart;
-      document.getElementById("lblEndImg").textContent = T[lang].lblEndImg;
-      document.getElementById("hintEnd").textContent = T[lang].hintEnd;
-      document.getElementById("lblImgExtra").textContent = T[lang].lblImgExtra;
-
-      btnTextMode.innerHTML = `<span class="icon">📝</span> ${T[lang].btnTextMode.replace("📝 ","").replace("📝","")}`.includes("span") ? btnTextMode.innerHTML : `<span class="icon">📝</span> ${T[lang].btnTextMode}`;
-      btnTextMode.innerHTML = T[lang].btnTextMode;
-      btnImageMode.innerHTML = T[lang].btnImageMode;
-
-      btnGenerate.textContent = T[lang].btnGenerate;
-      btnSaveResult.textContent = T[lang].btnSave;
-
-      document.getElementById("lblGeneratedReq").textContent = T[lang].lblGeneratedReq;
-      document.getElementById("lblSaved").textContent = T[lang].lblSaved;
-      document.getElementById("hintSaved").textContent = T[lang].hintSaved;
-
-      if (betaBadge) betaBadge.textContent = T[lang].badge;
-      if (loadingTitleEl) loadingTitleEl.textContent = T[lang].loaderTitle;
-      if (loadingSubEl) loadingSubEl.textContent = T[lang].loaderSub;
-      if (btnLangToggle) btnLangToggle.textContent = T[lang].btn;
-
-      updateTrialsUI();
-      renderSavedList();
-    }
-
-    if (btnLangToggle){
-      btnLangToggle.addEventListener("click", () => {
-        applyLang(currentLang === "en" ? "ar" : "en");
-      });
-    }
-
-    // =========================
-    // TRIALS UI
-    // =========================
-    function updateTrialsUI() {
-      const used = getTrialsUsed();
-      const left = Math.max(0, MAX_TRIALS - used);
-      trialsWrap.innerHTML = T[currentLang].trials(left);
-      btnGenerate.disabled = left <= 0;
-    }
-
-    // =========================
-    // SAVED LIST
-    // =========================
-    function renderSavedList() {
-      const saved = loadSaved();
-      savedList.innerHTML = "";
-      if (saved.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "hint";
-        empty.textContent = T[currentLang].emptySaved;
-        savedList.appendChild(empty);
-        return;
-      }
-      saved.forEach((item) => {
-        const div = document.createElement("div");
-        div.className = "saved-item";
-
-        const header = document.createElement("div");
-        header.className = "saved-item-header";
-
-        const title = document.createElement("div");
-        title.className = "saved-item-title";
-        title.textContent = item.mode === "text" ? (currentLang === "ar" ? "برومبت نصّي" : "Text prompt") : (currentLang === "ar" ? "برومبت صور" : "Images prompt");
-
-        const time = document.createElement("div");
-        time.className = "saved-item-time";
-        time.textContent = new Date(item.timestamp).toLocaleString();
-
-        header.appendChild(title);
-        header.appendChild(time);
-
-        const body = document.createElement("div");
-        body.textContent = item.promptPreview || "";
-
-        const linkWrapper = document.createElement("div");
-        if (item.videoUrl) {
-          const link = document.createElement("a");
-          link.href = item.videoUrl;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.textContent = T[currentLang].openVideo;
-          linkWrapper.appendChild(link);
-        }
-
-        div.appendChild(header);
-        div.appendChild(body);
-        if (item.videoUrl) div.appendChild(linkWrapper);
-
-        savedList.appendChild(div);
-      });
-    }
-
-    // =========================
-    // LOADER
-    // =========================
-    let loaderInterval = null;
-
-    function showFakeLoader(durationMs = FAKE_LOADING_MS){
-      loadingOverlay.style.display = "flex";
-      loadingOverlay.setAttribute("aria-hidden", "false");
-      loadingBar.style.width = "0%";
-      loadingTimer.textContent = Math.ceil(durationMs/1000) + "s";
-
-      const start = Date.now();
-      const end = start + durationMs;
-
-      clearInterval(loaderInterval);
-      loaderInterval = setInterval(() => {
-        const now = Date.now();
-        const remaining = Math.max(0, end - now);
-        const progress = Math.min(1, (now - start) / durationMs);
-
-        loadingBar.style.width = Math.round(progress * 100) + "%";
-        loadingTimer.textContent = Math.ceil(remaining / 1000) + "s";
-
-        if (remaining <= 0){
-          clearInterval(loaderInterval);
-          loaderInterval = null;
-          loadingBar.style.width = "100%";
-          loadingTimer.textContent = "0s";
-        }
-      }, 200);
-    }
-
-    function hideFakeLoader(){
-      clearInterval(loaderInterval);
-      loaderInterval = null;
-      loadingOverlay.style.display = "none";
-      loadingOverlay.setAttribute("aria-hidden", "true");
-    }
-
-    // =========================
-    // MODE SWITCH
-    // =========================
-    function setMode(mode) {
-      currentMode = mode;
-      if (mode === "text") {
-        btnTextMode.classList.add("active");
-        btnImageMode.classList.remove("active");
-        textModeFields.style.display = "flex";
-        imageModeFields.style.display = "none";
-      } else {
-        btnTextMode.classList.remove("active");
-        btnImageMode.classList.add("active");
-        textModeFields.style.display = "none";
-        imageModeFields.style.display = "flex";
-      }
-      setStatus("");
-      outputBox.style.display = "none";
-      btnSaveResult.disabled = true;
-      lastResult = null;
-    }
-
-    btnTextMode.addEventListener("click", () => setMode("text"));
-    btnImageMode.addEventListener("click", () => setMode("images"));
-
-    // =========================
-    // GENERATE HANDLER
-    // =========================
-    async function handleGenerate() {
-      const used = getTrialsUsed();
-      if (used >= MAX_TRIALS) {
-        setStatus(currentLang === "ar" ? "لقد استخدمت كل المحاولات." : "You have used all 3 trials.", true);
-        return;
-      }
-
-      setStatus("", false);
-      btnGenerate.disabled = true;
-      btnSaveResult.disabled = true;
-      outputBox.style.display = "none";
-
-      showFakeLoader(FAKE_LOADING_MS);
-
-      try {
-        let payload = {
-          mode: currentMode,
-          basePrompt: BASE_PROMPT,
-        };
-
-        if (currentMode === "text") {
-          const character = fieldCharacter.value.trim();
-          const location = fieldLocation.value.trim();
-          const extra = fieldExtra.value.trim();
-
-          if (!character || !location) {
-            hideFakeLoader();
-            setStatus(T[currentLang].statusFill, true);
-            btnGenerate.disabled = false;
-            return;
-          }
-
-          const composedPrompt = `
-${BASE_PROMPT}
-
-User details:
-- Main subject / character: ${character}
-- Location / environment: ${location}
-- Extra creative twist: ${extra || "None"}
-          `.trim();
-
-          payload.textPrompt = composedPrompt;
-
-        } else {
-          const startFile = startImageInput.files[0];
-          const endFile = endImageInput.files[0];
-
-          if (!startFile || !endFile) {
-            hideFakeLoader();
-            setStatus(T[currentLang].statusImages, true);
-            btnGenerate.disabled = false;
-            return;
-          }
-
-          const [startBase64, endBase64] = await Promise.all([
-            base64FromFile(startFile),
-            base64FromFile(endFile),
-          ]);
-
-          payload.startImage = startBase64;
-          payload.endImage = endBase64;
-          payload.imageExtra = imageExtra.value.trim();
-        }
-
-        const fetchPromise = fetch("https://0jy9jfuim3.execute-api.eu-central-1.amazonaws.com/veo3Generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        const [res] = await Promise.all([
-          fetchPromise,
-          wait(FAKE_LOADING_MS)
-        ]);
-
-        if (!res.ok) throw new Error("Server error: " + res.status);
-
-        const data = await res.json();
-        const promptUsed = data.promptUsed || (payload.textPrompt || "[Prompt sent]");
-        const videoUrl = data.videoUrl || "";
-
-        hideFakeLoader();
-
-        outputPrompt.textContent = promptUsed;
-        outputVideoWrapper.innerHTML = "";
-
-        if (videoUrl) {
-          const link = document.createElement("a");
-          link.href = videoUrl;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.textContent = T[currentLang].openGenerated;
-          outputVideoWrapper.appendChild(link);
-        } else {
-          outputVideoWrapper.textContent = T[currentLang].noVideo;
-        }
-
-        outputBox.style.display = "block";
-
-        setTrialsUsed(used + 1);
-        updateTrialsUI();
-
-        lastResult = {
-          mode: currentMode,
-          promptPreview: promptUsed.slice(0, 280) + (promptUsed.length > 280 ? "..." : ""),
-          videoUrl,
-          timestamp: Date.now(),
-        };
-
-        btnSaveResult.disabled = false;
-        setStatus(T[currentLang].statusDone, false);
-
-      } catch (err) {
-        console.error(err);
-        hideFakeLoader();
-        setStatus(T[currentLang].statusError, true);
-      } finally {
-        btnGenerate.disabled = getTrialsUsed() >= MAX_TRIALS;
-      }
-    }
-
-    btnGenerate.addEventListener("click", () => handleGenerate());
-
-    // =========================
-    // SAVE RESULT
-    // =========================
-    btnSaveResult.addEventListener("click", () => {
-      if (!lastResult) return;
-      const saved = loadSaved();
-      saved.unshift(lastResult);
-      saveSaved(saved);
-      renderSavedList();
-      btnSaveResult.disabled = true;
-      setStatus(currentLang === "ar" ? "تم حفظ النتيجة على هذا الجهاز." : "Result saved on this device.", false);
-    });
-
-    // =========================
-    // INIT
-    // =========================
-    updateTrialsUI();
-    renderSavedList();
-    applyLang(currentLang);
-  </script>
 </body>
 </html>
