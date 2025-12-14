@@ -225,23 +225,30 @@
           <path d="M9 9c-1.5 2.4-2.2 4.6-2.4 7.2 2.4-1.1 4.2-3 5.1-5.2-.7-.7-1.7-1.4-2.7-2Z" fill="#22c55e"/>
         </svg>
       </div>
-      Shaga3app · AI Creative Playground
+      <!-- ADDED: IDs so Arabic can translate these without changing layout -->
+      <span id="brandText">Shaga3app · AI Creative Playground</span>
     </div>
-    <div class="pill">Beta · Shaga3app powered</div>
+
+    <!-- ADDED: language toggle (no design change to your existing pill) -->
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="langBtn" id="langToggle" type="button">AR</button>
+      <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
+    </div>
   </div>
 
   <!-- Hero -->
   <div class="hero">
-    <h1>Play with our<br>guided video<br>prompt</h1>
-    <p>You get up to <b>3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
+    <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
+    <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
   </div>
 
   <!-- Locked Base -->
-  <div class="sectionLabel">BASE CONCEPT (LOCKED)</div>
+  <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
   <div class="lockedBox">
     <div class="lockedTop">
-      <div class="lockedTag">🔒 Locked</div>
-      <div class="lockedTag">Trials left: <b id="trialsLeft">3</b></div>
+      <div class="lockedTag" id="lockedTag">🔒 Locked</div>
+      <!-- ADDED: span for label so Arabic can translate -->
+      <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
     </div>
     <div class="lockedPrompt" id="basePrompt">
 YOUR_BASE_PROMPT_GOES_HERE
@@ -252,37 +259,46 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
   </div>
 
   <!-- Mode -->
-  <div class="sectionLabel">CHOOSE INPUT MODE</div>
+  <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
   <div class="modeBar">
-    <button class="modeBtn on" id="modeText">📝 Text prompt</button>
-    <button class="modeBtn" id="modeImages">🖼️ Start + End images</button>
+    <button class="modeBtn on" id="modeText">📝 <span id="modeTextTxt">Text prompt</span></button>
+    <button class="modeBtn" id="modeImages">🖼️ <span id="modeImgTxt">Start + End images</span></button>
   </div>
 
   <!-- Inputs -->
   <div class="grid">
     <div class="field">
-      <label>Main subject / character</label>
+      <label id="lblSubject">Main subject / character</label>
       <input id="subject">
+      <!-- ADDED: per-field description -->
+      <div class="miniHint" id="hintSubject">Who is the main character? (age, style, wardrobe, vibe)</div>
     </div>
     <div class="field">
-      <label>Location / environment</label>
+      <label id="lblLocation">Location / environment</label>
       <input id="location">
+      <!-- ADDED: per-field description -->
+      <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
     </div>
     <div class="field span2" id="extraBox">
-      <label>Extra creative twist</label>
+      <label id="lblTwist">Extra creative twist</label>
       <input id="twist">
+      <!-- ADDED: per-field description -->
+      <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
     </div>
   </div>
 
   <div style="margin-top:14px">
-    <button class="btn" id="generateBtn">▶ Generate video</button>
+    <button class="btn" id="generateBtn">▶ <span id="genBtnTxt">Generate video</span></button>
   </div>
 
   <!-- Result -->
   <div class="result" id="resultBox">
+    <!-- ADDED: countdown text -->
+    <div class="miniHint" id="timerText" style="margin-top:0;margin-bottom:10px;">~10s</div>
+
     <div class="progress"><div class="bar" id="bar"></div></div>
     <video id="video" controls playsinline></video>
-    <a class="btn secondary" id="downloadBtn" style="margin-top:10px" download>⬇ Download video</a>
+    <a class="btn secondary" id="downloadBtn" style="margin-top:10px" download>⬇ <span id="dlTxt">Download video</span></a>
   </div>
 
 </div>
@@ -304,6 +320,111 @@ const DEMO_VIDEOS = [
 let trials = 3;
 let generating = false;
 
+/* ===========================
+   ADDED: Arabic Toggle + RTL + Arabic Digits
+=========================== */
+const i18n = {
+  en: {
+    brandText: "Shaga3app · AI Creative Playground",
+    beta: "Beta · Shaga3app powered",
+    heroTitle: "Play with our<br>guided video<br>prompt",
+    heroDescStart: "You get up to ",
+    heroDescEnd: " tries. The core concept is fixed by us; you just add your creative twist ✨",
+    baseLabel: "BASE CONCEPT (LOCKED)",
+    locked: "🔒 Locked",
+    trialsLabel: "Trials left:",
+    modeLabel: "CHOOSE INPUT MODE",
+    modeText: "Text prompt",
+    modeImg: "Start + End images",
+    lblSubject: "Main subject / character",
+    lblLocation: "Location / environment",
+    lblTwist: "Extra creative twist",
+    hintSubject: "Who is the main character? (age, style, wardrobe, vibe)",
+    hintLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
+    hintTwist: "Optional: camera move, mood, style, or one special detail.",
+    gen: "Generate video",
+    dl: "Download video",
+    done: "Done"
+  },
+  ar: {
+    brandText: "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
+    beta: "بيتا · بدعم Shaga3app",
+    heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
+    heroDescStart: "لديك ",
+    heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
+    baseLabel: "المفهوم الأساسي (مقفول)",
+    locked: "🔒 مقفول",
+    trialsLabel: "المحاولات المتبقية:",
+    modeLabel: "اختر طريقة الإدخال",
+    modeText: "نص فقط",
+    modeImg: "صورتان: بداية + نهاية",
+    lblSubject: "الشخصية / العنصر الرئيسي",
+    lblLocation: "المكان / البيئة",
+    lblTwist: "إضافة إبداعية",
+    hintSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
+    hintLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
+    hintTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
+    gen: "توليد فيديو",
+    dl: "تحميل الفيديو",
+    done: "تم"
+  }
+};
+
+function toArabicDigits(str){
+  const map = {"0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩"};
+  return String(str).replace(/[0-9]/g, d => map[d]);
+}
+
+let currentLang = "en";
+
+function applyLang(lang){
+  currentLang = lang;
+  const t = i18n[lang];
+
+  $("brandText").textContent = t.brandText;
+  $("betaPill").textContent = t.beta;
+
+  $("heroTitle").innerHTML = t.heroTitle;
+  $("triesInline").textContent = (lang === "ar") ? toArabicDigits(String(trials + (generating?0:0))) : String(trials + (generating?0:0));
+
+  // rebuild hero desc with number in the middle
+  const triesNum = (lang === "ar") ? toArabicDigits(String(3)) : String(3);
+  $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
+
+  $("baseLabel").textContent = t.baseLabel;
+  $("lockedTag").textContent = t.locked;
+  $("trialsLabel").textContent = t.trialsLabel;
+
+  $("modeLabel").textContent = t.modeLabel;
+  $("modeTextTxt").textContent = t.modeText;
+  $("modeImgTxt").textContent = t.modeImg;
+
+  $("lblSubject").textContent = t.lblSubject;
+  $("lblLocation").textContent = t.lblLocation;
+  $("lblTwist").textContent = t.lblTwist;
+
+  $("hintSubject").textContent = t.hintSubject;
+  $("hintLocation").textContent = t.hintLocation;
+  $("hintTwist").textContent = t.hintTwist;
+
+  $("genBtnTxt").textContent = t.gen;
+  $("dlTxt").textContent = t.dl;
+
+  document.body.dir = (lang === "ar") ? "rtl" : "ltr";
+  document.documentElement.lang = (lang === "ar") ? "ar" : "en";
+  $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
+
+  // refresh timer display default
+  $("timerText").textContent = (lang === "ar") ? toArabicDigits("١٠ ث") : "~10s";
+}
+
+$("langToggle").addEventListener("click", () => {
+  applyLang(currentLang === "en" ? "ar" : "en");
+});
+
+/* ===========================
+   Original function kept, only ADDED Arabic countdown + timer
+=========================== */
 function fakeGenerate(){
   if(generating || trials <= 0) return;
   generating = true;
@@ -318,8 +439,17 @@ function fakeGenerate(){
   const total = 10000;
 
   const tick = () => {
-    const p = Math.min(100, ((Date.now() - start) / total) * 100);
+    const elapsed = Date.now() - start;
+    const p = Math.min(100, (elapsed / total) * 100);
     $("bar").style.width = p + "%";
+
+    const remain = Math.max(0, Math.ceil((total - elapsed) / 1000));
+    if(currentLang === "ar"){
+      $("timerText").textContent = remain ? toArabicDigits(`${remain} ث`) : i18n.ar.done;
+    }else{
+      $("timerText").textContent = remain ? `~${remain}s` : i18n.en.done;
+    }
+
     if(p < 100) requestAnimationFrame(tick);
   };
   tick();
@@ -339,6 +469,9 @@ function fakeGenerate(){
 }
 
 $("generateBtn").onclick = fakeGenerate;
+
+/* ADDED: init language (default EN) */
+applyLang("en");
 </script>
 </body>
 </html>
