@@ -481,6 +481,27 @@ function fakeGenerate(){
 $("generateBtn").onclick = fakeGenerate;
 
 /* ADDED: init language (default EN) */
+// ===========================
+// FIX: Input mode switching
+// ===========================
+const imagesBox = document.getElementById("imagesBox");
+const extraBox = document.getElementById("extraBox");
+
+document.getElementById("modeText").addEventListener("click", () => {
+  document.getElementById("modeText").classList.add("on");
+  document.getElementById("modeImages").classList.remove("on");
+  if(imagesBox) imagesBox.style.display = "none";
+  if(extraBox) extraBox.style.display = "block";
+});
+
+document.getElementById("modeImages").addEventListener("click", () => {
+  document.getElementById("modeImages").classList.add("on");
+  document.getElementById("modeText").classList.remove("on");
+  if(imagesBox) imagesBox.style.display = "block";
+  if(extraBox) extraBox.style.display = "none";
+});
+
+  
 applyLang("en");
 </script>
 </body>
