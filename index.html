@@ -280,6 +280,16 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
       <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
     </div>
     <div class="field span2" id="extraBox">
+
+      <div class="field span2" id="imagesBox" style="display:none;">
+  <label>Start + End images</label>
+  <input type="file" id="startImg" accept="image/*">
+  <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+  <div class="miniHint">
+    Upload a start frame and an end frame to guide the motion.
+  </div>
+</div>
+
       <label id="lblTwist">Extra creative twist</label>
       <input id="twist">
       <!-- ADDED: per-field description -->
