@@ -270,25 +270,20 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     <div class="field">
       <label id="lblSubject">Main subject / character</label>
       <input id="subject">
-      <!-- ADDED: per-field description -->
       <div class="miniHint" id="hintSubject">Who is the main character? (age, style, wardrobe, vibe)</div>
     </div>
     <div class="field">
       <label id="lblLocation">Location / environment</label>
       <input id="location">
-      <!-- ADDED: per-field description -->
       <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
     </div>
 
-    <!-- FIX: extraBox stays as-is (no nesting of fields inside it) -->
     <div class="field span2" id="extraBox">
       <label id="lblTwist">Extra creative twist</label>
       <input id="twist">
-      <!-- ADDED: per-field description -->
       <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
     </div>
 
-    <!-- FIX: imagesBox must be a sibling in the grid (not inside extraBox) -->
     <div class="field span2" id="imagesBox" style="display:none;">
       <label id="lblImages">Start + End images</label>
       <input type="file" id="startImg" accept="image/*">
@@ -422,7 +417,6 @@ function applyLang(lang){
   $("hintLocation").textContent = t.hintLocation;
   $("hintTwist").textContent = t.hintTwist;
 
-  // ADDED: translate image label + hint
   $("lblImages").textContent = t.lblImages;
   $("hintImages").textContent = t.hintImages;
 
