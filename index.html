@@ -220,6 +220,8 @@
   <div class="topBar">
     <div class="brand">
       <div class="logo">
+        <!-- ADDED: real Shaga3app logo image (SVG stays as fallback) -->
+        <img id="brandImg" alt="Shaga3app" style="display:none;width:22px;height:22px;object-fit:contain;">
         <svg viewBox="0 0 24 24">
           <path d="M12 3c2.5 2.8 4.8 4.2 7.5 4.9-1.3 5.6-4.3 9.6-7.5 13.2C8.8 17.5 5.8 13.5 4.5 7.9 7.2 7.2 9.5 5.8 12 3Z" fill="#5b5cff"/>
           <path d="M9 9c-1.5 2.4-2.2 4.6-2.4 7.2 2.4-1.1 4.2-3 5.1-5.2-.7-.7-1.7-1.4-2.7-2Z" fill="#22c55e"/>
@@ -435,7 +437,7 @@ $("langToggle").addEventListener("click", () => {
 });
 
 /* ===========================
-   FIX: Input mode switching (show imagesBox, hide extraBox)
+   FIX: Input mode switching (show imagesBox, keep extraBox visible)
 =========================== */
 const imagesBox = document.getElementById("imagesBox");
 const extraBox = document.getElementById("extraBox");
@@ -451,7 +453,7 @@ document.getElementById("modeImages").addEventListener("click", () => {
   document.getElementById("modeImages").classList.add("on");
   document.getElementById("modeText").classList.remove("on");
   if(imagesBox) imagesBox.style.display = "block";
-  if(extraBox) extraBox.style.display = "none";
+  if(extraBox) extraBox.style.display = "block"; /* CHANGED: keep twist visible */
 });
 
 /* ===========================
@@ -501,6 +503,23 @@ function fakeGenerate(){
 }
 
 $("generateBtn").onclick = fakeGenerate;
+
+/* ===========================
+   ADDED: Shaga3app logo loader (SVG fallback)
+   Put a file named: shaga3app-logo.png next to this HTML on GitHub
+=========================== */
+const brandImg = document.getElementById("brandImg");
+const brandSvg = document.querySelector(".logo svg");
+if(brandImg){
+  brandImg.src = "shaga3app-logo.png";
+  brandImg.onload = () => {
+    brandImg.style.display = "block";
+    if(brandSvg) brandSvg.style.display = "none";
+  };
+  brandImg.onerror = () => {
+    /* keep SVG if image not found */
+  };
+}
 
 applyLang("en");
 </script>
