@@ -35,6 +35,9 @@
   opacity:.95;
 }
 
+/* ✅ ADDED: hide below-field descriptions (we use placeholders inside inputs now) */
+.field .miniHint{ display:none; }
+
     
     :root{
       --bg:#0b0f18;
@@ -78,6 +81,7 @@
       display:grid;place-items:center;
       background:rgba(255,255,255,.06);
       border:1px solid var(--line);
+      overflow:hidden;
     }
     .logo svg{width:22px;height:22px}
     .pill{
@@ -220,18 +224,16 @@
   <div class="topBar">
     <div class="brand">
       <div class="logo">
-        <!-- ADDED: real Shaga3app logo image (SVG stays as fallback) -->
+        <!-- ✅ Logo image (PNG) + SVG fallback -->
         <img id="brandImg" alt="Shaga3app" style="display:none;width:22px;height:22px;object-fit:contain;">
         <svg viewBox="0 0 24 24">
           <path d="M12 3c2.5 2.8 4.8 4.2 7.5 4.9-1.3 5.6-4.3 9.6-7.5 13.2C8.8 17.5 5.8 13.5 4.5 7.9 7.2 7.2 9.5 5.8 12 3Z" fill="#5b5cff"/>
           <path d="M9 9c-1.5 2.4-2.2 4.6-2.4 7.2 2.4-1.1 4.2-3 5.1-5.2-.7-.7-1.7-1.4-2.7-2Z" fill="#22c55e"/>
         </svg>
       </div>
-      <!-- ADDED: IDs so Arabic can translate these without changing layout -->
       <span id="brandText">Shaga3app · AI Creative Playground</span>
     </div>
 
-    <!-- ADDED: language toggle (no design change to your existing pill) -->
     <div style="display:flex; gap:10px; align-items:center;">
       <button class="langBtn" id="langToggle" type="button">AR</button>
       <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
@@ -249,7 +251,6 @@
   <div class="lockedBox">
     <div class="lockedTop">
       <div class="lockedTag" id="lockedTag">🔒 Locked</div>
-      <!-- ADDED: span for label so Arabic can translate -->
       <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
     </div>
     <div class="lockedPrompt" id="basePrompt">
@@ -267,34 +268,37 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     <button class="modeBtn" id="modeImages">🖼️ <span id="modeImgTxt">Start + End images</span></button>
   </div>
 
+  <!-- ✅ MOVED: imagesBox directly under tabs (before other fields) -->
+  <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
+    <label id="lblImages">Start + End images</label>
+    <input type="file" id="startImg" accept="image/*">
+    <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+    <div class="miniHint" id="hintImages">
+      Upload a start frame and an end frame to guide the motion.
+    </div>
+  </div>
+
   <!-- Inputs -->
   <div class="grid">
     <div class="field">
       <label id="lblSubject">Main subject / character</label>
-      <input id="subject">
+      <!-- ✅ placeholder inside -->
+      <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
       <div class="miniHint" id="hintSubject">Who is the main character? (age, style, wardrobe, vibe)</div>
     </div>
     <div class="field">
       <label id="lblLocation">Location / environment</label>
-      <input id="location">
+      <!-- ✅ placeholder inside -->
+      <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
       <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
     </div>
 
     <div class="field span2" id="extraBox">
       <label id="lblTwist">Extra creative twist</label>
-      <input id="twist">
+      <!-- ✅ placeholder inside -->
+      <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
       <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
     </div>
-
-    <div class="field span2" id="imagesBox" style="display:none;">
-      <label id="lblImages">Start + End images</label>
-      <input type="file" id="startImg" accept="image/*">
-      <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-      <div class="miniHint" id="hintImages">
-        Upload a start frame and an end frame to guide the motion.
-      </div>
-    </div>
-
   </div>
 
   <div style="margin-top:14px">
@@ -303,9 +307,7 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
 
   <!-- Result -->
   <div class="result" id="resultBox">
-    <!-- ADDED: countdown text -->
     <div class="miniHint" id="timerText" style="margin-top:0;margin-bottom:10px;">~10s</div>
-
     <div class="progress"><div class="bar" id="bar"></div></div>
     <video id="video" controls playsinline></video>
     <a class="btn secondary" id="downloadBtn" style="margin-top:10px" download>⬇ <span id="dlTxt">Download video</span></a>
@@ -331,7 +333,7 @@ let trials = 3;
 let generating = false;
 
 /* ===========================
-   ADDED: Arabic Toggle + RTL + Arabic Digits
+   Arabic Toggle + RTL + Arabic Digits
 =========================== */
 const i18n = {
   en: {
@@ -354,6 +356,9 @@ const i18n = {
     hintLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
     hintTwist: "Optional: camera move, mood, style, or one special detail.",
     hintImages: "Upload a start frame and an end frame to guide the motion.",
+    phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
+    phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
+    phTwist: "Optional: camera move, mood, style, or one special detail.",
     gen: "Generate video",
     dl: "Download video",
     done: "Done"
@@ -378,6 +383,9 @@ const i18n = {
     hintLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
     hintTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
     hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
+    phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
+    phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
+    phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
     gen: "توليد فيديو",
     dl: "تحميل الفيديو",
     done: "تم"
@@ -422,6 +430,11 @@ function applyLang(lang){
   $("lblImages").textContent = t.lblImages;
   $("hintImages").textContent = t.hintImages;
 
+  // ✅ placeholders inside fields (dimmed)
+  $("subject").placeholder = t.phSubject;
+  $("location").placeholder = t.phLocation;
+  $("twist").placeholder = t.phTwist;
+
   $("genBtnTxt").textContent = t.gen;
   $("dlTxt").textContent = t.dl;
 
@@ -437,27 +450,26 @@ $("langToggle").addEventListener("click", () => {
 });
 
 /* ===========================
-   FIX: Input mode switching (show imagesBox, keep extraBox visible)
+   Mode switching
+   ✅ show imagesBox when images mode
+   ✅ keep extraBox always visible (your request)
 =========================== */
 const imagesBox = document.getElementById("imagesBox");
-const extraBox = document.getElementById("extraBox");
 
 document.getElementById("modeText").addEventListener("click", () => {
   document.getElementById("modeText").classList.add("on");
   document.getElementById("modeImages").classList.remove("on");
   if(imagesBox) imagesBox.style.display = "none";
-  if(extraBox) extraBox.style.display = "block";
 });
 
 document.getElementById("modeImages").addEventListener("click", () => {
   document.getElementById("modeImages").classList.add("on");
   document.getElementById("modeText").classList.remove("on");
   if(imagesBox) imagesBox.style.display = "block";
-  if(extraBox) extraBox.style.display = "block"; /* CHANGED: keep twist visible */
 });
 
 /* ===========================
-   Original function kept, only ADDED Arabic countdown + timer
+   Fake Generate (AWS demo videos)
 =========================== */
 function fakeGenerate(){
   if(generating || trials <= 0) return;
@@ -505,19 +517,20 @@ function fakeGenerate(){
 $("generateBtn").onclick = fakeGenerate;
 
 /* ===========================
-   ADDED: Shaga3app logo loader (SVG fallback)
-   Put a file named: logoshaga3app.svg next to this HTML on GitHub
+   ✅ Shaga3app logo loader (PNG) + SVG fallback
+   File must be beside HTML: logoshaga3app.png
 =========================== */
 const brandImg = document.getElementById("brandImg");
 const brandSvg = document.querySelector(".logo svg");
 if(brandImg){
-  brandImg.src = "logoshaga3app.svg";
+  brandImg.src = "logoshaga3app.png?v=3"; // cache-bust
   brandImg.onload = () => {
     brandImg.style.display = "block";
     if(brandSvg) brandSvg.style.display = "none";
   };
   brandImg.onerror = () => {
-    /* keep SVG if image not found */
+    // keep SVG fallback
+    if(brandSvg) brandSvg.style.display = "block";
   };
 }
 
