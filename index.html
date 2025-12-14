@@ -506,12 +506,12 @@ $("generateBtn").onclick = fakeGenerate;
 
 /* ===========================
    ADDED: Shaga3app logo loader (SVG fallback)
-   Put a file named: shaga3app-logo.png next to this HTML on GitHub
+   Put a file named: logoshaga3app.svg next to this HTML on GitHub
 =========================== */
 const brandImg = document.getElementById("brandImg");
 const brandSvg = document.querySelector(".logo svg");
 if(brandImg){
-  brandImg.src = "shaga3app-logo.png";
+  brandImg.src = "logoshaga3app.svg";
   brandImg.onload = () => {
     brandImg.style.display = "block";
     if(brandSvg) brandSvg.style.display = "none";
