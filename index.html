@@ -279,22 +279,25 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
       <!-- ADDED: per-field description -->
       <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
     </div>
+
+    <!-- FIX: extraBox stays as-is (no nesting of fields inside it) -->
     <div class="field span2" id="extraBox">
-
-      <div class="field span2" id="imagesBox" style="display:none;">
-  <label>Start + End images</label>
-  <input type="file" id="startImg" accept="image/*">
-  <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-  <div class="miniHint">
-    Upload a start frame and an end frame to guide the motion.
-  </div>
-</div>
-
       <label id="lblTwist">Extra creative twist</label>
       <input id="twist">
       <!-- ADDED: per-field description -->
       <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
     </div>
+
+    <!-- FIX: imagesBox must be a sibling in the grid (not inside extraBox) -->
+    <div class="field span2" id="imagesBox" style="display:none;">
+      <label id="lblImages">Start + End images</label>
+      <input type="file" id="startImg" accept="image/*">
+      <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+      <div class="miniHint" id="hintImages">
+        Upload a start frame and an end frame to guide the motion.
+      </div>
+    </div>
+
   </div>
 
   <div style="margin-top:14px">
@@ -349,9 +352,11 @@ const i18n = {
     lblSubject: "Main subject / character",
     lblLocation: "Location / environment",
     lblTwist: "Extra creative twist",
+    lblImages: "Start + End images",
     hintSubject: "Who is the main character? (age, style, wardrobe, vibe)",
     hintLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
     hintTwist: "Optional: camera move, mood, style, or one special detail.",
+    hintImages: "Upload a start frame and an end frame to guide the motion.",
     gen: "Generate video",
     dl: "Download video",
     done: "Done"
@@ -371,9 +376,11 @@ const i18n = {
     lblSubject: "الشخصية / العنصر الرئيسي",
     lblLocation: "المكان / البيئة",
     lblTwist: "إضافة إبداعية",
+    lblImages: "صورتان: بداية + نهاية",
     hintSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
     hintLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
     hintTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
+    hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
     gen: "توليد فيديو",
     dl: "تحميل الفيديو",
     done: "تم"
@@ -395,10 +402,8 @@ function applyLang(lang){
   $("betaPill").textContent = t.beta;
 
   $("heroTitle").innerHTML = t.heroTitle;
-  $("triesInline").textContent = (lang === "ar") ? toArabicDigits(String(trials + (generating?0:0))) : String(trials + (generating?0:0));
 
-  // rebuild hero desc with number in the middle
-  const triesNum = (lang === "ar") ? toArabicDigits(String(3)) : String(3);
+  const triesNum = (lang === "ar") ? toArabicDigits("3") : "3";
   $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
 
   $("baseLabel").textContent = t.baseLabel;
@@ -417,6 +422,10 @@ function applyLang(lang){
   $("hintLocation").textContent = t.hintLocation;
   $("hintTwist").textContent = t.hintTwist;
 
+  // ADDED: translate image label + hint
+  $("lblImages").textContent = t.lblImages;
+  $("hintImages").textContent = t.hintImages;
+
   $("genBtnTxt").textContent = t.gen;
   $("dlTxt").textContent = t.dl;
 
@@ -424,12 +433,31 @@ function applyLang(lang){
   document.documentElement.lang = (lang === "ar") ? "ar" : "en";
   $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
 
-  // refresh timer display default
   $("timerText").textContent = (lang === "ar") ? toArabicDigits("١٠ ث") : "~10s";
 }
 
 $("langToggle").addEventListener("click", () => {
   applyLang(currentLang === "en" ? "ar" : "en");
+});
+
+/* ===========================
+   FIX: Input mode switching (show imagesBox, hide extraBox)
+=========================== */
+const imagesBox = document.getElementById("imagesBox");
+const extraBox = document.getElementById("extraBox");
+
+document.getElementById("modeText").addEventListener("click", () => {
+  document.getElementById("modeText").classList.add("on");
+  document.getElementById("modeImages").classList.remove("on");
+  if(imagesBox) imagesBox.style.display = "none";
+  if(extraBox) extraBox.style.display = "block";
+});
+
+document.getElementById("modeImages").addEventListener("click", () => {
+  document.getElementById("modeImages").classList.add("on");
+  document.getElementById("modeText").classList.remove("on");
+  if(imagesBox) imagesBox.style.display = "block";
+  if(extraBox) extraBox.style.display = "none";
 });
 
 /* ===========================
@@ -480,28 +508,6 @@ function fakeGenerate(){
 
 $("generateBtn").onclick = fakeGenerate;
 
-/* ADDED: init language (default EN) */
-// ===========================
-// FIX: Input mode switching
-// ===========================
-const imagesBox = document.getElementById("imagesBox");
-const extraBox = document.getElementById("extraBox");
-
-document.getElementById("modeText").addEventListener("click", () => {
-  document.getElementById("modeText").classList.add("on");
-  document.getElementById("modeImages").classList.remove("on");
-  if(imagesBox) imagesBox.style.display = "none";
-  if(extraBox) extraBox.style.display = "block";
-});
-
-document.getElementById("modeImages").addEventListener("click", () => {
-  document.getElementById("modeImages").classList.add("on");
-  document.getElementById("modeText").classList.remove("on");
-  if(imagesBox) imagesBox.style.display = "block";
-  if(extraBox) extraBox.style.display = "none";
-});
-
-  
 applyLang("en");
 </script>
 </body>
