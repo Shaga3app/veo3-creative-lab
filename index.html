@@ -6,39 +6,37 @@
   <title>Shaga3app · AI Creative Playground</title>
 
   <style>
-
     /* ===== Added: logo + language toggle ===== */
-.brandLogo{
-  width:26px;height:26px;border-radius:8px;
-  border:1px solid var(--line);
-  background: rgba(255,255,255,.06);
-  display:inline-flex;align-items:center;justify-content:center;
-  overflow:hidden;
-}
-.brandLogo img{width:100%;height:100%;object-fit:contain;display:block}
+    .brandLogo{
+      width:26px;height:26px;border-radius:8px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      display:inline-flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:contain;display:block}
 
-.langBtn{
-  font-size:12px; padding:7px 10px; border-radius:999px;
-  border:1px solid var(--line); color: var(--text);
-  background: rgba(255,255,255,.06);
-  font-weight:800;
-  cursor:pointer;
-  -webkit-tap-highlight-color: transparent;
-}
+    .langBtn{
+      font-size:12px; padding:7px 10px; border-radius:999px;
+      border:1px solid var(--line); color: var(--text);
+      background: rgba(255,255,255,.06);
+      font-weight:800;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-/* make field hints look like your current hint style */
-.field .miniHint{
-  margin-top:8px;
-  font-size:12px;
-  color: var(--muted);
-  line-height:1.35;
-  opacity:.95;
-}
+    /* make field hints look like your current hint style */
+    .field .miniHint{
+      margin-top:8px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+      opacity:.95;
+    }
 
-/* ✅ ADDED: hide below-field descriptions (we use placeholders inside inputs now) */
-.field .miniHint{ display:none; }
+    /* ✅ ADDED: hide below-field descriptions (we use placeholders inside inputs now) */
+    .field .miniHint{ display:none; }
 
-    
     :root{
       --bg:#0b0f18;
       --text:#e5e7eb;
@@ -268,34 +266,29 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
     <button class="modeBtn" id="modeImages">🖼️ <span id="modeImgTxt">Start + End images</span></button>
   </div>
 
-  <!-- ✅ MOVED: imagesBox directly under tabs (before other fields) -->
+  <!-- imagesBox -->
   <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
     <label id="lblImages">Start + End images</label>
     <input type="file" id="startImg" accept="image/*">
     <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-    <div class="miniHint" id="hintImages">
-      Upload a start frame and an end frame to guide the motion.
-    </div>
+    <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
   </div>
 
   <!-- Inputs -->
   <div class="grid">
     <div class="field">
       <label id="lblSubject">Main subject / character</label>
-      <!-- ✅ placeholder inside -->
       <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
       <div class="miniHint" id="hintSubject">Who is the main character? (age, style, wardrobe, vibe)</div>
     </div>
     <div class="field">
       <label id="lblLocation">Location / environment</label>
-      <!-- ✅ placeholder inside -->
       <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
       <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
     </div>
 
     <div class="field span2" id="extraBox">
       <label id="lblTwist">Extra creative twist</label>
-      <!-- ✅ placeholder inside -->
       <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
       <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
     </div>
@@ -320,14 +313,10 @@ Create a vertical 9:16 cinematic video, 5 to 8 seconds long, with smooth camera 
 const $ = id => document.getElementById(id);
 
 /* ===========================
-   AWS DEMO VIDEOS (CONNECTED)
+   ✅ NEW: Your Lambda Function URL
 =========================== */
-const DEMO_VIDEOS = [
-  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1127%286%29.mp4",
-  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1127%281%29.mp4",
-  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1127%285%29.mp4",
-  "https://shaga3app-veo3-demo-videos.s3.eu-central-1.amazonaws.com/1st+vide..last+i+time+line.mp4"
-];
+const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
+const MODEL_ID = "veo-3.1-generate-001"; // keep as default
 
 let trials = 3;
 let generating = false;
@@ -361,7 +350,9 @@ const i18n = {
     phTwist: "Optional: camera move, mood, style, or one special detail.",
     gen: "Generate video",
     dl: "Download video",
-    done: "Done"
+    done: "Done",
+    generating: "Generating…",
+    waiting: "Waiting for video…"
   },
   ar: {
     brandText: "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
@@ -388,7 +379,9 @@ const i18n = {
     phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
     gen: "توليد فيديو",
     dl: "تحميل الفيديو",
-    done: "تم"
+    done: "تم",
+    generating: "جارٍ التوليد…",
+    waiting: "بنستنى الفيديو…"
   }
 };
 
@@ -430,7 +423,6 @@ function applyLang(lang){
   $("lblImages").textContent = t.lblImages;
   $("hintImages").textContent = t.hintImages;
 
-  // ✅ placeholders inside fields (dimmed)
   $("subject").placeholder = t.phSubject;
   $("location").placeholder = t.phLocation;
   $("twist").placeholder = t.phTwist;
@@ -451,8 +443,6 @@ $("langToggle").addEventListener("click", () => {
 
 /* ===========================
    Mode switching
-   ✅ show imagesBox when images mode
-   ✅ keep extraBox always visible (your request)
 =========================== */
 const imagesBox = document.getElementById("imagesBox");
 
@@ -469,56 +459,179 @@ document.getElementById("modeImages").addEventListener("click", () => {
 });
 
 /* ===========================
-   Fake Generate (AWS demo videos)
+   ✅ NEW: Real Generate (calls your Lambda)
 =========================== */
-function fakeGenerate(){
-  if(generating || trials <= 0) return;
-  generating = true;
-  trials--;
-  $("trialsLeft").textContent = trials;
 
+function buildPrompt(){
+  const base = $("basePrompt").textContent || "";
+  const subject = ($("subject").value || "").trim();
+  const location = ($("location").value || "").trim();
+  const twist = ($("twist").value || "").trim();
+
+  const parts = [];
+  if(subject) parts.push(`Main subject: ${subject}`);
+  if(location) parts.push(`Location: ${location}`);
+  if(twist) parts.push(`Creative twist: ${twist}`);
+
+  // Your base is “locked” so we keep it + inject user parts
+  return `${base}\n\n---\n${parts.join("\n")}`.trim();
+}
+
+async function postJSON(payload){
+  // cache-bust always
+  const url = API_URL + "?t=" + Date.now();
+  const r = await fetch(url, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload),
+  });
+
+  const text = await r.text();
+  let data;
+  try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
+  if(!r.ok){
+    const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
+    throw new Error(msg);
+  }
+  return data;
+}
+
+function showProgressUI(){
   $("resultBox").style.display = "block";
   $("video").style.display = "none";
   $("bar").style.width = "0%";
+}
 
+function setTimerText(secondsLeft){
+  if(currentLang === "ar"){
+    $("timerText").textContent = secondsLeft > 0
+      ? toArabicDigits(`${secondsLeft} ث`)
+      : i18n.ar.waiting;
+  } else {
+    $("timerText").textContent = secondsLeft > 0
+      ? `~${secondsLeft}s`
+      : i18n.en.waiting;
+  }
+}
+
+function setDoneText(){
+  $("timerText").textContent = (currentLang === "ar") ? i18n.ar.done : i18n.en.done;
+}
+
+async function realGenerate(){
+  if(generating || trials <= 0) return;
+  generating = true;
+
+  trials--;
+  $("trialsLeft").textContent = trials;
+
+  showProgressUI();
+
+  // Progress animation (we’ll run it for up to 60s, then keep “waiting…”)
+  const maxSeconds = 60;
   const start = Date.now();
-  const total = 10000;
+  let rafId;
 
   const tick = () => {
-    const elapsed = Date.now() - start;
-    const p = Math.min(100, (elapsed / total) * 100);
+    const elapsed = (Date.now() - start) / 1000;
+    const p = Math.min(95, (elapsed / maxSeconds) * 95); // up to 95% while waiting
     $("bar").style.width = p + "%";
 
-    const remain = Math.max(0, Math.ceil((total - elapsed) / 1000));
-    if(currentLang === "ar"){
-      $("timerText").textContent = remain ? toArabicDigits(`${remain} ث`) : i18n.ar.done;
-    }else{
-      $("timerText").textContent = remain ? `~${remain}s` : i18n.en.done;
-    }
+    const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
+    setTimerText(remain);
 
-    if(p < 100) requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   };
   tick();
 
-  setTimeout(() => {
-    const promptLen =
-      ($("subject").value + $("location").value + $("twist").value).length;
-    const videoURL = DEMO_VIDEOS[promptLen % DEMO_VIDEOS.length];
+  try{
+    const prompt = buildPrompt();
 
-    $("video").src = videoURL;
+    // 1) Start generation
+    const gen = await postJSON({
+      action: "generate",
+      modelId: MODEL_ID,
+      prompt
+    });
+
+    // Possible responses:
+    // - { name: "projects/.../operations/..." }
+    // - OR already done with downloadUrl
+    const operationName = gen.operationName || gen.name;
+
+    // 2) If Lambda already returned done/downloadUrl, use it
+    if(gen.done && gen.downloadUrl){
+      $("bar").style.width = "100%";
+      setDoneText();
+
+      $("video").src = gen.downloadUrl;
+      $("video").style.display = "block";
+      $("video").load();
+
+      $("downloadBtn").href = gen.downloadUrl;
+      generating = false;
+      cancelAnimationFrame(rafId);
+      return;
+    }
+
+    if(!operationName){
+      throw new Error("No operationName returned from generate");
+    }
+
+    // 3) Poll check until done (every 3 seconds, up to 60 seconds)
+    const pollEveryMs = 3000;
+    const maxPolls = 25; // ~75s total
+    let doneData = null;
+
+    for(let i=0;i<maxPolls;i++){
+      await new Promise(res => setTimeout(res, pollEveryMs));
+
+      const chk = await postJSON({
+        action: "check",
+        modelId: MODEL_ID,
+        operationName
+      });
+
+      if(chk.done && chk.downloadUrl){
+        doneData = chk;
+        break;
+      }
+      // Some implementations wrap under "response"
+      if(chk.done && chk.response && chk.response.downloadUrl){
+        doneData = { downloadUrl: chk.response.downloadUrl, done:true };
+        break;
+      }
+      // If it returns the original Vertex response with bytesBase64Encoded, your Lambda should convert it to S3.
+      // In your latest Lambda, it DOES convert to S3 and returns downloadUrl, so we wait for that.
+    }
+
+    if(!doneData){
+      throw new Error("Still processing. Try again in a few seconds.");
+    }
+
+    $("bar").style.width = "100%";
+    setDoneText();
+
+    $("video").src = doneData.downloadUrl;
     $("video").style.display = "block";
     $("video").load();
 
-    $("downloadBtn").href = videoURL;
+    $("downloadBtn").href = doneData.downloadUrl;
+
+  }catch(err){
+    // Show error in timer text area (simple + clear)
+    $("timerText").textContent = "Error: " + (err?.message || "Unknown error");
+    $("bar").style.width = "0%";
+  }finally{
     generating = false;
-  }, total);
+    if(rafId) cancelAnimationFrame(rafId);
+  }
 }
 
-$("generateBtn").onclick = fakeGenerate;
+$("generateBtn").onclick = realGenerate;
 
 /* ===========================
    ✅ Shaga3app logo loader (PNG) + SVG fallback
-   File must be beside HTML: logoshaga3app.png
 =========================== */
 const brandImg = document.getElementById("brandImg");
 const brandSvg = document.querySelector(".logo svg");
@@ -529,7 +642,6 @@ if(brandImg){
     if(brandSvg) brandSvg.style.display = "none";
   };
   brandImg.onerror = () => {
-    // keep SVG fallback
     if(brandSvg) brandSvg.style.display = "block";
   };
 }
