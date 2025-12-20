@@ -6,35 +6,6 @@
   <title>Shaga3app · AI Creative Playground</title>
 
   <style>
-    .brandLogo{
-      width:26px;height:26px;border-radius:8px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      display:inline-flex;align-items:center;justify-content:center;
-      overflow:hidden;
-    }
-    .brandLogo img{width:100%;height:100%;object-fit:contain;display:block}
-
-    .langBtn{
-      font-size:12px; padding:7px 10px; border-radius:999px;
-      border:1px solid var(--line); color: var(--text);
-      background: rgba(255,255,255,.06);
-      font-weight:800;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .field .miniHint{
-      margin-top:8px;
-      font-size:12px;
-      color: var(--muted);
-      line-height:1.35;
-      opacity:.95;
-    }
-
-    /* hide below-field descriptions (we use placeholders) */
-    .field .miniHint{ display:none; }
-
     :root{
       --bg:#0b0f18;
       --text:#e5e7eb;
@@ -42,6 +13,9 @@
       --line:rgba(255,255,255,.10);
       --accent:#5b5cff;
       --ok:#22c55e;
+
+      --cardBg: linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      --glass: rgba(0,0,0,.18);
     }
     *{box-sizing:border-box}
     body{
@@ -53,24 +27,38 @@
         var(--bg);
       color:var(--text);
     }
-    .wrap{max-width:860px;margin:0 auto;padding:18px 16px 40px;}
+
+    /* Container */
+    .wrap{max-width:860px;margin:0 auto;padding:18px 16px 120px;}
     .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      background:var(--cardBg);
       border:1px solid var(--line);
-      border-radius:18px;
+      border-radius:22px;
       padding:14px;
       backdrop-filter:blur(10px);
     }
 
+    /* App-like top bar */
     .topBar{
       display:flex;justify-content:space-between;align-items:center;
-      padding:10px 14px;
-      border-radius:999px;
+      padding:10px 12px;
+      border-radius:18px;
       border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
+      background:rgba(0,0,0,.22);
       gap:12px;
     }
-    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .leftHead{display:flex;align-items:center;gap:10px;}
+    .backBtn{
+      width:36px;height:36px;border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:900;
+      display:grid;place-items:center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
     .logo{
       width:34px;height:34px;border-radius:10px;
       display:grid;place-items:center;
@@ -79,65 +67,82 @@
       overflow:hidden;
     }
     .logo svg{width:22px;height:22px}
+    #brandText{font-size:13px;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
+
+    .rightHead{display:flex; gap:10px; align-items:center;}
+    .langBtn{
+      font-size:12px; padding:7px 10px; border-radius:999px;
+      border:1px solid var(--line); color: var(--text);
+      background: rgba(255,255,255,.06);
+      font-weight:900;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
     .pill{
       padding:7px 12px;
       border-radius:999px;
       border:1px solid rgba(91,92,255,.45);
       background:rgba(91,92,255,.18);
       font-size:12px;
-      font-weight:800;
+      font-weight:900;
+      white-space:nowrap;
     }
 
-    .hero{margin:18px 0}
-    .hero h1{font-size:52px;line-height:1.05;margin:6px 0;font-weight:900}
-    .hero p{color:var(--muted);font-size:18px;max-width:520px}
+    /* Hero */
+    .hero{margin:18px 0 10px}
+    .hero h1{font-size:48px;line-height:1.05;margin:6px 0;font-weight:950}
+    .hero p{color:var(--muted);font-size:16px;max-width:560px;margin:10px 0 0}
 
+    /* App cards */
     .sectionLabel{
-      margin:20px 0 10px;
+      margin:18px 0 10px;
       font-size:12px;
       letter-spacing:.14em;
       color:var(--muted);
     }
-
     .lockedBox{
-      background:rgba(0,0,0,.18);
+      background:var(--glass);
       border:1px solid var(--line);
-      border-radius:16px;
+      border-radius:18px;
       padding:14px;
     }
-    .lockedTop{display:flex;justify-content:space-between;align-items:center}
+    .lockedTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
     .lockedTag{
       font-size:12px;
       padding:6px 10px;
       border-radius:999px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.04);
+      font-weight:800;
     }
     .lockedPrompt{
       margin-top:10px;
       border:2px dashed rgba(255,255,255,.16);
       border-radius:14px;
-      padding:16px;
+      padding:14px;
       font-family:ui-monospace,monospace;
       white-space:pre-wrap;
+      font-size:12px;
+      opacity:.95;
     }
 
+    /* Mode bar */
     .modeBar{
       display:flex;gap:10px;
       border:1px solid var(--line);
-      border-radius:14px;
+      border-radius:16px;
       padding:8px;
       background:rgba(0,0,0,.18);
     }
     .modeBtn{
       flex:1;
       padding:10px;
-      border-radius:12px;
+      border-radius:14px;
       background:transparent;
       border:1px solid transparent;
       color:var(--muted);
       cursor:pointer;
-      font-weight:700;
+      font-weight:900;
     }
     .modeBtn.on{
       background:rgba(91,92,255,.22);
@@ -145,46 +150,36 @@
       color:var(--text);
     }
 
+    /* Inputs */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
-
     .field{
       background:rgba(0,0,0,.18);
       border:1px solid var(--line);
-      border-radius:14px;
+      border-radius:16px;
       padding:12px;
     }
-    .field label{font-size:13px;margin-bottom:6px;display:block}
+    .field label{font-size:13px;margin-bottom:6px;display:block;font-weight:800}
     .field input{
       width:100%;
       padding:12px;
-      border-radius:12px;
+      border-radius:14px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.04);
       color:var(--text);
+      outline:none;
+    }
+    .field input:focus{
+      border-color:rgba(91,92,255,.55);
+      box-shadow:0 0 0 3px rgba(91,92,255,.12);
     }
 
-    .btn{
-      padding:12px 16px;
-      border-radius:14px;
-      border:none;
-      font-weight:900;
-      cursor:pointer;
-      background:linear-gradient(180deg,#22c55e,#1ea84d);
-      color:#07120a;
-    }
-    .btn.secondary{
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      color:var(--text);
-      text-decoration:none;
-    }
-
+    /* Result box */
     .result{
       display:none;
       margin-top:14px;
       border:1px solid var(--line);
-      border-radius:16px;
+      border-radius:18px;
       padding:12px;
       background:rgba(0,0,0,.18);
     }
@@ -198,143 +193,333 @@
       height:100%;width:0%;
       background:linear-gradient(90deg,#5b5cff,#22c55e);
     }
-    video{
+
+    /* ===== Carousel ===== */
+    .carouselWrap{
+      margin-top:14px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .carouselHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px 8px;
+    }
+    .carouselTitle{
+      font-weight:950;
+      font-size:14px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .carouselHint{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+    }
+    .carousel{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      padding:10px 12px 12px;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+    }
+    .carousel::-webkit-scrollbar{height:8px}
+    .carousel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:99px}
+    .item{
+      flex:0 0 82%;
+      scroll-snap-align:center;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      overflow:hidden;
+      position:relative;
+      cursor:pointer;
+    }
+    @media(min-width:720px){
+      .item{flex-basis:55%}
+    }
+    .thumb{
+      width:100%;
+      aspect-ratio: 9 / 16;
+      background:
+        radial-gradient(400px 220px at 50% 20%, rgba(91,92,255,.22), transparent 60%),
+        radial-gradient(300px 180px at 30% 70%, rgba(34,197,94,.12), transparent 60%),
+        rgba(0,0,0,.25);
+      display:grid;
+      place-items:center;
+      position:relative;
+    }
+    .thumb video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .badges{
+      position:absolute;
+      top:10px; right:10px;
+      display:flex;
+      gap:8px;
+    }
+    .badge{
+      font-size:12px;
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+    }
+    .selectedRing{
+      position:absolute; inset:0;
+      border:2px solid rgba(34,197,94,.75);
+      border-radius:16px;
+      pointer-events:none;
+      opacity:0;
+    }
+    .item.selected .selectedRing{opacity:1}
+    .itemFooter{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      background:rgba(0,0,0,.18);
+      border-top:1px solid rgba(255,255,255,.08);
+    }
+    .itemMeta{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      display:flex;gap:10px;flex-wrap:wrap;
+    }
+    .actions{
+      display:flex;gap:10px;
+      font-weight:900;
+    }
+    .iconBtn{
+      border:none;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:12px;
+    }
+
+    /* Sticky bottom action bar */
+    .stickyBar{
+      position:fixed;
+      left:0; right:0;
+      bottom:0;
+      padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+      background:rgba(6,10,18,.65);
+      backdrop-filter: blur(12px);
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:center;
+      z-index:50;
+    }
+    .stickyInner{
+      width:min(860px, 100%);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .stickyNote{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      display:none;
+    }
+    @media(min-width:720px){
+      .stickyNote{display:block}
+    }
+
+    .btn{
+      padding:12px 16px;
+      border-radius:16px;
+      border:none;
+      font-weight:950;
+      cursor:pointer;
+      background:linear-gradient(180deg,#22c55e,#1ea84d);
+      color:#07120a;
+      box-shadow:0 10px 30px rgba(34,197,94,.15);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn.secondary{
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color:var(--text);
+      text-decoration:none;
+      box-shadow:none;
+    }
+
+    /* Keep your existing video element (we’ll use it as “selected player”) */
+    video#video{
       width:100%;
       margin-top:10px;
-      border-radius:14px;
+      border-radius:16px;
       border:1px solid var(--line);
       display:none;
+      background:#000;
+    }
+
+    /* tiny helper */
+    .miniHint{
+      margin-top:8px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+      opacity:.95;
     }
   </style>
 </head>
 
 <body>
 <div class="wrap">
-<div class="card">
+  <div class="card">
 
-  <div class="topBar">
-    <div class="brand">
-      <div class="logo">
-        <img id="brandImg" alt="Shaga3app" style="display:none;width:22px;height:22px;object-fit:contain;">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 3c2.5 2.8 4.8 4.2 7.5 4.9-1.3 5.6-4.3 9.6-7.5 13.2C8.8 17.5 5.8 13.5 4.5 7.9 7.2 7.2 9.5 5.8 12 3Z" fill="#5b5cff"/>
-          <path d="M9 9c-1.5 2.4-2.2 4.6-2.4 7.2 2.4-1.1 4.2-3 5.1-5.2-.7-.7-1.7-1.4-2.7-2Z" fill="#22c55e"/>
-        </svg>
+    <div class="topBar">
+      <div class="leftHead">
+        <button class="backBtn" id="appBack" type="button" title="Back">←</button>
+
+        <div class="brand">
+          <div class="logo">
+            <img id="brandImg" alt="Shaga3app" style="display:none;width:22px;height:22px;object-fit:contain;">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3c2.5 2.8 4.8 4.2 7.5 4.9-1.3 5.6-4.3 9.6-7.5 13.2C8.8 17.5 5.8 13.5 4.5 7.9 7.2 7.2 9.5 5.8 12 3Z" fill="#5b5cff"/>
+              <path d="M9 9c-1.5 2.4-2.2 4.6-2.4 7.2 2.4-1.1 4.2-3 5.1-5.2-.7-.7-1.7-1.4-2.7-2Z" fill="#22c55e"/>
+            </svg>
+          </div>
+          <span id="brandText">Shaga3app · AI Creative Playground</span>
+        </div>
       </div>
-      <span id="brandText">Shaga3app · AI Creative Playground</span>
+
+      <div class="rightHead">
+        <button class="langBtn" id="langToggle" type="button">AR</button>
+        <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
+      </div>
     </div>
 
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button class="langBtn" id="langToggle" type="button">AR</button>
-      <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
-    </div>
-  </div>
-
-  <div class="hero">
-    <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
-    <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
-  </div>
-
-  <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
-  <div class="lockedBox">
-    <div class="lockedTop">
-      <div class="lockedTag" id="lockedTag">🔒 Locked</div>
-      <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
+    <div class="hero">
+      <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
+      <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
     </div>
 
-    <!-- ✅ bilingual base prompt -->
-    <div
-      class="lockedPrompt"
-      id="basePrompt"
-      data-en="YOUR_BASE_PROMPT_GOES_HERE
+    <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
+    <div class="lockedBox">
+      <div class="lockedTop">
+        <div class="lockedTag" id="lockedTag">🔒 Locked</div>
+        <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
+      </div>
+
+      <div
+        class="lockedPrompt"
+        id="basePrompt"
+        data-en="YOUR_BASE_PROMPT_GOES_HERE
 
 BASE (LOCKED)
 
 Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
 Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.
 The scene follows this base concept, and we will inject the user details below."
-data-ar="الأساس (مقفول)
+        data-ar="الأساس (مقفول)
 
 اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
 لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد — بشكل طبيعي ومتناسق مع المكان، من غير ما يبانوا متحطّين كده أو فيك.
 المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت."
->
-YOUR_BASE_PROMPT_GOES_HERE
+      >YOUR_BASE_PROMPT_GOES_HERE
 
 
 BASE (LOCKED)
 
 Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
 Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.
-The scene follows this base concept, and we will inject the user details below.
-    </div>
-  </div>
-
-  <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
-  <div class="modeBar">
-    <button class="modeBtn on" id="modeText">📝 <span id="modeTextTxt">Text prompt</span></button>
-    <button class="modeBtn" id="modeImages">🖼️ <span id="modeImgTxt">Start + End images</span></button>
-  </div>
-
-  <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
-    <label id="lblImages">Start + End images</label>
-    <input type="file" id="startImg" accept="image/*">
-    <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-    <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
-  </div>
-
-  <div class="grid">
-    <div class="field">
-      <label id="lblSubject">Main subject / character</label>
-      <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
-      <div class="miniHint" id="hintSubject">Who is the main character? (age, style, wardrobe, vibe)</div>
-    </div>
-    <div class="field">
-      <label id="lblLocation">Location / environment</label>
-      <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
-      <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
+The scene follows this base concept, and we will inject the user details below.</div>
     </div>
 
-    <div class="field span2" id="extraBox">
-      <label id="lblTwist">Extra creative twist</label>
-      <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
-      <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
+    <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
+    <div class="modeBar">
+      <button class="modeBtn on" id="modeText">📝 <span id="modeTextTxt">Text prompt</span></button>
+      <button class="modeBtn" id="modeImages">🖼️ <span id="modeImgTxt">Start + End images</span></button>
     </div>
-  </div>
 
-  <div style="margin-top:14px">
+    <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
+      <label id="lblImages">Start + End images</label>
+      <input type="file" id="startImg" accept="image/*">
+      <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+      <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label id="lblSubject">Main subject / character</label>
+        <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
+        <div class="miniHint" id="hintSubject" style="display:none;">Who is the main character? (age, style, wardrobe, vibe)</div>
+      </div>
+      <div class="field">
+        <label id="lblLocation">Location / environment</label>
+        <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
+        <div class="miniHint" id="hintLocation" style="display:none;">Where is it happening? (city, time of day, lighting, atmosphere)</div>
+      </div>
+
+      <div class="field span2" id="extraBox">
+        <label id="lblTwist">Extra creative twist</label>
+        <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
+        <div class="miniHint" id="hintTwist" style="display:none;">Optional: camera move, mood, style, or one special detail.</div>
+      </div>
+    </div>
+
+    <!-- ===== Carousel + Selected Player ===== -->
+    <div class="carouselWrap" id="carouselWrap">
+      <div class="carouselHead">
+        <div class="carouselTitle">🎞️ <span id="carouselTitleTxt">Generated videos</span></div>
+        <div class="carouselHint" id="carouselHintTxt">Swipe to preview • Tap to select</div>
+      </div>
+
+      <div class="carousel" id="carousel"></div>
+
+      <!-- Selected player (uses your existing #video id for compatibility) -->
+      <div style="padding:0 12px 12px;">
+        <video id="video" controls playsinline></video>
+      </div>
+    </div>
+
+    <!-- ===== Progress / Actions (kept) ===== -->
+    <div class="result" id="resultBox">
+      <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download video</span></button>
+        <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
+        <button class="btn secondary" id="backBtn" type="button">↩ <span id="backTxt">Back</span></button>
+      </div>
+
+      <div class="miniHint" id="saveWarn" style="display:block;margin-top:10px">
+        This page does not save your generated video. Please download it or copy the link before leaving.
+      </div>
+
+      <div class="miniHint" id="copyNote" style="display:none;margin-top:8px"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Sticky bottom bar CTA -->
+<div class="stickyBar">
+  <div class="stickyInner">
+    <div class="stickyNote" id="stickyNoteTxt">Tip: lock prices early by generating now ✨</div>
     <button class="btn" id="generateBtn">▶ <span id="genBtnTxt">Generate video</span></button>
   </div>
-
-  <div class="result" id="resultBox">
-    <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
-    <div class="progress"><div class="bar" id="bar"></div></div>
-
-    <video id="video" controls playsinline></video>
-
-    <!-- ✅ user-friendly actions (download, copy link, back) -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-      <button class="btn secondary" id="downloadBtn" type="button">
-        ⬇ <span id="dlTxt">Download video</span>
-      </button>
-
-      <button class="btn secondary" id="copyBtn" type="button">
-        🔗 <span id="copyTxt">Copy link</span>
-      </button>
-
-      <button class="btn secondary" id="backBtn" type="button">
-        ↩ <span id="backTxt">Back</span>
-      </button>
-    </div>
-
-    <div class="miniHint" id="saveWarn" style="display:block;margin-top:10px">
-      This page does not save your generated video. Please download it or copy the link before leaving.
-    </div>
-
-    <div class="miniHint" id="copyNote" style="display:none;margin-top:8px"></div>
-  </div>
-
-</div>
 </div>
 
 <script>
@@ -351,6 +536,32 @@ let generating = false;
 
 // ✅ we keep last URL so it can be restored if user returns
 const LAST_URL_KEY = "shaga3app_last_video_url";
+
+/* ===========================
+   Carousel state (demo + real)
+=========================== */
+const carouselState = {
+  items: [],
+  selectedId: null
+};
+
+// ✅ Replace these demo video URLs with your own mp4 links later
+const DEMO_VIDEOS = [
+  {
+    id: "demo-1",
+    label: "Demo A",
+    seconds: "5–8s",
+    ratio: "9:16",
+    url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+  },
+  {
+    id: "demo-2",
+    label: "Demo B",
+    seconds: "5–8s",
+    ratio: "9:16",
+    url: "https://media.w3.org/2010/05/sintel/trailer.mp4"
+  }
+];
 
 /* ===========================
    Arabic Toggle + RTL + Arabic Digits
@@ -387,7 +598,10 @@ const i18n = {
     generating: "Generating…",
     waiting: "Waiting for video…",
     saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
-    copied: "Link copied ✅"
+    copied: "Link copied ✅",
+    carouselTitle: "Generated videos",
+    carouselHint: "Swipe to preview • Tap to select",
+    stickyNote: "Tip: generate early to lock best options ✨"
   },
   ar: {
     brandText: "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
@@ -420,7 +634,10 @@ const i18n = {
     generating: "جارٍ التوليد…",
     waiting: "بنستنى الفيديو…",
     saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
-    copied: "تم نسخ الرابط ✅"
+    copied: "تم نسخ الرابط ✅",
+    carouselTitle: "الفيديوهات الناتجة",
+    carouselHint: "اسحب للتنقل • اضغط للاختيار",
+    stickyNote: "نصيحة: ولّد بدري علشان أحسن اختيار ✨"
   }
 };
 
@@ -472,7 +689,11 @@ function applyLang(lang){
 
   $("saveWarn").textContent = t.saveWarn;
 
-  // ✅ Switch the locked base prompt language (IMPORTANT)
+  $("carouselTitleTxt").textContent = t.carouselTitle;
+  $("carouselHintTxt").textContent = t.carouselHint;
+  $("stickyNoteTxt").textContent = t.stickyNote;
+
+  // ✅ Switch the locked base prompt language
   const bp = $("basePrompt");
   if (bp) {
     const enText = bp.getAttribute("data-en") || bp.textContent;
@@ -495,13 +716,11 @@ $("langToggle").addEventListener("click", () => {
    Mode switching
 =========================== */
 const imagesBox = $("imagesBox");
-
 $("modeText").addEventListener("click", () => {
   $("modeText").classList.add("on");
   $("modeImages").classList.remove("on");
   if(imagesBox) imagesBox.style.display = "none";
 });
-
 $("modeImages").addEventListener("click", () => {
   $("modeImages").classList.add("on");
   $("modeText").classList.remove("on");
@@ -526,7 +745,7 @@ function buildPrompt(){
 }
 
 async function postJSON(payload){
-  const url = API_URL + "?t=" + Date.now(); // cache-bust always
+  const url = API_URL + "?t=" + Date.now();
   const r = await fetch(url, {
     method: "POST",
     headers: {"Content-Type":"application/json"},
@@ -546,7 +765,6 @@ async function postJSON(payload){
 
 function showProgressUI(){
   $("resultBox").style.display = "block";
-  $("video").style.display = "none";
   $("bar").style.width = "0%";
   $("copyNote").style.display = "none";
 }
@@ -562,30 +780,131 @@ function setTimerText(secondsLeft){
       : i18n.en.waiting;
   }
 }
-
 function setDoneText(){
   $("timerText").textContent = (currentLang === "ar") ? i18n.ar.done : i18n.en.done;
 }
 
-// ✅ Save/restore the last video URL (prevents “disappears” surprise)
+/* ===========================
+   Save/restore last URL
+=========================== */
 function saveLastUrl(url){
   try { localStorage.setItem(LAST_URL_KEY, url); } catch(e) {}
 }
 function loadLastUrl(){
   try { return localStorage.getItem(LAST_URL_KEY) || ""; } catch(e) { return ""; }
 }
-function restoreLastVideoIfAny(){
-  const url = loadLastUrl();
-  if(url){
-    $("resultBox").style.display = "block";
-    $("video").src = url;
+
+/* ===========================
+   Carousel rendering
+=========================== */
+function upsertCarouselItem(item){
+  const idx = carouselState.items.findIndex(x => x.id === item.id);
+  if(idx >= 0) carouselState.items[idx] = item;
+  else carouselState.items.unshift(item); // new items at start
+}
+
+function renderCarousel(){
+  const el = $("carousel");
+  if(!el) return;
+  el.innerHTML = "";
+
+  carouselState.items.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item" + (item.id === carouselState.selectedId ? " selected" : "");
+    div.dataset.id = item.id;
+
+    div.innerHTML = `
+      <div class="thumb">
+        <div class="badges">
+          <div class="badge">⏱ ${item.seconds || "5–8s"}</div>
+          <div class="badge">${item.ratio || "9:16"}</div>
+        </div>
+        <video muted playsinline preload="metadata"></video>
+        <div class="selectedRing"></div>
+      </div>
+      <div class="itemFooter">
+        <div class="itemMeta">
+          <span>${item.label || "Video"}</span>
+          <span>${item.kind === "real" ? "✅ Real" : "🧪 Demo"}</span>
+        </div>
+        <div class="actions">
+          <button class="iconBtn" data-act="save">❤️</button>
+          <button class="iconBtn" data-act="download">⬇️</button>
+          <button class="iconBtn" data-act="regen">🔁</button>
+          <button class="iconBtn" data-act="use">⭐</button>
+        </div>
+      </div>
+    `;
+
+    // attach video src (preview)
+    const v = div.querySelector("video");
+    v.src = item.url;
+    v.addEventListener("mouseenter", () => { try { v.play(); } catch(e) {} });
+    v.addEventListener("mouseleave", () => { try { v.pause(); } catch(e) {} });
+
+    // tap to select
+    div.addEventListener("click", (e) => {
+      // ignore clicking action buttons (handled below)
+      const btn = e.target.closest("button");
+      if(btn) return;
+
+      selectCarouselItem(item.id);
+    });
+
+    // action buttons
+    div.querySelectorAll("button.iconBtn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const act = btn.dataset.act;
+        if(act === "download") downloadFile(item.url);
+        if(act === "save") {
+          $("copyNote").style.display = "block";
+          $("copyNote").textContent = (currentLang === "ar")
+            ? "تم حفظ الاختيار (ديمو) ✅"
+            : "Saved selection (demo) ✅";
+        }
+        if(act === "regen") {
+          // regenerate using same prompt (just triggers your existing generate)
+          realGenerate();
+        }
+        if(act === "use") {
+          $("copyNote").style.display = "block";
+          $("copyNote").textContent = (currentLang === "ar")
+            ? "تم اختيار الفيديو للاستخدام ⭐"
+            : "Video selected for use ⭐";
+        }
+      });
+    });
+
+    el.appendChild(div);
+  });
+}
+
+function selectCarouselItem(id){
+  carouselState.selectedId = id;
+  renderCarousel();
+
+  const item = carouselState.items.find(x => x.id === id);
+  if(item && item.url){
     $("video").style.display = "block";
+    $("video").src = item.url;
     $("video").load();
+    saveLastUrl(item.url);
   }
 }
 
+function initDemoCarousel(){
+  DEMO_VIDEOS.forEach(v => upsertCarouselItem({...v, kind:"demo"}));
+  // select first
+  if(!carouselState.selectedId && carouselState.items.length){
+    carouselState.selectedId = carouselState.items[0].id;
+  }
+  renderCarousel();
+  selectCarouselItem(carouselState.selectedId);
+}
+
 /* ===========================
-   Real Generate
+   Generate (kept, now adds to carousel)
 =========================== */
 async function realGenerate(){
   if(generating || trials <= 0) return;
@@ -627,9 +946,17 @@ async function realGenerate(){
       $("bar").style.width = "100%";
       setDoneText();
 
-      $("video").src = gen.downloadUrl;
-      $("video").style.display = "block";
-      $("video").load();
+      // ✅ Add to carousel & select it
+      const id = "real-" + Date.now();
+      upsertCarouselItem({
+        id,
+        label: "Generated",
+        seconds: "5–8s",
+        ratio: "9:16",
+        url: gen.downloadUrl,
+        kind: "real"
+      });
+      selectCarouselItem(id);
 
       saveLastUrl(gen.downloadUrl);
       generating = false;
@@ -671,9 +998,17 @@ async function realGenerate(){
     $("bar").style.width = "100%";
     setDoneText();
 
-    $("video").src = doneData.downloadUrl;
-    $("video").style.display = "block";
-    $("video").load();
+    // ✅ Add to carousel & select
+    const id = "real-" + Date.now();
+    upsertCarouselItem({
+      id,
+      label: "Generated",
+      seconds: "5–8s",
+      ratio: "9:16",
+      url: doneData.downloadUrl,
+      kind: "real"
+    });
+    selectCarouselItem(id);
 
     saveLastUrl(doneData.downloadUrl);
 
@@ -689,19 +1024,21 @@ async function realGenerate(){
 $("generateBtn").onclick = realGenerate;
 
 /* ===========================
-   ✅ Download / Copy / Back (user friendly)
+   Download / Copy / Back
 =========================== */
 function getCurrentVideoUrl(){
+  // Prefer selected carousel item
+  const sel = carouselState.items.find(x => x.id === carouselState.selectedId);
+  if(sel && sel.url) return sel.url;
   return ($("video") && $("video").src) ? $("video").src : loadLastUrl();
 }
 
-// ✅ Best effort download without leaving the page
 function downloadFile(url){
   if(!url) return;
   const a = document.createElement("a");
   a.href = url;
-  a.download = "shaga3app-video.mp4"; // might be ignored by some browsers for cross-origin
-  a.target = "_blank"; // fallback-safe: if forced, opens new tab (but main page remains)
+  a.download = "shaga3app-video.mp4";
+  a.target = "_blank";
   a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
@@ -715,7 +1052,6 @@ $("downloadBtn").addEventListener("click", () => {
   downloadFile(url);
 });
 
-// ✅ Copy link button (super important on mobile)
 $("copyBtn").addEventListener("click", async () => {
   const url = getCurrentVideoUrl();
   if(!url) return;
@@ -727,10 +1063,7 @@ $("copyBtn").addEventListener("click", async () => {
     $("copyNote").style.display = "block";
     $("copyNote").textContent = (currentLang === "ar") ? i18n.ar.copied : i18n.en.copied;
   }catch(e){
-    // fallback prompt
-    const msg = (currentLang === "ar")
-      ? "انسخ الرابط من هنا:"
-      : "Copy the link from here:";
+    const msg = (currentLang === "ar") ? "انسخ الرابط من هنا:" : "Copy the link from here:";
     const manual = prompt(msg, url);
     if(manual !== null){
       $("copyNote").style.display = "block";
@@ -739,8 +1072,12 @@ $("copyBtn").addEventListener("click", async () => {
   }
 });
 
-// ✅ Back button (keeps UI stable)
 $("backBtn").addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+// Top-left back arrow: scroll to top (safe in webview)
+$("appBack").addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
@@ -760,9 +1097,10 @@ if(brandImg){
   };
 }
 
-/* ✅ restore last video if user comes back and page reloads */
-restoreLastVideoIfAny();
-
+/* ===========================
+   Init
+=========================== */
+initDemoCarousel();
 applyLang("en");
 </script>
 </body>
