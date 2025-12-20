@@ -9,20 +9,20 @@
     :root{
       --bg:#0b0f18;
       --text:#e5e7eb;
-      --muted:#b8c0d4;
-      --line:rgba(255,255,255,.14);
+      --muted:#94a3b8;
+      --line:rgba(255,255,255,.10);
 
       --accent:#5b5cff;
       --ok:#22c55e;
 
-      /* “Light cards on dark background” like your reference */
-      --card: rgba(255,255,255,.92);
-      --card2: rgba(255,255,255,.86);
-      --cardLine: rgba(15,23,42,.10);
-      --darkText:#0b1220;
-      --darkMuted:#485569;
+      /* Dark theme cards (as before) */
+      --cardBg: linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      --glass: rgba(0,0,0,.18);
 
-      --glassDark: rgba(0,0,0,.40);
+      /* App-like card geometry */
+      --radius:18px;
+      --radiusInner:16px;
+      --shadow: 0 10px 30px rgba(0,0,0,.30);
     }
 
     *{box-sizing:border-box}
@@ -30,22 +30,23 @@
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
-        radial-gradient(1200px 900px at 30% -10%, rgba(91,92,255,.22), transparent 55%),
-        radial-gradient(900px 700px at 80% 10%, rgba(34,197,94,.10), transparent 50%),
+        radial-gradient(1200px 900px at 30% -10%, rgba(91,92,255,.25), transparent 55%),
+        radial-gradient(900px 700px at 80% 10%, rgba(34,197,94,.12), transparent 50%),
         var(--bg);
       color:var(--text);
     }
 
-    .wrap{max-width:860px;margin:0 auto;padding:14px 14px 120px;}
+    .wrap{max-width:860px;margin:0 auto;padding:14px 14px 40px;}
     .shell{
-      border-radius:26px;
+      border-radius:22px;
       padding:12px;
       border:1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      background: var(--cardBg);
       backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
     }
 
-    /* ===== Header pill (dark so text is readable) ===== */
+    /* ===== Header (dark, readable) ===== */
     .topBar{
       display:flex;
       align-items:center;
@@ -54,10 +55,9 @@
       padding:10px 10px;
       border-radius:18px;
       border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.45);
+      background:rgba(0,0,0,.35);
       backdrop-filter: blur(12px);
     }
-
     .leftHead{display:flex;align-items:center;gap:10px;min-width:0;flex:1;}
     .backBtn{
       width:36px;height:36px;border-radius:12px;
@@ -70,6 +70,17 @@
       -webkit-tap-highlight-color: transparent;
       flex:0 0 auto;
     }
+
+    /* Logo restored + visible */
+    .brandLogo{
+      width:26px;height:26px;border-radius:9px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      display:inline-flex;align-items:center;justify-content:center;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:contain;display:block}
 
     .headerTitle{
       font-weight:950;
@@ -109,7 +120,6 @@
       color:#fff;
     }
 
-    /* Beta pill overflow fix */
     .pill{
       padding:7px 10px;
       border-radius:999px;
@@ -145,17 +155,6 @@
       line-height:1.45;
     }
 
-    /* ===== Light Cards like the reference ===== */
-    .cardLight{
-      background: linear-gradient(180deg, var(--card), var(--card2));
-      border:1px solid var(--cardLine);
-      border-radius:18px;
-      padding:12px;
-      color:var(--darkText);
-      box-shadow: 0 10px 30px rgba(0,0,0,.12);
-    }
-    .cardLight .muted{color:var(--darkMuted)}
-
     .sectionLabel{
       margin:16px 2px 10px;
       font-size:12px;
@@ -163,28 +162,38 @@
       color:rgba(255,255,255,.65);
     }
 
+    /* ===== Base concept card (dark) ===== */
+    .cardBlock{
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--radius);
+      padding:12px;
+      box-shadow: var(--shadow);
+    }
     .lockedTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
     .lockedTag{
       font-size:12px;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(15,23,42,.10);
-      background:rgba(15,23,42,.04);
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
       font-weight:900;
-      color:var(--darkText);
+      color:#fff;
     }
     .lockedPrompt{
       margin-top:10px;
-      border:1px dashed rgba(15,23,42,.22);
+      border:1px dashed rgba(255,255,255,.18);
       border-radius:14px;
       padding:12px;
       font-family:ui-monospace,monospace;
       white-space:pre-wrap;
       font-size:12px;
-      color:rgba(15,23,42,.85);
-      background:rgba(255,255,255,.55);
+      /* ✅ dimmed text inside mandatory box */
+      color:rgba(229,231,235,.72);
+      background:rgba(255,255,255,.03);
     }
 
+    /* Mode bar */
     .modeBar{
       display:flex;gap:10px;
       border:1px solid rgba(255,255,255,.14);
@@ -209,46 +218,45 @@
       color:#fff;
     }
 
+    /* Inputs */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
-
     .field{
-      background:rgba(255,255,255,.70);
-      border:1px solid rgba(15,23,42,.10);
-      border-radius:16px;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--radiusInner);
       padding:12px;
-      color:var(--darkText);
+      color:#fff;
     }
-    .field label{font-size:13px;margin-bottom:6px;display:block;font-weight:950;color:var(--darkText)}
+    .field label{font-size:13px;margin-bottom:6px;display:block;font-weight:950;color:#fff}
     .field input{
       width:100%;
       padding:12px;
       border-radius:14px;
-      border:1px solid rgba(15,23,42,.14);
-      background:rgba(255,255,255,.95);
-      color:var(--darkText);
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:#fff;
       outline:none;
     }
+    .field input::placeholder{color:rgba(255,255,255,.45)}
     .field input:focus{
       border-color:rgba(91,92,255,.55);
       box-shadow:0 0 0 3px rgba(91,92,255,.12);
     }
 
-    /* ===== Video Module (exact vibe like reference) ===== */
+    /* ===== Video Module (dark + app-like) ===== */
     .videoModule{
       margin-top:14px;
-      border-radius:18px;
+      border-radius:var(--radius);
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.22);
       overflow:hidden;
+      box-shadow: var(--shadow);
     }
 
-    /* Main preview (poster) */
-    .mainPreview{
-      padding:12px;
-    }
+    .mainPreview{padding:12px;}
     .previewCard{
-      border-radius:16px;
+      border-radius:var(--radiusInner);
       overflow:hidden;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(0,0,0,.25);
@@ -302,7 +310,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Actions row (like screenshot) */
     .actionsRow{
       display:flex;
       justify-content:space-between;
@@ -330,10 +337,10 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* ===== Square carousel strip (shows MORE than 4 items) ===== */
+    /* ===== Square carousel strip (many items) ===== */
     .carouselStrip{
       border-top:1px solid rgba(255,255,255,.10);
-      padding:10px 12px 12px;
+      padding:10px 12px 10px;
       display:flex;
       gap:10px;
       overflow-x:auto;
@@ -355,13 +362,8 @@
       -webkit-tap-highlight-color: transparent;
       background:rgba(255,255,255,.06);
     }
-    /* On wider phones show more items (small squares) */
-    @media(min-width:420px){
-      .thumbItem{flex-basis:22%;max-width:22%;}
-    }
-    @media(min-width:720px){
-      .thumbItem{flex-basis:14%;max-width:14%;}
-    }
+    @media(min-width:420px){ .thumbItem{flex-basis:22%;max-width:22%;} }
+    @media(min-width:720px){ .thumbItem{flex-basis:14%;max-width:14%;} }
 
     .thumbItem::after{
       content:"";
@@ -392,54 +394,46 @@
       backdrop-filter: blur(10px);
     }
 
-    /* Progress / actions (kept, compact) */
-    .result{
-      display:none;
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:18px;
-      padding:12px;
-      background:rgba(0,0,0,.22);
+    /* ===== Dots pagination under carousel ===== */
+    .dots{
+      padding:0 12px 12px;
+      display:flex;
+      gap:6px;
+      justify-content:center;
+      align-items:center;
+      border-top:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.08);
     }
-    .progress{
-      height:10px;border-radius:999px;
-      background:rgba(255,255,255,.06);
-      overflow:hidden;
+    .dot{
+      width:6px;height:6px;border-radius:99px;
+      background:rgba(255,255,255,.25);
       border:1px solid rgba(255,255,255,.12);
     }
-    .bar{
-      height:100%;width:0%;
-      background:linear-gradient(90deg,#5b5cff,#22c55e);
+    .dot.on{
+      width:18px;
+      background:rgba(255,255,255,.65);
     }
 
-    /* Sticky bottom CTA */
-    .stickyBar{
-      position:fixed;left:0;right:0;bottom:0;
-      padding:12px 14px calc(12px + env(safe-area-inset-bottom));
-      background:rgba(6,10,18,.65);
-      backdrop-filter: blur(14px);
+    /* Generate inside the card (not sticky) */
+    .generateInside{
+      padding:12px;
       border-top:1px solid rgba(255,255,255,.10);
-      display:flex;justify-content:center;
-      z-index:50;
-    }
-    .stickyInner{
-      width:min(860px, 100%);
       display:flex;
-      gap:10px;
       align-items:center;
       justify-content:space-between;
+      gap:10px;
+      background:rgba(0,0,0,.12);
     }
-    .stickyNote{
-      color:rgba(255,255,255,.70);
+    .smallNote{
       font-size:12px;
+      color:rgba(255,255,255,.65);
       font-weight:850;
-      display:none;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       max-width:55%;
     }
-    @media(min-width:720px){ .stickyNote{display:block} }
+    @media(max-width:520px){ .smallNote{display:none;} }
 
     .btn{
       padding:12px 16px;
@@ -462,6 +456,26 @@
       box-shadow:none;
     }
 
+    /* Progress / Errors */
+    .result{
+      display:none;
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:var(--radius);
+      padding:12px;
+      background:rgba(0,0,0,.22);
+      box-shadow: var(--shadow);
+    }
+    .progress{
+      height:10px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .bar{
+      height:100%;width:0%;
+      background:linear-gradient(90deg,#5b5cff,#22c55e);
+    }
     .miniHint{
       margin-top:8px;
       font-size:12px;
@@ -479,6 +493,12 @@
     <div class="topBar">
       <div class="leftHead">
         <button class="backBtn" id="appBack" type="button" title="Back">←</button>
+
+        <!-- ✅ Logo visible again -->
+        <span class="brandLogo" aria-hidden="true">
+          <img id="brandImg" alt="Shaga3app">
+        </span>
+
         <div class="headerTitle" id="headerTitle">Shaga3app – AI Video Lab</div>
       </div>
 
@@ -497,9 +517,9 @@
       <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
     </div>
 
-    <!-- BASE (LIGHT CARD) -->
+    <!-- BASE (dark) -->
     <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
-    <div class="cardLight">
+    <div class="cardBlock">
       <div class="lockedTop">
         <div class="lockedTag" id="lockedTag">🔒 Locked</div>
         <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
@@ -534,7 +554,7 @@ The scene follows this base concept, and we will inject the user details below."
       <label id="lblImages">Start + End images</label>
       <input type="file" id="startImg" accept="image/*">
       <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-      <div class="muted" id="hintImages" style="font-size:12px;margin-top:8px;">Upload a start frame and an end frame to guide the motion.</div>
+      <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
     </div>
 
     <!-- INPUTS -->
@@ -555,7 +575,7 @@ The scene follows this base concept, and we will inject the user details below."
       </div>
     </div>
 
-    <!-- VIDEO MODULE (Main preview + actions + square carousel) -->
+    <!-- VIDEO MODULE (dark, app-like) -->
     <div class="videoModule" id="videoModule">
       <div class="mainPreview">
         <div class="previewCard">
@@ -565,10 +585,7 @@ The scene follows this base concept, and we will inject the user details below."
               <div class="badge" id="badgeRatio">9:16</div>
             </div>
 
-            <!-- poster is fast -->
             <img id="mainPoster" alt="Selected video poster" />
-
-            <!-- actual player only shows when user taps play -->
             <video id="video" controls playsinline></video>
 
             <button class="playBtn" id="playBtn" type="button">▶</button>
@@ -576,7 +593,7 @@ The scene follows this base concept, and we will inject the user details below."
         </div>
       </div>
 
-      <!-- actions row like screenshot -->
+      <!-- actions row -->
       <div class="actionsRow">
         <div class="actionIcon">
           <button type="button" id="saveBtn" title="Save">♡</button>
@@ -596,8 +613,17 @@ The scene follows this base concept, and we will inject the user details below."
         </div>
       </div>
 
-      <!-- square carousel (more than 4 items) -->
+      <!-- square carousel -->
       <div class="carouselStrip" id="carouselStrip"></div>
+
+      <!-- ✅ dots pagination under carousel -->
+      <div class="dots" id="dots"></div>
+
+      <!-- ✅ generate inside the same card (not sticky) -->
+      <div class="generateInside">
+        <div class="smallNote" id="insideNote">Tip: generate early to lock best options ✨</div>
+        <button class="btn" id="generateBtn">⚡ <span id="genBtnTxt">Generate video</span></button>
+      </div>
     </div>
 
     <!-- Progress / Errors -->
@@ -620,14 +646,6 @@ The scene follows this base concept, and we will inject the user details below."
   </div>
 </div>
 
-<!-- Sticky bottom CTA -->
-<div class="stickyBar">
-  <div class="stickyInner">
-    <div class="stickyNote" id="stickyNoteTxt">Tip: generate early to lock best options ✨</div>
-    <button class="btn" id="generateBtn">⚡ <span id="genBtnTxt">Generate video</span></button>
-  </div>
-</div>
-
 <script>
 const $ = id => document.getElementById(id);
 
@@ -643,15 +661,17 @@ const LAST_URL_KEY = "shaga3app_last_video_url";
 
 /* ===========================
    Demo items (POSTERS + VIDEO URLs)
-   ✅ Put as many as you want (4, 6, 10…)
+   Add as many as you want.
 =========================== */
 const DEMO_VIDEOS = [
-  { id:"demo-1", label:"Demo A", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/600/600?random=101", videoUrl:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-  { id:"demo-2", label:"Demo B", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/600/600?random=102", videoUrl:"https://media.w3.org/2010/05/sintel/trailer.mp4" },
-  { id:"demo-3", label:"Demo C", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/600/600?random=103", videoUrl:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-  { id:"demo-4", label:"Demo D", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/600/600?random=104", videoUrl:"https://media.w3.org/2010/05/sintel/trailer.mp4" },
-  { id:"demo-5", label:"Demo E", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/600/600?random=105", videoUrl:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-  { id:"demo-6", label:"Demo F", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/600/600?random=106", videoUrl:"https://media.w3.org/2010/05/sintel/trailer.mp4" },
+  { id:"demo-1", label:"Demo A", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=201", videoUrl:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
+  { id:"demo-2", label:"Demo B", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=202", videoUrl:"https://media.w3.org/2010/05/sintel/trailer.mp4" },
+  { id:"demo-3", label:"Demo C", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=203", videoUrl:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
+  { id:"demo-4", label:"Demo D", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=204", videoUrl:"https://media.w3.org/2010/05/sintel/trailer.mp4" },
+  { id:"demo-5", label:"Demo E", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=205", videoUrl:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
+  { id:"demo-6", label:"Demo F", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=206", videoUrl:"https://media.w3.org/2010/05/sintel/trailer.mp4" },
+  { id:"demo-7", label:"Demo G", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=207", videoUrl:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
+  { id:"demo-8", label:"Demo H", seconds:"5–8s", ratio:"9:16", posterUrl:"https://picsum.photos/700/700?random=208", videoUrl:"https://media.w3.org/2010/05/sintel/trailer.mp4" }
 ];
 
 /* ===========================
@@ -685,7 +705,7 @@ const i18n = {
     waiting: "Waiting for video…",
     saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
     copied: "Link copied ✅",
-    stickyNote: "Tip: generate early to lock best options ✨",
+    insideNote: "Tip: generate early to lock best options ✨",
     save: "Save",
     download: "Download",
     regen: "Regenerate",
@@ -718,7 +738,7 @@ const i18n = {
     waiting: "بنستنى الفيديو…",
     saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
     copied: "تم نسخ الرابط ✅",
-    stickyNote: "نصيحة: ولّد بدري علشان أحسن اختيار ✨",
+    insideNote: "نصيحة: ولّد بدري علشان أحسن اختيار ✨",
     save: "حفظ",
     download: "تحميل",
     regen: "إعادة",
@@ -772,7 +792,7 @@ function applyLang(lang){
   $("backTxt").textContent = t.back;
 
   $("saveWarn").textContent = t.saveWarn;
-  $("stickyNoteTxt").textContent = t.stickyNote;
+  $("insideNote").textContent = t.insideNote;
 
   $("saveLbl").textContent = t.save;
   $("dlTxt").textContent = t.download;
@@ -869,10 +889,7 @@ function saveLastUrl(url){ try { localStorage.setItem(LAST_URL_KEY, url); } catc
 function loadLastUrl(){ try { return localStorage.getItem(LAST_URL_KEY) || ""; } catch(e) { return ""; } }
 
 /* ===== Carousel + Selection ===== */
-const state = {
-  items: [],
-  selectedId: null
-};
+const state = { items: [], selectedId: null };
 
 function upsert(item){
   const i = state.items.findIndex(x => x.id === item.id);
@@ -893,12 +910,12 @@ function renderStrip(){
       <img class="thumbSquare" alt="thumb" loading="lazy" />
       <div class="miniPlay">▶</div>
     `;
-
     d.querySelector("img").src = item.posterUrl || "";
-
     d.addEventListener("click", () => selectItem(item.id));
     el.appendChild(d);
   });
+
+  updateDots();
 }
 
 function selectItem(id){
@@ -908,21 +925,20 @@ function selectItem(id){
   const item = state.items.find(x => x.id === id);
   if(!item) return;
 
-  // Set main poster fast
   $("mainPoster").src = item.posterUrl || "";
   $("badgeDur").textContent = "⏱ " + (item.seconds || "5–8s");
   $("badgeRatio").textContent = item.ratio || "9:16";
 
-  // Set video src but don't auto-load heavy unless user plays
   $("video").pause();
   $("video").removeAttribute("src");
   $("video").load();
   $("video").style.display = "none";
   $("mainPoster").style.display = "block";
 
-  // Save url for download/copy
   saveLastUrl(item.videoUrl || "");
   $("video").dataset.pendingSrc = item.videoUrl || "";
+
+  updateDots();
 }
 
 function initDemo(){
@@ -932,7 +948,78 @@ function initDemo(){
   if(state.selectedId) selectItem(state.selectedId);
 }
 
-/* ===== Play behaviour (loads video only on demand) ===== */
+/* ===== Dots pagination (based on scroll pages) ===== */
+function updateDots(){
+  const strip = $("carouselStrip");
+  const dots = $("dots");
+  if(!strip || !dots) return;
+
+  // Estimate pages by how many items can fit per view
+  const item = strip.querySelector(".thumbItem");
+  if(!item){
+    dots.innerHTML = "";
+    return;
+  }
+
+  const itemW = item.getBoundingClientRect().width + 10; // +gap
+  const viewW = strip.getBoundingClientRect().width;
+  const perView = Math.max(1, Math.floor(viewW / itemW));
+  const pages = Math.max(1, Math.ceil(state.items.length / perView));
+
+  const idx = Math.max(0, state.items.findIndex(x => x.id === state.selectedId));
+  const pageIndex = Math.min(pages - 1, Math.floor(idx / perView));
+
+  dots.innerHTML = "";
+  for(let i=0;i<pages;i++){
+    const dot = document.createElement("div");
+    dot.className = "dot" + (i === pageIndex ? " on" : "");
+    dot.addEventListener("click", () => {
+      const targetIdx = i * perView;
+      const target = strip.children[targetIdx];
+      if(target) target.scrollIntoView({behavior:"smooth", inline:"start", block:"nearest"});
+    });
+    dots.appendChild(dot);
+  }
+}
+
+/* update dots on scroll + resize */
+$("carouselStrip").addEventListener("scroll", () => {
+  // find closest item to left edge for page indicator
+  const strip = $("carouselStrip");
+  const items = [...strip.querySelectorAll(".thumbItem")];
+  if(!items.length) return;
+
+  const left = strip.getBoundingClientRect().left;
+  let best = items[0], bestDist = Infinity;
+  items.forEach(el => {
+    const d = Math.abs(el.getBoundingClientRect().left - left);
+    if(d < bestDist){ bestDist = d; best = el; }
+  });
+
+  const id = best?.dataset?.id;
+  if(id && id !== state.selectedId){
+    state.selectedId = id;
+    // update selection UI WITHOUT rerendering strip
+    items.forEach(it => it.classList.toggle("selected", it.dataset.id === id));
+    const chosen = state.items.find(x => x.id === id);
+    if(chosen){
+      $("mainPoster").src = chosen.posterUrl || "";
+      $("badgeDur").textContent = "⏱ " + (chosen.seconds || "5–8s");
+      $("badgeRatio").textContent = chosen.ratio || "9:16";
+      $("video").pause();
+      $("video").removeAttribute("src");
+      $("video").load();
+      $("video").style.display = "none";
+      $("mainPoster").style.display = "block";
+      saveLastUrl(chosen.videoUrl || "");
+      $("video").dataset.pendingSrc = chosen.videoUrl || "";
+    }
+    updateDots();
+  }
+});
+window.addEventListener("resize", () => updateDots());
+
+/* Play behaviour (loads video only on demand) */
 $("playBtn").addEventListener("click", () => {
   const src = $("video").dataset.pendingSrc || loadLastUrl();
   if(!src) return;
@@ -944,7 +1031,7 @@ $("playBtn").addEventListener("click", () => {
   $("video").play().catch(()=>{});
 });
 
-/* ===== Download/Copy/Back ===== */
+/* Download/Copy/Back */
 function downloadFile(url){
   if(!url) return;
   const a = document.createElement("a");
@@ -956,13 +1043,11 @@ function downloadFile(url){
   a.click();
   a.remove();
 }
-
 $("downloadBtn").addEventListener("click", () => {
   const url = loadLastUrl();
   if(!url) return;
   downloadFile(url);
 });
-
 $("copyBtn").addEventListener("click", async () => {
   const url = loadLastUrl();
   if(!url) return;
@@ -980,26 +1065,21 @@ $("copyBtn").addEventListener("click", async () => {
     }
   }
 });
-
 $("backBtn").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 $("appBack").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
-/* ===== Actions row ===== */
+/* Actions row */
 $("saveBtn").addEventListener("click", () => {
   $("copyNote").style.display = "block";
   $("copyNote").textContent = (currentLang === "ar") ? "اتحفظ اختيارك ✅" : "Saved selection ✅";
 });
-
-$("regenBtn").addEventListener("click", () => {
-  realGenerate();
-});
-
 $("useBtn").addEventListener("click", () => {
   $("copyNote").style.display = "block";
   $("copyNote").textContent = (currentLang === "ar") ? "تم اختيار الفيديو ⭐" : "Video selected ⭐";
 });
+$("regenBtn").addEventListener("click", () => realGenerate());
 
-/* ===== Generate (same logic, adds new item + selects it) ===== */
+/* Generate */
 async function realGenerate(){
   if(generating || trials <= 0) return;
   generating = true;
@@ -1035,8 +1115,8 @@ async function realGenerate(){
       setDoneText();
 
       const id = "real-" + Date.now();
-      // Poster placeholder for now (fast). Later you can generate a real thumbnail server-side.
-      const poster = `https://picsum.photos/600/600?random=${Math.floor(Math.random()*9999)}`;
+      // Poster placeholder (fast). Replace with your own later.
+      const poster = `https://picsum.photos/700/700?random=${Math.floor(Math.random()*9999)}`;
 
       upsert({
         id,
@@ -1050,6 +1130,8 @@ async function realGenerate(){
       state.selectedId = id;
       renderStrip();
       selectItem(id);
+      // scroll to start so new one is visible
+      $("carouselStrip").scrollTo({left:0, behavior:"smooth"});
     };
 
     if(gen.done && gen.downloadUrl){
@@ -1088,9 +1170,18 @@ async function realGenerate(){
   }
 }
 
-$("generateBtn").addEventListener("click", realGenerate);
+/* Language */
+$("segAR").addEventListener("click", () => applyLang("ar"));
+$("segEN").addEventListener("click", () => applyLang("en"));
 
-/* ===== Init ===== */
+/* Logo file */
+(function loadLogo(){
+  const img = $("brandImg");
+  img.src = "logoshaga3app.png?v=3";
+  img.onerror = () => { img.style.display = "none"; };
+})();
+
+/* Init */
 initDemo();
 applyLang("en");
 </script>
