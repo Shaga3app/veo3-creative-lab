@@ -14,85 +14,82 @@
       --accent:#5b5cff;
       --ok:#22c55e;
 
-      /* iPhone-like polish */
-      --cardBg: linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
-      --glass: rgba(0,0,0,.18);
-      --shadow: 0 18px 60px rgba(0,0,0,.45);
-      --radius: 18px;
-      --radiusBig: 22px;
+      /* brand overrides injected by JS */
+      --brandAccent: var(--accent);
+      --brandOk: var(--ok);
+      --brandPillBorder: rgba(91,92,255,.45);
+      --brandPillBg: rgba(91,92,255,.18);
+      --brandHeroGlowA: rgba(91,92,255,.25);
+      --brandHeroGlowB: rgba(34,197,94,.12);
+
+      --radiusCard:18px;
+      --radiusField:14px;
+      --shadow: 0 18px 45px rgba(0,0,0,.35);
     }
+
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
-        radial-gradient(1200px 900px at 30% -10%, rgba(91,92,255,.25), transparent 55%),
-        radial-gradient(900px 700px at 80% 10%, rgba(34,197,94,.12), transparent 50%),
+        radial-gradient(1200px 900px at 30% -10%, var(--brandHeroGlowA), transparent 55%),
+        radial-gradient(900px 700px at 80% 10%, var(--brandHeroGlowB), transparent 50%),
         var(--bg);
       color:var(--text);
     }
+
     .wrap{max-width:860px;margin:0 auto;padding:18px 16px 40px;}
     .card{
-      background:var(--cardBg);
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
       border:1px solid var(--line);
-      border-radius:var(--radiusBig);
+      border-radius:var(--radiusCard);
       padding:14px;
       backdrop-filter:blur(10px);
       box-shadow: var(--shadow);
     }
 
-    /* ===== Top bar (fix bright/white + overflow) ===== */
+    /* Top bar (make it darker like locked box, not white) */
     .topBar{
       display:flex;justify-content:space-between;align-items:center;
       padding:10px 14px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:var(--glass); /* dark like the rest */
+      background:rgba(0,0,0,.18);
       gap:12px;
     }
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;min-width:0}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
     .logo{
       width:34px;height:34px;border-radius:10px;
       display:grid;place-items:center;
       background:rgba(255,255,255,.06);
       border:1px solid var(--line);
       overflow:hidden;
-      flex:0 0 auto;
     }
     .logo img{width:22px;height:22px;object-fit:contain;display:block}
-    #brandText{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width: 46vw;
-      display:block;
-    }
+    .logo svg{width:22px;height:22px}
+
     .pill{
       padding:7px 12px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.06);
+      border:1px solid var(--brandPillBorder);
+      background:var(--brandPillBg);
       font-size:12px;
-      font-weight:900;
+      font-weight:800;
       white-space:nowrap;
-      max-width: 46vw;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
+
     .langBtn{
       font-size:12px; padding:7px 10px; border-radius:999px;
       border:1px solid var(--line); color: var(--text);
       background: rgba(255,255,255,.06);
-      font-weight:900;
+      font-weight:800;
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
-      flex:0 0 auto;
     }
 
-    /* ===== Hero ===== */
     .hero{margin:18px 0}
-    .hero h1{font-size:52px;line-height:1.05;margin:6px 0;font-weight:950}
-    .hero p{color:var(--muted);font-size:18px;max-width:560px}
+    .hero h1{font-size:52px;line-height:1.05;margin:6px 0;font-weight:900}
+    .hero p{color:var(--muted);font-size:18px;max-width:520px}
 
     .sectionLabel{
       margin:20px 0 10px;
@@ -101,22 +98,19 @@
       color:var(--muted);
     }
 
-    /* ===== Locked box ===== */
     .lockedBox{
-      background:var(--glass);
+      background:rgba(0,0,0,.18);
       border:1px solid var(--line);
       border-radius:16px;
       padding:14px;
     }
-    .lockedTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .lockedTop{display:flex;justify-content:space-between;align-items:center}
     .lockedTag{
       font-size:12px;
       padding:6px 10px;
       border-radius:999px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.04);
-      font-weight:900;
-      white-space:nowrap;
     }
     .lockedPrompt{
       margin-top:10px;
@@ -125,18 +119,16 @@
       padding:16px;
       font-family:ui-monospace,monospace;
       white-space:pre-wrap;
-      line-height:1.45;
-      /* dimmed text inside mandatory box */
-      color: rgba(255,255,255,.72);
+      /* make text a bit dimmed like you asked */
+      color: rgba(229,231,235,.82);
     }
 
-    /* ===== Mode bar (unchanged logic) ===== */
     .modeBar{
       display:flex;gap:10px;
       border:1px solid var(--line);
       border-radius:14px;
       padding:8px;
-      background:var(--glass);
+      background:rgba(0,0,0,.18);
     }
     .modeBtn{
       flex:1;
@@ -146,7 +138,7 @@
       border:1px solid transparent;
       color:var(--muted);
       cursor:pointer;
-      font-weight:800;
+      font-weight:700;
     }
     .modeBtn.on{
       background:rgba(91,92,255,.22);
@@ -154,16 +146,16 @@
       color:var(--text);
     }
 
-    /* ===== Inputs ===== */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
+
     .field{
-      background:var(--glass);
+      background:rgba(0,0,0,.18);
       border:1px solid var(--line);
-      border-radius:14px;
+      border-radius:var(--radiusField);
       padding:12px;
     }
-    .field label{font-size:13px;margin-bottom:6px;display:block;font-weight:900}
+    .field label{font-size:13px;margin-bottom:6px;display:block}
     .field input{
       width:100%;
       padding:12px;
@@ -171,131 +163,17 @@
       border:1px solid var(--line);
       background:rgba(255,255,255,.04);
       color:var(--text);
-      outline:none;
     }
+    .field .miniHint{display:none;} /* you already wanted hidden */
 
-    /* ===== iPhone-like Preview + Carousel (NEW, but doesn’t change your backend logic) ===== */
-    .mediaCard{
-      margin-top:14px;
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:var(--glass);
-      overflow:hidden;
-    }
-    .mainPreview{
-      position:relative;
-      width:100%;
-      aspect-ratio:1/1; /* square like iPhone-style */
-      background:#000;
-    }
-    .mainPreview img,
-    .mainPreview video{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    .mainPreview video{display:none}
-    .metaChip{
-      position:absolute;
-      top:10px; right:10px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-      font-size:12px;
-      font-weight:900;
-    }
-    .playOverlay{
-      position:absolute; inset:0;
-      display:none;
-      place-items:center;
-      pointer-events:none;
-    }
-    .playOverlay .circle{
-      width:64px;height:64px;border-radius:50%;
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.25);
-      display:grid;place-items:center;
-    }
-    .playOverlay svg{width:26px;height:26px;fill:#fff}
-
-    .thumbRowWrap{
-      padding:12px;
-      border-top:1px solid var(--line);
-    }
-    .thumbRow{
-      display:flex;
-      gap:10px;
-      overflow-x:auto;
-      padding-bottom:6px;
-      scroll-snap-type:x mandatory;
-    }
-    .thumb{
-      width:92px;height:92px;
-      border-radius:18px;
-      overflow:hidden;
-      flex:0 0 auto;
-      border:2px solid transparent;
-      background:rgba(255,255,255,.04);
-      position:relative;
-      scroll-snap-align:start;
-      cursor:pointer;
-    }
-    .thumb.active{border-color:var(--ok)}
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .thumb .badge{
-      position:absolute;bottom:6px;left:6px;
-      font-size:11px;font-weight:900;
-      padding:3px 7px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.35);
-      backdrop-filter: blur(8px);
-    }
-    .thumb .play{
-      position:absolute; inset:0;
-      display:grid;place-items:center;
-      pointer-events:none;
-    }
-    .thumb .play span{
-      width:28px;height:28px;border-radius:50%;
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.22);
-      display:grid;place-items:center;
-      font-weight:900;
-    }
-
-    .dots{
-      display:flex;gap:6px;
-      justify-content:center;
-      padding-top:8px;
-    }
-    .dot{
-      width:6px;height:6px;border-radius:999px;
-      background:rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .dot.on{
-      background:rgba(34,197,94,.85);
-      border-color:rgba(34,197,94,.55);
-    }
-
-    /* ===== Buttons ===== */
     .btn{
       padding:12px 16px;
       border-radius:14px;
       border:none;
-      font-weight:950;
+      font-weight:900;
       cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .btn.primary{
-      background:linear-gradient(180deg,var(--ok), color-mix(in srgb, var(--ok) 72%, #000));
+      background:linear-gradient(180deg,var(--brandOk), #1ea84d);
       color:#07120a;
-      width:100%;
-      margin-top:14px;
     }
     .btn.secondary{
       background:rgba(255,255,255,.06);
@@ -304,13 +182,177 @@
       text-decoration:none;
     }
 
+    /* ===== Preview Card (iPhone-like) ===== */
+    .previewCard{
+      margin-top:14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(0,0,0,.18);
+      padding:12px;
+    }
+    .previewTop{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-bottom:10px;
+    }
+    .previewTop .title{
+      font-weight:900;
+      display:flex;align-items:center;gap:8px;
+    }
+    .chip{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.35);
+      white-space:nowrap;
+    }
+
+    .mainPreview{
+      position:relative;
+      width:100%;
+      aspect-ratio: 9 / 16;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    /* Poster DIV (NOT img) – works on iPhone webview */
+    .posterDiv{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:flex-end;
+      padding:18px;
+      color:#fff;
+      font-weight:900;
+      background:
+        radial-gradient(700px 500px at 30% 10%, rgba(255,255,255,.08), transparent 55%),
+        radial-gradient(700px 500px at 80% 30%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.82));
+    }
+    .posterTitle{
+      width:100%;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .posterTitle .name{
+      font-size:18px;
+      letter-spacing:.02em;
+      opacity:.95;
+    }
+    .posterTitle .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(0,0,0,.35);
+      backdrop-filter:blur(8px);
+      opacity:.95;
+    }
+
+    video#mainVideo{
+      width:100%;
+      height:100%;
+      display:none;
+      object-fit:cover;
+      background:#000;
+    }
+
+    .playOverlay{
+      position:absolute; inset:0;
+      display:grid; place-items:center;
+      pointer-events:auto;
+      background:linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.45));
+    }
+    .playBtn{
+      width:74px;height:74px;border-radius:50%;
+      display:grid;place-items:center;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:20px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Carousel thumbs */
+    .carousel{
+      margin-top:10px;
+      display:flex;gap:10px;
+      overflow:auto;
+      padding-bottom:6px;
+      scrollbar-width: thin;
+    }
+    .thumb{
+      width:92px;
+      height:92px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      flex:0 0 auto;
+      position:relative;
+      overflow:hidden;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .thumb.active{
+      outline:2px solid var(--brandOk);
+      outline-offset:2px;
+    }
+    .thumbInner{
+      position:absolute; inset:0;
+      padding:10px;
+      display:flex;align-items:flex-end;
+      background:
+        radial-gradient(120px 90px at 30% 20%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(120px 90px at 80% 30%, rgba(255,255,255,.08), transparent 65%),
+        linear-gradient(135deg, rgba(0,0,0,.20), rgba(0,0,0,.82));
+    }
+    .thumbRow{
+      width:100%;
+      display:flex;justify-content:space-between;align-items:center;gap:8px;
+      color:#fff;
+      font-weight:900;
+    }
+    .thumbRow .lbl{font-size:11px;opacity:.95}
+    .thumbRow .pbtn{
+      width:24px;height:24px;border-radius:50%;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.20);
+      display:grid;place-items:center;font-size:12px;
+    }
+    .thumbBadge{
+      position:absolute;
+      top:8px; right:8px;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.45);
+      color:#fff;
+    }
+
+    /* pagination dots */
+    .dots{
+      display:flex;justify-content:center;gap:6px;
+      margin-top:8px;
+    }
+    .dot{
+      width:6px;height:6px;border-radius:50%;
+      background:rgba(255,255,255,.18);
+    }
+    .dot.on{ background: var(--brandOk); }
+
+    /* Result / progress */
     .result{
       display:none;
       margin-top:14px;
       border:1px solid var(--line);
       border-radius:16px;
       padding:12px;
-      background:var(--glass);
+      background:rgba(0,0,0,.18);
     }
     .progress{
       height:10px;border-radius:999px;
@@ -320,162 +362,151 @@
     }
     .bar{
       height:100%;width:0%;
-      background:linear-gradient(90deg,var(--accent),var(--ok));
+      background:linear-gradient(90deg,var(--brandAccent), var(--brandOk));
     }
-    .miniHint{font-size:12px;color:var(--muted);line-height:1.35}
-
-    video{
-      border-radius:14px;
-      border:1px solid var(--line);
+    .miniHint{
+      margin-top:8px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+      opacity:.95;
     }
 
-    /* Hide below-field descriptions (you already do placeholders) */
-    .field .miniHint{display:none}
+    /* actions row */
+    .actionsRow{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;
+      justify-content:flex-end;
+    }
   </style>
 </head>
 
 <body>
 <div class="wrap">
-<div class="card">
+  <div class="card">
 
-  <div class="topBar">
-    <div class="brand">
-      <div class="logo">
-        <img id="brandImg" alt="Brand logo">
+    <div class="topBar">
+      <div class="brand">
+        <div class="logo">
+          <img id="brandImg" alt="Brand logo" style="display:none;">
+          <svg id="fallbackSvg" viewBox="0 0 24 24">
+            <path d="M12 3c2.5 2.8 4.8 4.2 7.5 4.9-1.3 5.6-4.3 9.6-7.5 13.2C8.8 17.5 5.8 13.5 4.5 7.9 7.2 7.2 9.5 5.8 12 3Z" fill="#5b5cff"/>
+            <path d="M9 9c-1.5 2.4-2.2 4.6-2.4 7.2 2.4-1.1 4.2-3 5.1-5.2-.7-.7-1.7-1.4-2.7-2Z" fill="#22c55e"/>
+          </svg>
+        </div>
+        <span id="brandText">Shaga3app · AI Creative Playground</span>
       </div>
-      <span id="brandText">Shaga3app · AI Creative Playground</span>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="langBtn" id="langToggle" type="button">AR</button>
+        <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
+      </div>
     </div>
 
-    <div style="display:flex; gap:10px; align-items:center; min-width:0;">
-      <button class="langBtn" id="langToggle" type="button">AR</button>
-      <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
-    </div>
-  </div>
-
-  <div class="hero">
-    <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
-    <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
-  </div>
-
-  <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
-  <div class="lockedBox">
-    <div class="lockedTop">
-      <div class="lockedTag" id="lockedTag">🔒 Locked</div>
-      <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
+    <div class="hero">
+      <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
+      <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
     </div>
 
-    <div
-      class="lockedPrompt"
-      id="basePrompt"
-      data-en="YOUR_BASE_PROMPT_GOES_HERE
+    <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
+    <div class="lockedBox">
+      <div class="lockedTop">
+        <div class="lockedTag" id="lockedTag">🔒 Locked</div>
+        <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
+      </div>
 
-BASE (LOCKED)
+      <div class="lockedPrompt" id="basePrompt"
+        data-en="BASE (LOCKED)
 
 Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
 Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.
 The scene follows this base concept, and we will inject the user details below."
-      data-ar="الأساس (مقفول)
+        data-ar="الأساس (مقفول)
 
 اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
 لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد — بشكل طبيعي ومتناسق مع المكان، من غير ما يبانوا متحطّين كده أو فيك.
-المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت."
-    >
-YOUR_BASE_PROMPT_GOES_HERE
-
-
+المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.">
 BASE (LOCKED)
 
 Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
 Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.
 The scene follows this base concept, and we will inject the user details below.
-    </div>
-  </div>
-
-  <!-- ✅ iPhone-like media block (carousel posters + main preview video) -->
-  <div class="sectionLabel" id="demoLabel">DEMO CAROUSEL</div>
-  <div class="mediaCard">
-    <div class="mainPreview">
-      <img id="mainPoster" alt="Selected demo poster">
-      <video id="mainVideo" controls playsinline muted></video>
-      <div class="metaChip" id="metaChip">Demo</div>
-
-      <div class="playOverlay" id="playOverlay">
-        <div class="circle">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </div>
       </div>
     </div>
 
-    <div class="thumbRowWrap">
-      <div class="thumbRow" id="thumbRow"></div>
+    <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
+    <div class="modeBar">
+      <button class="modeBtn on" id="modeText" type="button">📝 <span id="modeTextTxt">Text prompt</span></button>
+      <button class="modeBtn" id="modeImages" type="button">🖼️ <span id="modeImgTxt">Start + End images</span></button>
+    </div>
+
+    <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
+      <label id="lblImages">Start + End images</label>
+      <input type="file" id="startImg" accept="image/*">
+      <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+      <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label id="lblSubject">Main subject / character</label>
+        <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
+      </div>
+      <div class="field">
+        <label id="lblLocation">Location / environment</label>
+        <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
+      </div>
+
+      <div class="field span2" id="extraBox">
+        <label id="lblTwist">Extra creative twist</label>
+        <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
+      </div>
+    </div>
+
+    <!-- Preview + carousel (same idea as before, but posters always show) -->
+    <div class="previewCard">
+      <div class="previewTop">
+        <div class="title">🎬 <span id="previewTitle">Selected demo</span></div>
+        <div class="chip" id="metaChip">9:16 · 5–8s</div>
+      </div>
+
+      <div class="mainPreview" id="mainPreview">
+        <div id="mainPoster" class="posterDiv">
+          <div class="posterTitle">
+            <div class="name" id="posterName">Shaga3app · Demo</div>
+            <div class="tag" id="posterTag">9:16 · 5–8s</div>
+          </div>
+        </div>
+
+        <video id="mainVideo" controls playsinline muted preload="metadata"></video>
+
+        <div class="playOverlay" id="playOverlay">
+          <div class="playBtn" id="playBtn">▶</div>
+        </div>
+      </div>
+
+      <div class="carousel" id="carousel"></div>
       <div class="dots" id="dots"></div>
-    </div>
-  </div>
 
-  <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
-  <div class="modeBar">
-    <button class="modeBtn on" id="modeText">📝 <span id="modeTextTxt">Text prompt</span></button>
-    <button class="modeBtn" id="modeImages">🖼️ <span id="modeImgTxt">Start + End images</span></button>
-  </div>
+      <!-- Buttons inside same card like you requested -->
+      <div class="actionsRow">
+        <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
+        <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download</span></button>
+        <button class="btn" id="generateBtn" type="button">⚡ <span id="genBtnTxt">Generate video</span></button>
+      </div>
 
-  <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
-    <label id="lblImages">Start + End images</label>
-    <input type="file" id="startImg" accept="image/*">
-    <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-    <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
-  </div>
-
-  <div class="grid">
-    <div class="field">
-      <label id="lblSubject">Main subject / character</label>
-      <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
-      <div class="miniHint" id="hintSubject">Who is the main character? (age, style, wardrobe, vibe)</div>
-    </div>
-    <div class="field">
-      <label id="lblLocation">Location / environment</label>
-      <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
-      <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
+      <div class="miniHint" id="saveWarn" style="margin-top:10px">
+        This page does not save your generated video. Please download it or copy the link before leaving.
+      </div>
+      <div class="miniHint" id="copyNote" style="display:none;margin-top:8px"></div>
     </div>
 
-    <div class="field span2" id="extraBox">
-      <label id="lblTwist">Extra creative twist</label>
-      <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
-      <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
-    </div>
-  </div>
-
-  <!-- ✅ Generate button stays in same card area (not sticky) -->
-  <div style="margin-top:14px">
-    <button class="btn primary" id="generateBtn">▶ <span id="genBtnTxt">Generate video</span></button>
-  </div>
-
-  <div class="result" id="resultBox">
-    <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
-    <div class="progress"><div class="bar" id="bar"></div></div>
-
-    <!-- ✅ user-friendly actions -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-      <button class="btn secondary" id="downloadBtn" type="button">
-        ⬇ <span id="dlTxt">Download video</span>
-      </button>
-
-      <button class="btn secondary" id="copyBtn" type="button">
-        🔗 <span id="copyTxt">Copy link</span>
-      </button>
-
-      <button class="btn secondary" id="backBtn" type="button">
-        ↩ <span id="backTxt">Back</span>
-      </button>
+    <!-- Progress box (kept, but generation will replace main preview immediately when ready) -->
+    <div class="result" id="resultBox">
+      <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
     </div>
 
-    <div class="miniHint" id="saveWarn" style="display:block;margin-top:10px">
-      This page does not save your generated video. Please download it or copy the link before leaving.
-    </div>
-
-    <div class="miniHint" id="copyNote" style="display:none;margin-top:8px"></div>
   </div>
-
-</div>
 </div>
 
 <script>
@@ -487,116 +518,112 @@ const $ = id => document.getElementById(id);
 const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
 const MODEL_ID = "veo-3.1-generate-001";
 
-let trials = 3;
-let generating = false;
-
-const LAST_URL_KEY = "shaga3app_last_video_url";
-
 /* ===========================
-   ✅ Demo videos like before (MDN CC0)
-   - We DO NOT load them in the carousel.
-   - Only play when user taps a thumb.
+   Brand routing (3 brands)
+   Use:
+   /index.html?brand=shaga3
+   /index.html?brand=cocacola
+   /index.html?brand=tui
 =========================== */
-const DEMO_VIDEOS = [
-  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/forest.mp4",
-  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/river.mp4"
-];
+const BRAND_DEFAULT = "shaga3";
+const brandKey = (new URLSearchParams(location.search).get("brand") || BRAND_DEFAULT).toLowerCase();
+
+const BRANDS = {
+  shaga3: {
+    name_en: "Shaga3app · AI Creative Playground",
+    name_ar: "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
+    beta_en: "Beta · Shaga3app powered",
+    beta_ar: "بيتا · بدعم Shaga3app",
+    accent: "#5b5cff",
+    ok: "#22c55e",
+    glowA: "rgba(91,92,255,.25)",
+    glowB: "rgba(34,197,94,.12)",
+    pillBorder: "rgba(91,92,255,.45)",
+    pillBg: "rgba(91,92,255,.18)",
+    logo: "logoshaga3app.png?v=9",
+    base_en: null, // use default in HTML
+    base_ar: null
+  },
+  cocacola: {
+    name_en: "Coca-Cola · AI Video Lab",
+    name_ar: "كوكاكولا · معمل فيديو بالذكاء الاصطناعي",
+    beta_en: "Demo · Coca-Cola",
+    beta_ar: "ديمو · كوكاكولا",
+    accent: "#e11d48",
+    ok: "#22c55e",
+    glowA: "rgba(225,29,72,.22)",
+    glowB: "rgba(255,255,255,.10)",
+    pillBorder: "rgba(225,29,72,.55)",
+    pillBg: "rgba(225,29,72,.18)",
+    logo: "logoshaga3app.png?v=9", // لو عندك لوجو كوكاكولا حطه هنا
+    base_en:
+`BASE (LOCKED)
+
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
+The scene must include an ultra-realistic Coca-Cola can naturally integrated (not placed/fake).
+Keep it premium, cinematic, and believable. We will inject user details below.`,
+    base_ar:
+`الأساس (مقفول)
+
+اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
+لازم يظهر علبة كوكاكولا واقعية جدًا ومندمجة طبيعي في المكان (من غير ما تبان متحطّة/فيك).
+خلي الإحساس بريميوم وسينمائي وواقعي. وإحنا هنضيف تفاصيل المستخدم تحت.`
+  },
+  tui: {
+    name_en: "TUI · AI Video Lab",
+    name_ar: "TUI · معمل فيديو بالذكاء الاصطناعي",
+    beta_en: "Demo · TUI",
+    beta_ar: "ديمو · TUI",
+    accent: "#38bdf8",
+    ok: "#22c55e",
+    glowA: "rgba(56,189,248,.20)",
+    glowB: "rgba(34,197,94,.10)",
+    pillBorder: "rgba(56,189,248,.55)",
+    pillBg: "rgba(56,189,248,.18)",
+    logo: "logoshaga3app.png?v=9", // لو عندك لوجو TUI حطه هنا
+    base_en:
+`BASE (LOCKED)
+
+Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and realistic lighting.
+The scene should feel like a premium TUI destination moment (relaxed, sunny, aspirational) without showing any copyrighted brand signage.
+We will inject user details below.`,
+    base_ar:
+`الأساس (مقفول)
+
+اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية.
+خلي المشهد إحساسه سفر/ريلاكس بريميوم كأنه لحظة من وجهة TUI (شمس/هدوء/فاخر) من غير لافتات أو شعارات حقوقها محفوظة.
+وإحنا هنضيف تفاصيل المستخدم تحت.`
+  }
+};
+
+const BRAND = BRANDS[brandKey] || BRANDS[BRAND_DEFAULT];
+
+/* inject brand colors */
+document.documentElement.style.setProperty("--brandAccent", BRAND.accent);
+document.documentElement.style.setProperty("--brandOk", BRAND.ok);
+document.documentElement.style.setProperty("--brandHeroGlowA", BRAND.glowA);
+document.documentElement.style.setProperty("--brandHeroGlowB", BRAND.glowB);
+document.documentElement.style.setProperty("--brandPillBorder", BRAND.pillBorder);
+document.documentElement.style.setProperty("--brandPillBg", BRAND.pillBg);
+
+/* logo */
+const brandImg = $("brandImg");
+const fallbackSvg = $("fallbackSvg");
+brandImg.src = BRAND.logo;
+brandImg.onload = () => { brandImg.style.display="block"; if(fallbackSvg) fallbackSvg.style.display="none"; };
+brandImg.onerror = () => { if(fallbackSvg) fallbackSvg.style.display="block"; };
 
 /* ===========================
-   ✅ Posters (fast) — local data SVG
-   - No external image sites (WebView breaks them)
-=========================== */
-function makePosterDataUrl({brandKey, i, accent}) {
-  const title = (brandKey === "cocacola") ? "Coca-Cola" : (brandKey === "tui") ? "TUI" : "Shaga3app";
-  const sub = (i === 0) ? "Demo" : "Demo";
-  const bg1 = (brandKey === "cocacola") ? "#120305" : (brandKey === "tui") ? "#06121c" : "#0b0f18";
-  const bg2 = (brandKey === "cocacola") ? "#2b0406" : (brandKey === "tui") ? "#0a2b3f" : "#121a2c";
-  const x = 15 + (i*9)%70;
-  const y = 20 + (i*13)%60;
-
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="${bg1}"/>
-        <stop offset="1" stop-color="${bg2}"/>
-      </linearGradient>
-      <radialGradient id="r" cx="${x}%" cy="${y}%" r="70%">
-        <stop offset="0" stop-color="${accent}" stop-opacity="0.50"/>
-        <stop offset="1" stop-color="${accent}" stop-opacity="0"/>
-      </radialGradient>
-      <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="18"/>
-      </filter>
-    </defs>
-
-    <rect width="900" height="900" fill="url(#g)"/>
-    <circle cx="55%" cy="45%" r="420" fill="url(#r)" filter="url(#blur)"/>
-
-    <g opacity="0.16">
-      <path d="M90 630 C 260 520, 360 700, 540 560 S 820 640, 860 520"
-            fill="none" stroke="#ffffff" stroke-width="8"/>
-      <path d="M60 420 C 220 340, 320 520, 480 410 S 760 420, 880 360"
-            fill="none" stroke="#ffffff" stroke-width="6"/>
-    </g>
-
-    <text x="70" y="140" fill="#ffffff"
-      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
-      font-size="54" font-weight="900" opacity="0.92">${title}</text>
-
-    <text x="70" y="200" fill="#ffffff"
-      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
-      font-size="26" font-weight="700" opacity="0.72">${sub}</text>
-
-    <rect x="70" y="760" rx="28" ry="28" width="250" height="76"
-      fill="rgba(0,0,0,0.35)" stroke="rgba(255,255,255,0.18)"/>
-    <text x="104" y="808" fill="#ffffff"
-      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
-      font-size="26" font-weight="900" opacity="0.92">▶ Preview</text>
-  </svg>`;
-
-  const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
-  return `data:image/svg+xml;charset=utf-8,${encoded}`;
-}
-
-/* ===========================
-   Brand config via ?brand=
-=========================== */
-function getBrandKey(){
-  const u = new URL(location.href);
-  return (u.searchParams.get("brand") || "shaga3").toLowerCase();
-}
-
-async function loadBrandConfig(){
-  const key = getBrandKey();
-  const url = `brands/${key}.json?v=${Date.now()}`;
-  const r = await fetch(url);
-  const txt = await r.text();
-  if(!r.ok) throw new Error(`Cannot load ${url} (HTTP ${r.status})`);
-  try { return JSON.parse(txt); }
-  catch(e){ throw new Error(`Bad JSON in ${url}. Make sure it is valid JSON (no trailing commas).`); }
-}
-
-function applyTheme(cfg){
-  document.documentElement.style.setProperty("--accent", cfg.accent || "#5b5cff");
-  document.documentElement.style.setProperty("--ok", cfg.ok || "#22c55e");
-}
-
-/* ===========================
-   Arabic Toggle + RTL + Arabic Digits
+   i18n (keep Arabic like before)
 =========================== */
 const i18n = {
   en: {
-    brandText: "Shaga3app · AI Creative Playground",
-    beta: "Beta · Shaga3app powered",
     heroTitle: "Play with our<br>guided video<br>prompt",
     heroDescStart: "You get up to ",
     heroDescEnd: " tries. The core concept is fixed by us; you just add your creative twist ✨",
     baseLabel: "BASE CONCEPT (LOCKED)",
     locked: "🔒 Locked",
     trialsLabel: "Trials left:",
-    demoLabel: "DEMO CAROUSEL",
     modeLabel: "CHOOSE INPUT MODE",
     modeText: "Text prompt",
     modeImg: "Start + End images",
@@ -604,32 +631,24 @@ const i18n = {
     lblLocation: "Location / environment",
     lblTwist: "Extra creative twist",
     lblImages: "Start + End images",
-    hintSubject: "Who is the main character? (age, style, wardrobe, vibe)",
-    hintLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
-    hintTwist: "Optional: camera move, mood, style, or one special detail.",
-    hintImages: "Upload a start frame and an end frame to guide the motion.",
     phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
     phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
     phTwist: "Optional: camera move, mood, style, or one special detail.",
     gen: "Generate video",
-    dl: "Download video",
+    dl: "Download",
     copy: "Copy link",
-    back: "Back",
-    done: "Done",
-    waiting: "Waiting for video…",
     saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
-    copied: "Link copied ✅"
+    copied: "Link copied ✅",
+    waiting: "Waiting for video…",
+    done: "Done"
   },
   ar: {
-    brandText: "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
-    beta: "بيتا · بدعم Shaga3app",
     heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
     heroDescStart: "لديك ",
     heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
     baseLabel: "المفهوم الأساسي (مقفول)",
     locked: "🔒 مقفول",
     trialsLabel: "المحاولات المتبقية:",
-    demoLabel: "كاروسيل ديمو",
     modeLabel: "اختر طريقة الإدخال",
     modeText: "نص فقط",
     modeImg: "صورتان: بداية + نهاية",
@@ -637,21 +656,16 @@ const i18n = {
     lblLocation: "المكان / البيئة",
     lblTwist: "إضافة إبداعية",
     lblImages: "صورتان: بداية + نهاية",
-    hintSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
-    hintLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
-    hintTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
-    hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
     phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
     phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
     phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
     gen: "توليد فيديو",
-    dl: "تحميل الفيديو",
+    dl: "تحميل",
     copy: "نسخ الرابط",
-    back: "رجوع",
-    done: "تم",
-    waiting: "بنستنى الفيديو…",
     saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
-    copied: "تم نسخ الرابط ✅"
+    copied: "تم نسخ الرابط ✅",
+    waiting: "بنستنى الفيديو…",
+    done: "تم"
   }
 };
 
@@ -661,32 +675,29 @@ function toArabicDigits(str){
 }
 
 let currentLang = "en";
-let brandCfg = null;
+let trials = 3;
+let generating = false;
 
+const LAST_URL_KEY = "shaga3app_last_video_url_" + brandKey;
+
+function saveLastUrl(url){ try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){} }
+function loadLastUrl(){ try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; } }
+
+/* Apply brand text + base prompt per language */
 function applyLang(lang){
   currentLang = lang;
   const t = i18n[lang];
 
-  $("brandText").textContent = brandCfg
-    ? (lang === "ar" ? (brandCfg.brandText_ar || brandCfg.brandText_en || t.brandText) : (brandCfg.brandText_en || t.brandText))
-    : t.brandText;
+  $("brandText").textContent = (lang==="ar") ? BRAND.name_ar : BRAND.name_en;
+  $("betaPill").textContent  = (lang==="ar") ? BRAND.beta_ar : BRAND.beta_en;
 
-  $("betaPill").textContent = brandCfg
-    ? (lang === "ar" ? (brandCfg.beta_ar || brandCfg.beta_en || t.beta) : (brandCfg.beta_en || t.beta))
-    : t.beta;
-
-  $("heroTitle").innerHTML = brandCfg
-    ? (lang === "ar" ? (brandCfg.heroTitle_ar || brandCfg.heroTitle_en || t.heroTitle) : (brandCfg.heroTitle_en || t.heroTitle))
-    : t.heroTitle;
-
-  // tries display
-  const triesNum = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+  $("heroTitle").innerHTML = t.heroTitle;
+  const triesNum = (lang==="ar") ? toArabicDigits("3") : "3";
   $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
 
   $("baseLabel").textContent = t.baseLabel;
   $("lockedTag").textContent = t.locked;
   $("trialsLabel").textContent = t.trialsLabel;
-  $("demoLabel").textContent = t.demoLabel;
 
   $("modeLabel").textContent = t.modeLabel;
   $("modeTextTxt").textContent = t.modeText;
@@ -695,13 +706,7 @@ function applyLang(lang){
   $("lblSubject").textContent = t.lblSubject;
   $("lblLocation").textContent = t.lblLocation;
   $("lblTwist").textContent = t.lblTwist;
-
-  $("hintSubject").textContent = t.hintSubject;
-  $("hintLocation").textContent = t.hintLocation;
-  $("hintTwist").textContent = t.hintTwist;
-
   $("lblImages").textContent = t.lblImages;
-  $("hintImages").textContent = t.hintImages;
 
   $("subject").placeholder = t.phSubject;
   $("location").placeholder = t.phLocation;
@@ -710,49 +715,190 @@ function applyLang(lang){
   $("genBtnTxt").textContent = t.gen;
   $("dlTxt").textContent = t.dl;
   $("copyTxt").textContent = t.copy;
-  $("backTxt").textContent = t.back;
 
   $("saveWarn").textContent = t.saveWarn;
 
-  // base prompt language swap (from your original)
+  // base prompt language + brand override
   const bp = $("basePrompt");
-  if (bp) {
-    const enText = bp.getAttribute("data-en") || bp.textContent;
-    const arText = bp.getAttribute("data-ar") || bp.textContent;
-    bp.textContent = (lang === "ar") ? arText : enText;
-  }
+  const defaultEn = bp.getAttribute("data-en") || bp.textContent;
+  const defaultAr = bp.getAttribute("data-ar") || bp.textContent;
 
-  document.body.dir = (lang === "ar") ? "rtl" : "ltr";
-  document.documentElement.lang = (lang === "ar") ? "ar" : "en";
-  $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
+  const enText = BRAND.base_en || defaultEn;
+  const arText = BRAND.base_ar || defaultAr;
 
-  // timer default
-  $("timerText").textContent = (lang === "ar") ? toArabicDigits("١٠ ث") : "~10s";
+  bp.textContent = (lang==="ar") ? arText : enText;
+
+  document.body.dir = (lang==="ar") ? "rtl" : "ltr";
+  document.documentElement.lang = (lang==="ar") ? "ar" : "en";
+  $("langToggle").textContent = (lang==="ar") ? "EN" : "AR";
+
+  // re-render carousel labels (Demo/New)
+  renderCarousel();
 }
 
-$("langToggle").addEventListener("click", () => {
-  applyLang(currentLang === "en" ? "ar" : "en");
-});
+$("langToggle").addEventListener("click", () => applyLang(currentLang==="en" ? "ar" : "en"));
 
-/* ===========================
-   Mode switching (unchanged)
-=========================== */
+/* Mode switching */
 const imagesBox = $("imagesBox");
-
 $("modeText").addEventListener("click", () => {
   $("modeText").classList.add("on");
   $("modeImages").classList.remove("on");
-  if(imagesBox) imagesBox.style.display = "none";
+  imagesBox.style.display = "none";
 });
-
 $("modeImages").addEventListener("click", () => {
   $("modeImages").classList.add("on");
   $("modeText").classList.remove("on");
-  if(imagesBox) imagesBox.style.display = "block";
+  imagesBox.style.display = "block";
 });
 
 /* ===========================
-   Helpers (unchanged)
+   Carousel (posters ALWAYS show, no external site)
+=========================== */
+const mainVideo = $("mainVideo");
+const mainPoster = $("mainPoster");
+const playOverlay = $("playOverlay");
+const metaChip = $("metaChip");
+const posterName = $("posterName");
+const posterTag = $("posterTag");
+
+const DEMO_VIDEOS = [
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/bee.mp4",
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/river.mp4"
+];
+
+// 8 thumbs (repeats videos if only 3 links)
+let carouselItems = Array.from({length: 8}).map((_, idx) => ({
+  id: "demo-" + idx,
+  label: "Demo",
+  tag: "9:16 · 5–8s",
+  videoUrl: DEMO_VIDEOS[idx % DEMO_VIDEOS.length]
+}));
+
+// if we generated a last video, keep it as item 0 "New"
+function hydrateGeneratedIntoCarousel(){
+  const last = loadLastUrl();
+  if(last){
+    // prevent duplicates
+    carouselItems = carouselItems.filter(x => x.id !== "gen-last");
+    carouselItems.unshift({
+      id: "gen-last",
+      label: "New",
+      tag: "9:16 · 5–8s",
+      videoUrl: last
+    });
+  }
+}
+
+let selectedId = carouselItems[0].id;
+
+function posterHTML(name, tag){
+  return `
+    <div class="posterTitle">
+      <div class="name">${name}</div>
+      <div class="tag">${tag}</div>
+    </div>
+  `;
+}
+
+function showPosterForSelection(item){
+  const brandLabel = (brandKey==="cocacola") ? "Coca-Cola" : (brandKey==="tui" ? "TUI" : "Shaga3app");
+  const labelTxt = (currentLang==="ar")
+    ? (item.label==="New" ? "جديد" : "ديمو")
+    : item.label;
+
+  posterName.textContent = `${brandLabel} · ${labelTxt}`;
+  posterTag.textContent = item.tag || "9:16 · 5–8s";
+
+  // keep poster visible
+  mainPoster.style.display = "flex";
+  mainVideo.style.display = "none";
+
+  playOverlay.style.display = "grid";
+  metaChip.textContent = item.tag || "9:16 · 5–8s";
+}
+
+function playSelectedVideo(item){
+  // show video, hide poster
+  mainPoster.style.display = "none";
+  mainVideo.style.display = "block";
+  playOverlay.style.display = "none";
+  metaChip.textContent = item.tag || "9:16 · 5–8s";
+
+  // Force reload (fix iPhone “only 1 plays”)
+  try{
+    mainVideo.pause();
+    mainVideo.currentTime = 0;
+  }catch(e){}
+
+  mainVideo.muted = true; // iOS-safe
+  mainVideo.src = item.videoUrl;
+  mainVideo.load();
+
+  const tryPlay = () => {
+    mainVideo.play().catch(()=>{});
+    mainVideo.removeEventListener("loadeddata", tryPlay);
+  };
+  mainVideo.addEventListener("loadeddata", tryPlay);
+}
+
+$("playBtn").addEventListener("click", () => {
+  const it = carouselItems.find(x => x.id === selectedId) || carouselItems[0];
+  playSelectedVideo(it);
+});
+
+function renderDots(activeIndex){
+  const dots = $("dots");
+  dots.innerHTML = "";
+  const total = Math.min(8, carouselItems.length);
+  for(let i=0;i<total;i++){
+    const d = document.createElement("div");
+    d.className = "dot" + (i===activeIndex ? " on" : "");
+    dots.appendChild(d);
+  }
+}
+
+function renderCarousel(){
+  const c = $("carousel");
+  c.innerHTML = "";
+
+  const labelDemo = (currentLang==="ar") ? "ديمو" : "Demo";
+  const labelNew  = (currentLang==="ar") ? "جديد" : "New";
+
+  carouselItems.forEach((it, idx) => {
+    const el = document.createElement("div");
+    el.className = "thumb" + (it.id === selectedId ? " active" : "");
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+
+    const badge = (it.label==="New") ? labelNew : labelDemo;
+
+    el.innerHTML = `
+      <div class="thumbInner">
+        <div class="thumbRow">
+          <span class="lbl">${badge}</span>
+          <span class="pbtn">▶</span>
+        </div>
+      </div>
+      <div class="thumbBadge">${badge}</div>
+    `;
+
+    el.addEventListener("click", () => {
+      selectedId = it.id;
+      renderCarousel();
+      showPosterForSelection(it); // poster first (fast), user presses play
+      renderDots(idx);
+    });
+
+    c.appendChild(el);
+  });
+
+  const activeIndex = Math.max(0, carouselItems.findIndex(x => x.id === selectedId));
+  renderDots(activeIndex);
+}
+
+/* ===========================
+   Build prompt
 =========================== */
 function buildPrompt(){
   const base = $("basePrompt").textContent || "";
@@ -787,163 +933,32 @@ async function postJSON(payload){
   return data;
 }
 
+/* Progress UI */
 function showProgressUI(){
   $("resultBox").style.display = "block";
   $("bar").style.width = "0%";
   $("copyNote").style.display = "none";
 }
-
 function setTimerText(secondsLeft){
   if(currentLang === "ar"){
-    $("timerText").textContent = secondsLeft > 0
-      ? toArabicDigits(`${secondsLeft} ث`)
-      : i18n.ar.waiting;
+    $("timerText").textContent = secondsLeft > 0 ? toArabicDigits(`${secondsLeft} ث`) : i18n.ar.waiting;
   } else {
-    $("timerText").textContent = secondsLeft > 0
-      ? `~${secondsLeft}s`
-      : i18n.en.waiting;
+    $("timerText").textContent = secondsLeft > 0 ? `~${secondsLeft}s` : i18n.en.waiting;
   }
 }
-
 function setDoneText(){
   $("timerText").textContent = (currentLang === "ar") ? i18n.ar.done : i18n.en.done;
 }
 
-/* ✅ Save/restore the last video URL */
-function saveLastUrl(url){
-  try { localStorage.setItem(LAST_URL_KEY, url); } catch(e) {}
-}
-function loadLastUrl(){
-  try { return localStorage.getItem(LAST_URL_KEY) || ""; } catch(e) { return ""; }
-}
-
 /* ===========================
-   ✅ Carousel state (NEW)
-   - Thumbs show posters only
-   - Main preview plays the video when selected
-=========================== */
-const thumbRow = $("thumbRow");
-const dots = $("dots");
-const mainPoster = $("mainPoster");
-const mainVideo = $("mainVideo");
-const playOverlay = $("playOverlay");
-const metaChip = $("metaChip");
-
-let carouselItems = []; // {id, posterUrl, videoUrl, label}
-let selectedId = "";
-
-function renderDots(){
-  dots.innerHTML = "";
-  carouselItems.forEach(it=>{
-    const d = document.createElement("div");
-    d.className = "dot" + (it.id === selectedId ? " on" : "");
-    dots.appendChild(d);
-  });
-}
-
-function renderThumbs(){
-  thumbRow.innerHTML = "";
-  carouselItems.forEach(it=>{
-    const el = document.createElement("div");
-    el.className = "thumb" + (it.id === selectedId ? " active" : "");
-    el.innerHTML = `
-      <img src="${it.posterUrl}" alt="poster">
-      <div class="play"><span>▶</span></div>
-      <div class="badge">${it.label || "Demo"}</div>
-    `;
-    el.addEventListener("click", ()=> selectCarouselItem(it.id));
-    thumbRow.appendChild(el);
-  });
-  renderDots();
-}
-
-function showPoster(posterUrl, chipText){
-  mainPoster.src = posterUrl || "";
-  mainPoster.style.display = "block";
-  mainVideo.style.display = "none";
-  mainVideo.removeAttribute("src");
-  mainVideo.load();
-  playOverlay.style.display = "grid";
-  metaChip.textContent = chipText || "Demo";
-}
-
-function playVideo(videoUrl, chipText){
-  mainVideo.src = videoUrl;
-  mainVideo.style.display = "block";
-  mainPoster.style.display = "none";
-  playOverlay.style.display = "none";
-  metaChip.textContent = chipText || "Preview";
-  mainVideo.load();
-  mainVideo.play().catch(()=>{});
-}
-
-function selectCarouselItem(id){
-  selectedId = id;
-  renderThumbs();
-  const it = carouselItems.find(x=>x.id===id);
-  if(!it) return;
-
-  if(it.videoUrl){
-    playVideo(it.videoUrl, it.label || "Preview");
-  }else{
-    showPoster(it.posterUrl, it.label || "Demo");
-  }
-}
-
-/* Add generated video as NEW first item + auto play in main preview */
-function pushGeneratedVideo(url){
-  const brandKey = getBrandKey();
-  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#5b5cff";
-  const newPoster = makePosterDataUrl({brandKey, i: 99, accent});
-
-  const item = {
-    id: "gen-" + Date.now(),
-    posterUrl: newPoster,
-    videoUrl: url,
-    label: "New"
-  };
-  carouselItems.unshift(item);
-  selectedId = item.id;
-  renderThumbs();
-  playVideo(url, "New");
-}
-
-/* Initialize demo carousel */
-function initCarousel(){
-  const brandKey = getBrandKey();
-  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#5b5cff";
-
-  // Make 8 poster thumbs (fast). Videos rotate from MDN list.
-  carouselItems = Array.from({length: 8}).map((_, idx) => ({
-    id: "demo-" + idx,
-    posterUrl: makePosterDataUrl({brandKey, i: idx+1, accent}),
-    videoUrl: DEMO_VIDEOS[idx % DEMO_VIDEOS.length],
-    label: "Demo"
-  }));
-
-  selectedId = carouselItems[0].id;
-
-  // Default: show poster only, no mp4 loads yet
-  renderThumbs();
-  showPoster(carouselItems[0].posterUrl, "Demo");
-}
-
-/* Make clicking the big overlay play the currently selected item's video */
-playOverlay.addEventListener("click", () => {
-  const it = carouselItems.find(x=>x.id===selectedId);
-  if(it?.videoUrl) playVideo(it.videoUrl, it.label || "Preview");
-});
-
-/* ===========================
-   Real Generate (UNCHANGED backend)
-   ✅ Change: when done, show in main preview + add as NEW in carousel
+   ✅ Generate (AND replace main preview immediately when ready)
 =========================== */
 async function realGenerate(){
   if(generating || trials <= 0) return;
   generating = true;
 
   trials--;
-  $("trialsLeft").textContent = (currentLang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+  $("trialsLeft").textContent = trials;
 
   showProgressUI();
 
@@ -974,15 +989,18 @@ async function realGenerate(){
 
     const operationName = gen.operationName || gen.name;
 
-    // Direct done
+    // fast path
     if(gen.done && gen.downloadUrl){
       $("bar").style.width = "100%";
       setDoneText();
 
+      // ✅ replace main preview immediately
       saveLastUrl(gen.downloadUrl);
-
-      // ✅ show immediately in main preview + add NEW in carousel
-      pushGeneratedVideo(gen.downloadUrl);
+      hydrateGeneratedIntoCarousel();
+      selectedId = "gen-last";
+      renderCarousel();
+      showPosterForSelection(carouselItems[0]); // show poster fast
+      playSelectedVideo(carouselItems[0]);      // then play
 
       generating = false;
       cancelAnimationFrame(rafId);
@@ -993,21 +1011,24 @@ async function realGenerate(){
       throw new Error("No operationName returned from generate");
     }
 
+    // poll
     const pollEveryMs = 3000;
     const maxPolls = 25;
     let doneUrl = "";
 
     for(let i=0;i<maxPolls;i++){
       await new Promise(res => setTimeout(res, pollEveryMs));
-
       const chk = await postJSON({
         action: "check",
         modelId: MODEL_ID,
         operationName
       });
 
-      doneUrl = chk.downloadUrl || chk.response?.downloadUrl || "";
-      if(chk.done && doneUrl) break;
+      const url = chk?.downloadUrl || chk?.response?.downloadUrl || "";
+      if(chk.done && url){
+        doneUrl = url;
+        break;
+      }
     }
 
     if(!doneUrl){
@@ -1017,10 +1038,13 @@ async function realGenerate(){
     $("bar").style.width = "100%";
     setDoneText();
 
+    // ✅ replace main preview immediately
     saveLastUrl(doneUrl);
-
-    // ✅ show immediately in main preview + add NEW in carousel
-    pushGeneratedVideo(doneUrl);
+    hydrateGeneratedIntoCarousel();
+    selectedId = "gen-last";
+    renderCarousel();
+    showPosterForSelection(carouselItems[0]); // show poster fast
+    playSelectedVideo(carouselItems[0]);      // then play
 
   }catch(err){
     $("timerText").textContent = "Error: " + (err?.message || "Unknown error");
@@ -1031,22 +1055,22 @@ async function realGenerate(){
   }
 }
 
-$("generateBtn").onclick = realGenerate;
+// ✅ ensure button works
+$("generateBtn").addEventListener("click", realGenerate);
 
 /* ===========================
-   Download / Copy / Back (unchanged)
+   Copy / Download
 =========================== */
 function getCurrentVideoUrl(){
-  // prefer currently playing main video, else last saved
+  // mainVideo may be playing or not
   if(mainVideo && mainVideo.src) return mainVideo.src;
   return loadLastUrl();
 }
-
 function downloadFile(url){
   if(!url) return;
   const a = document.createElement("a");
   a.href = url;
-  a.download = "shaga3app-video.mp4";
+  a.download = "ai-video.mp4";
   a.target = "_blank";
   a.rel = "noopener";
   document.body.appendChild(a);
@@ -1064,7 +1088,6 @@ $("downloadBtn").addEventListener("click", () => {
 $("copyBtn").addEventListener("click", async () => {
   const url = getCurrentVideoUrl();
   if(!url) return;
-
   saveLastUrl(url);
 
   try{
@@ -1081,48 +1104,16 @@ $("copyBtn").addEventListener("click", async () => {
   }
 });
 
-$("backBtn").addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
-
 /* ===========================
-   Logo loader (same idea)
+   Init
 =========================== */
-function setBrandLogo(path){
-  const img = $("brandImg");
-  img.src = (path || "logoshaga3app.png") + "?v=" + Date.now();
-  img.onerror = () => {
-    // fallback to your existing local png
-    img.src = "logoshaga3app.png?v=3";
-  };
-}
+(function init(){
+  hydrateGeneratedIntoCarousel();              // bring last generated (if exists)
+  selectedId = carouselItems[0].id;            // select first
+  renderCarousel();                            // draw thumbs + dots
+  showPosterForSelection(carouselItems[0]);    // show poster (fast)
 
-/* ===========================
-   Init: load brand config, apply theme, init carousel, restore last video
-=========================== */
-(async function init(){
-  try{
-    brandCfg = await loadBrandConfig();
-    applyTheme(brandCfg);
-
-    // apply logo
-    setBrandLogo(brandCfg.logo);
-
-    // init carousel (posters only)
-    initCarousel();
-
-    // restore last generated video if exists (show it as NEW + play)
-    const last = loadLastUrl();
-    if(last){
-      pushGeneratedVideo(last);
-    }
-
-    applyLang("en");
-  }catch(e){
-    // show error in base prompt area
-    $("basePrompt").textContent = "Error loading brand config: " + (e?.message || e);
-    console.error(e);
-  }
+  applyLang("en"); // keep like before
 })();
 </script>
 </body>
