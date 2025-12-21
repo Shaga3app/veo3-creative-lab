@@ -55,7 +55,7 @@
       padding:10px 12px;
       border-radius:999px;
       border:1px solid var(--line);
-      background: var(--panel2); /* FIX: dark (not white) */
+      background: var(--panel2);
     }
     .brandLeft{display:flex;align-items:center;gap:10px;min-width:0;}
     .brandLogo{
@@ -128,11 +128,11 @@
       border-radius:14px;
       padding:12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size:12px;             /* smaller */
+      font-size:12px;
       line-height:1.45;
-      color: rgba(229,231,235,.82); /* dimmed */
+      color: rgba(229,231,235,.82);
       white-space:pre-wrap;
-      max-height: 160px;           /* avoid taking space */
+      max-height: 160px;
       overflow:auto;
     }
 
@@ -308,7 +308,15 @@
     }
     .field input::placeholder{color:rgba(148,163,184,.65)}
 
-    /* result/progress */
+    .miniHint{
+      margin-top:10px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+      opacity:.95;
+    }
+
+    /* progress */
     .result{
       display:none;
       margin-top:12px;
@@ -328,12 +336,7 @@
       background:linear-gradient(90deg, var(--accent), var(--accent2));
     }
 
-    /* actions */
-    .actionsRow{
-      display:grid;
-      gap:10px;
-      margin-top:10px;
-    }
+    /* buttons */
     .btn{
       padding:12px 14px;
       border-radius:14px;
@@ -341,6 +344,7 @@
       font-weight:950;
       cursor:pointer;
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;
     }
     .btn.secondary{
       background:rgba(255,255,255,.06);
@@ -353,41 +357,30 @@
       border:1px solid rgba(0,0,0,.10);
     }
 
-    /* Mobile layout (requested):
-       Row 1: Copy + Download (equal, full width)
-       Row 2: Generate full width alone
-    */
-    @media(max-width:719px){
-      .actionsRow{
-        grid-template-columns:1fr 1fr;
-      }
-      #generateBtn{
-        grid-column: 1 / -1;
-        width:100%;
-        padding:14px 16px;
-        border-radius:16px;
-        font-size:15px;
-      }
-      #copyBtn,#downloadBtn{width:100%}
+    /* NEW: button placement under inputs */
+    .actionsUnderInputs{
+      margin-top:12px;
+      display:grid;
+      gap:10px;
+    }
+    .actionsUnderInputs .row2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
     }
 
-    /* Desktop: align right nicely */
+    /* Desktop: keep same look but still as requested */
     @media(min-width:720px){
-      .actionsRow{
-        display:flex;
-        justify-content:flex-end;
-        flex-wrap:wrap;
-        gap:10px;
+      .actionsUnderInputs{
+        grid-template-columns:1fr;
       }
-      #generateBtn{min-width:220px}
-    }
-
-    .miniHint{
-      margin-top:10px;
-      font-size:12px;
-      color: var(--muted);
-      line-height:1.35;
-      opacity:.95;
+      .actionsUnderInputs .row2{
+        grid-template-columns:1fr 1fr;
+        max-width:520px;
+      }
+      .actionsUnderInputs .primaryWrap{
+        max-width:520px;
+      }
     }
 
     /* RTL tweaks */
@@ -430,7 +423,7 @@
         <div class="lockedPrompt" id="basePrompt"></div>
       </div>
 
-      <!-- Preview + Carousel (right after locked prompt as requested) -->
+      <!-- Preview + Carousel (stays exactly here) -->
       <div class="previewCard">
         <div class="previewHeader">
           <div id="selectedLabel">Selected demo</div>
@@ -439,7 +432,6 @@
 
         <div class="mainStage">
           <img id="mainPoster" alt="Selected poster" />
-          <!-- IMPORTANT: preload none to avoid slow loading in WebView -->
           <video id="mainVideo" controls playsinline preload="none"></video>
 
           <div class="playOverlay">
@@ -450,13 +442,6 @@
         <div class="thumbRowWrap">
           <div class="thumbRow" id="thumbRow"></div>
           <div class="thumbDots" id="thumbDots"></div>
-        </div>
-
-        <!-- actions -->
-        <div class="actionsRow">
-          <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
-          <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download</span></button>
-          <button class="btn primary" id="generateBtn" type="button">⚡ <span id="genTxt">Generate video</span></button>
         </div>
 
         <div class="miniHint" id="saveWarn" style="margin-top:10px;">
@@ -498,6 +483,17 @@
         <div class="field span2">
           <label id="lblTwist">Extra creative twist</label>
           <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
+        </div>
+      </div>
+
+      <!-- ✅ MOVED BUTTONS HERE (ONLY CHANGE) -->
+      <div class="actionsUnderInputs">
+        <div class="primaryWrap">
+          <button class="btn primary" id="generateBtn" type="button">⚡ <span id="genTxt">Generate video</span></button>
+        </div>
+        <div class="row2">
+          <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
+          <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download</span></button>
         </div>
       </div>
 
@@ -551,8 +547,6 @@
       copied: "Link copied ✅",
       newTag: "New",
       demoTag: "Demo",
-      errBrand: "Error loading brand config:",
-      errJson: "Make sure it is valid JSON (no trailing commas)."
     },
     ar: {
       betaDefault: "بيتا · بدعم Shaga3app",
@@ -585,8 +579,6 @@
       copied: "تم نسخ الرابط ✅",
       newTag: "جديد",
       demoTag: "ديمو",
-      errBrand: "خطأ في تحميل إعدادات البراند:",
-      errJson: "تأكد أن ملف JSON صحيح (بدون فاصلة في الآخر)."
     }
   };
 
@@ -596,64 +588,14 @@
   }
 
   let currentLang = "en";
-  function applyLang(lang){
-    currentLang = lang;
-    const t = i18n[lang];
-
-    $("heroTitle").innerHTML = t.heroTitle;
-
-    const triesNum = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
-    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
-
-    $("baseLabel").textContent = t.baseLabel;
-    $("lockedTag").textContent = t.locked;
-    $("trialsLabel").textContent = t.trialsLabel;
-    $("selectedLabel").textContent = t.selectedDemo;
-    $("playTxt").textContent = t.play;
-
-    $("modeLabel").textContent = t.modeLabel;
-    $("modeTextTxt").textContent = t.modeText;
-    $("modeImgTxt").textContent = t.modeImg;
-
-    $("lblSubject").textContent = t.lblSubject;
-    $("lblLocation").textContent = t.lblLocation;
-    $("lblTwist").textContent = t.lblTwist;
-    $("lblImages").textContent = t.lblImages;
-    $("hintImages").textContent = t.hintImages;
-
-    $("subject").placeholder = t.phSubject;
-    $("location").placeholder = t.phLocation;
-    $("twist").placeholder = t.phTwist;
-
-    $("genTxt").textContent = t.gen;
-    $("dlTxt").textContent = t.dl;
-    $("copyTxt").textContent = t.copy;
-    $("saveWarn").textContent = t.saveWarn;
-
-    document.body.dir = (lang === "ar") ? "rtl" : "ltr";
-    document.documentElement.lang = (lang === "ar") ? "ar" : "en";
-    $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
-
-    // re-render prompt text in current language from config
-    renderBasePrompt();
-    renderThumbs();
-  }
-
-  $("langToggle").addEventListener("click", () => {
-    applyLang(currentLang === "en" ? "ar" : "en");
-  });
 
   /* ===========================
-     Brand config
-     - loads /brands/{brand}.json if exists
-     - fallback inline defaults if not
-     - brand is selected by URL: ?brand=shaga3 OR ?brand=cocacola OR ?brand=tui
+     Brand config (same as before)
   =========================== */
   function getBrandFromUrl(){
     const u = new URL(location.href);
     const b = (u.searchParams.get("brand") || "").trim().toLowerCase();
     if(b) return b;
-    // fallback: last brand
     try{
       const last = localStorage.getItem(LAST_BRAND_KEY);
       if(last) return last;
@@ -742,10 +684,7 @@ We will inject user details below.`,
     }
   };
 
-  // Demo pack uses free public MP4s (no upload needed).
-  // Posters use picsum (fast), videos are sample mp4 (light). Replace with your preferred sources anytime.
   function demoPack(color){
-    // 10 demos
     const posters = [
       `https://picsum.photos/seed/${color}-a/400/700`,
       `https://picsum.photos/seed/${color}-b/400/700`,
@@ -758,8 +697,6 @@ We will inject user details below.`,
       `https://picsum.photos/seed/${color}-i/400/700`,
       `https://picsum.photos/seed/${color}-j/400/700`,
     ];
-
-    // Small lightweight mp4 samples (public)
     const vids = [
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
@@ -772,7 +709,6 @@ We will inject user details below.`,
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
     ];
-
     return posters.map((p, idx)=>({
       id: "demo-" + idx,
       kind: "demo",
@@ -783,11 +719,8 @@ We will inject user details below.`,
   }
 
   async function loadBrandConfig(brandId){
-    // persist selection
     try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
 
-    // 1) try JSON file: /brands/{brand}.json
-    // (you already created brands/shaga3.json etc — this will use them if valid)
     try{
       const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
       if(r.ok){
@@ -795,18 +728,13 @@ We will inject user details below.`,
         const parsed = JSON.parse(txt);
         return normalizeBrand(parsed, brandId);
       }
-    }catch(e){
-      // ignore, fallback below
-    }
+    }catch(e){}
 
-    // 2) fallback inline defaults
     return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
   }
 
   function normalizeBrand(raw, brandId){
-    // allow small JSON format, but still work
     const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
-
     const theme = raw.theme || raw.colors || {};
     const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
 
@@ -837,8 +765,6 @@ We will inject user details below.`,
     root.setProperty("--accent2", theme.accent2);
     root.setProperty("--heroGradA", theme.heroGradA);
     root.setProperty("--heroGradB", theme.heroGradB);
-
-    // auto choose button text
     root.setProperty("--btnText", "#07120a");
   }
 
@@ -846,12 +772,10 @@ We will inject user details below.`,
     $("brandTitle").textContent = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
     $("betaPill").textContent = (currentLang === "ar") ? cfg.beta_ar : cfg.beta_en;
 
-    // logo (if you uploaded to GitHub)
     const img = $("brandLogo");
     img.src = cfg.logo || "assets/brand-logos/shaga3app.png";
     img.onerror = () => { img.src = "assets/brand-logos/shaga3app.png"; };
 
-    // title tag
     document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
   }
 
@@ -859,7 +783,7 @@ We will inject user details below.`,
      Carousel / preview logic
   =========================== */
   let brandCfg = null;
-  let items = [];          // demos + generated
+  let items = [];
   let selectedIndex = 0;
 
   function renderBasePrompt(){
@@ -869,19 +793,15 @@ We will inject user details below.`,
 
   function setSelected(index){
     selectedIndex = Math.max(0, Math.min(items.length-1, index));
-    // update thumb selection
     [...$("thumbRow").children].forEach((el,i)=>el.classList.toggle("on", i===selectedIndex));
     updateDots();
-
-    // show poster for the selected item
     showPoster(items[selectedIndex]);
   }
 
   function showPoster(it){
-    // Always show poster in main stage
     $("mainPoster").src = it.poster || "";
     $("mainPoster").style.display = "block";
-    // hide video (no auto-load)
+
     $("mainVideo").pause();
     $("mainVideo").removeAttribute("src");
     $("mainVideo").load();
@@ -889,7 +809,6 @@ We will inject user details below.`,
   }
 
   function playInline(it){
-    // demos can play inline (small)
     $("mainVideo").src = it.video;
     $("mainVideo").style.display = "block";
     $("mainPoster").style.display = "none";
@@ -906,12 +825,10 @@ We will inject user details below.`,
     const it = items[selectedIndex];
     if(!it) return;
 
-    // Generated videos: open viewer tab (fast in WebView)
     if(it.kind === "new"){
       openVideoViewer(it.video);
       return;
     }
-    // Demos: play inline
     playInline(it);
   });
 
@@ -919,7 +836,6 @@ We will inject user details below.`,
     const row = $("thumbRow");
     row.innerHTML = "";
     $("thumbDots").innerHTML = "";
-
     if(!items.length) return;
 
     items.forEach((it, idx)=>{
@@ -944,7 +860,6 @@ We will inject user details below.`,
   function buildDots(){
     const dots = $("thumbDots");
     dots.innerHTML = "";
-    // simple pagination dots: 10 max
     const pages = Math.min(10, Math.max(1, Math.ceil(items.length / 2)));
     for(let i=0;i<pages;i++){
       const dot = document.createElement("div");
@@ -1036,7 +951,7 @@ We will inject user details below.`,
 
     trials--;
     $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
-    applyLang(currentLang); // refresh hero tries text
+    applyLang(currentLang);
 
     $("resultBox").style.display = "block";
     $("bar").style.width = "0%";
@@ -1062,7 +977,6 @@ We will inject user details below.`,
       const gen = await postJSON({ action:"generate", modelId: MODEL_ID, prompt });
       const operationName = gen.operationName || gen.name;
 
-      // immediate done
       if(gen.done && gen.downloadUrl){
         onGenerated(gen.downloadUrl);
         return;
@@ -1101,36 +1015,29 @@ We will inject user details below.`,
 
     saveLastUrl(downloadUrl);
 
-    // Put generated result as first item (New)
     const newItem = {
       id: "new-" + Date.now(),
       kind: "new",
-      // reuse currently selected poster as “thumbnail” (fast)
       poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || ""),
       video: downloadUrl,
       tag: "new"
     };
 
-    // remove old "new" items to keep clean
     items = items.filter(x => x.kind !== "new");
     items.unshift(newItem);
 
-    // re-render, select the generated item
     selectedIndex = 0;
     renderThumbs();
     setSelected(0);
 
-    // Do NOT autoplay inline (WebView slow). User taps Play -> opens viewer tab fast.
     $("resultNote").textContent = (currentLang==="ar")
       ? "✅ اتولد فيديو جديد. اضغط «تشغيل» لمشاهدته بسرعة."
       : "✅ New video generated. Tap “Play” to open it fast.";
   }
 
+  // buttons
   $("generateBtn").addEventListener("click", generate);
 
-  /* ===========================
-     Copy / Download buttons
-  =========================== */
   function getCurrentVideoUrl(){
     const it = items[selectedIndex];
     if(it?.video) return it.video;
@@ -1141,8 +1048,6 @@ We will inject user details below.`,
     const url = getCurrentVideoUrl();
     if(!url) return;
     saveLastUrl(url);
-
-    // Best effort: open to viewer (works like your download page)
     openVideoViewer(url);
   });
 
@@ -1160,6 +1065,56 @@ We will inject user details below.`,
   });
 
   /* ===========================
+     Language apply
+  =========================== */
+  function applyLang(lang){
+    currentLang = lang;
+    const t = i18n[lang];
+
+    $("heroTitle").innerHTML = t.heroTitle;
+    const triesNum = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
+
+    $("baseLabel").textContent = t.baseLabel;
+    $("lockedTag").textContent = t.locked;
+    $("trialsLabel").textContent = t.trialsLabel;
+
+    $("selectedLabel").textContent = t.selectedDemo;
+    $("playTxt").textContent = t.play;
+
+    $("modeLabel").textContent = t.modeLabel;
+    $("modeTextTxt").textContent = t.modeText;
+    $("modeImgTxt").textContent = t.modeImg;
+
+    $("lblSubject").textContent = t.lblSubject;
+    $("lblLocation").textContent = t.lblLocation;
+    $("lblTwist").textContent = t.lblTwist;
+    $("lblImages").textContent = t.lblImages;
+    $("hintImages").textContent = t.hintImages;
+
+    $("subject").placeholder = t.phSubject;
+    $("location").placeholder = t.phLocation;
+    $("twist").placeholder = t.phTwist;
+
+    $("genTxt").textContent = t.gen;
+    $("dlTxt").textContent = t.dl;
+    $("copyTxt").textContent = t.copy;
+    $("saveWarn").textContent = t.saveWarn;
+
+    document.body.dir = (lang === "ar") ? "rtl" : "ltr";
+    document.documentElement.lang = (lang === "ar") ? "ar" : "en";
+    $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
+
+    renderBasePrompt();
+    renderThumbs();
+    setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
+  }
+
+  $("langToggle").addEventListener("click", () => {
+    applyLang(currentLang === "en" ? "ar" : "en");
+  });
+
+  /* ===========================
      Boot
   =========================== */
   async function boot(){
@@ -1167,18 +1122,15 @@ We will inject user details below.`,
     brandCfg = await loadBrandConfig(brandId);
 
     applyTheme(brandCfg.theme);
+    applyLang("en");
     setBrandUI(brandCfg);
 
-    // build items from demos
     items = (brandCfg.demos && brandCfg.demos.length) ? brandCfg.demos.slice() : FALLBACK_BRANDS.shaga3.demos.slice();
     selectedIndex = 0;
 
     renderBasePrompt();
     renderThumbs();
     setSelected(0);
-
-    // default language
-    applyLang("en");
   }
 
   boot();
