@@ -1,1 +1,24 @@
+{
+  "brandText_en": "Shaga3app · AI Creative Playground",
+  "brandText_ar": "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
+  "beta_en": "Beta · Shaga3app powered",
+  "beta_ar": "بيتا · بدعم Shaga3app",
+  "logo": "assets/brand-logos/shaga3app.png",
+  "accent": "#5b5cff",
+  "ok": "#22c55e",
+  "heroTitle_en": "Play with our<br>guided video<br>prompt",
+  "heroTitle_ar": "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
+  "heroDesc_en": "You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨",
+  "heroDesc_ar": "لديك ٣ محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
+  "basePrompt_en": "BASE (LOCKED)\\n\\nCreate a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.\\nInclude an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.\\nThe scene follows this base concept, and we will inject the user details below.",
+  "basePrompt_ar": "الأساس (مقفول)\\n\\nاعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.\\nلازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد — بشكل طبيعي ومتناسق مع المكان، من غير ما يبانوا متحطّين كده أو فيك.\\nالمشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.",
+  "demoPosters": [
+    "assets/demo/shaga3/1.jpg",
+    "assets/demo/shaga3/2.jpg",
+    "assets/demo/shaga3/3.jpg",
+    "assets/demo/shaga3/4.jpg",
+    "assets/demo/shaga3/5.jpg",
+    "assets/demo/shaga3/6.jpg"
+  ]
+}
 
