@@ -1,24 +1,53 @@
 {
-  "brandText_en": "TUI · AI Video Lab",
-  "brandText_ar": "TUI · معمل فيديو",
-  "beta_en": "Demo · TUI × Shaga3app",
-  "beta_ar": "ديمو · TUI × شجّع 3 آب",
+  "id": "tui",
+  "title_en": "TUI · AI Video Lab",
+  "title_ar": "TUI · معمل فيديو بالذكاء الاصطناعي",
+  "beta_en": "Demo · TUI",
+  "beta_ar": "ديمو · TUI",
   "logo": "assets/brand-logos/tui.png",
-  "accent": "#0EA5E9",
-  "ok": "#22c55e",
-  "heroTitle_en": "TUI<br>AI Video Lab",
-  "heroTitle_ar": "TUI<br>معمل فيديو",
-  "heroDesc_en": "Create premium travel-style micro clips. Your result appears instantly in the main preview.",
-  "heroDesc_ar": "اعمل لقطات سفر قصيرة بشكل بريميوم — والنتيجة هتظهر فورًا في المعاينة.",
-  "basePrompt_en": "BASE (LOCKED)\\n\\nCreate a vertical 9:16 cinematic travel video, 5–8 seconds long, with smooth camera movement and realistic lighting.\\nKeep the mood premium and natural (no obvious AI look).\\nWe will inject the user details below.",
-  "basePrompt_ar": "الأساس (مقفول)\\n\\nاعمل فيديو سفر سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية.\\nخليه بريميوم وطبيعي (من غير شكل AI واضح).\\nوإحنا هنضيف تفاصيل المستخدم تحت.",
-  "demoPosters": [
-    "assets/demo/tui/1.jpg",
-    "assets/demo/tui/2.jpg",
-    "assets/demo/tui/3.jpg",
-    "assets/demo/tui/4.jpg",
-    "assets/demo/tui/5.jpg",
-    "assets/demo/tui/6.jpg"
+
+  "theme": {
+    "bg": "#071423",
+    "accent": "#62C8F5",
+    "accent2": "#1EE3B3",
+    "heroGradA": "rgba(98,200,245,.28)",
+    "heroGradB": "rgba(30,227,179,.14)"
+  },
+
+  "basePrompt_en": "BASE (LOCKED)\n\nCreate a vertical 9:16 premium cinematic video, 5–8 seconds long, with smooth camera movement and rich, realistic lighting.\n\nThe scene must feel like it is inside or around a TUI hotel (lobby, pool, room balcony, restaurant, spa, entrance, or hallway). The exact country/city can be anything.\n\nIntegrate TUI branding in a natural, believable way (NOT pasted/fake): subtle hotel signage, a welcome screen at reception, a key card sleeve, a staff lanyard, a towel tag, a menu cover, or a small logo on a glass door.\n\nKeep it modern, elegant, and realistic. No AI look, no warped text, no extra fake logos. We will inject user details below.",
+
+  "basePrompt_ar": "الأساس (مقفول)\n\nاعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.\n\nالمشهد لازم يحسّسك إنّه جوّه أو حوالين فندق تابع لـ TUI (لوبي/حمّام سباحة/بلكونة أو غرفة/مطعم/سبا/المدخل/ممرات الفندق). البلد/المدينة ممكن تكون أي مكان.\n\nلازم يظهر لوجو/هوية TUI بشكل طبيعي جدًا ومُقنع (مش متحطوط فيك): لافتة بسيطة داخل الفندق، شاشة ترحيب عند الريسبشن، ظرف كارت الغرفة، بادچ/لانْيارد موظف، تيكت على فوطة، غلاف منيو، أو لوجو صغير على باب زجاج.\n\nخليه مودرن وأنيق وواقعي، من غير تشويه كتابة أو لوجوهات إضافية. وإحنا هنضيف تفاصيل المستخدم تحت.",
+
+  "demos": [
+    {
+      "label": "Demo",
+      "poster": "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "video": "https://videos.pexels.com/video-files/3015510/3015510-hd_720_1280_25fps.mp4",
+      "badge": "9:16 • 5–8s"
+    },
+    {
+      "label": "Demo",
+      "poster": "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "video": "https://videos.pexels.com/video-files/857195/857195-hd_720_1280_24fps.mp4",
+      "badge": "9:16 • 5–8s"
+    },
+    {
+      "label": "Demo",
+      "poster": "https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "video": "https://videos.pexels.com/video-files/2795737/2795737-hd_720_1280_25fps.mp4",
+      "badge": "9:16 • 5–8s"
+    },
+    {
+      "label": "Demo",
+      "poster": "https://images.pexels.com/photos/261169/pexels-photo-261169.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "video": "https://videos.pexels.com/video-files/853889/853889-hd_720_1280_24fps.mp4",
+      "badge": "9:16 • 5–8s"
+    },
+    {
+      "label": "Demo",
+      "poster": "https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "video": "https://videos.pexels.com/video-files/1918465/1918465-hd_720_1280_24fps.mp4",
+      "badge": "9:16 • 5–8s"
+    }
   ]
 }
-
