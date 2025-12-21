@@ -13,6 +13,13 @@
       --line:rgba(255,255,255,.10);
       --accent:#5b5cff;
       --ok:#22c55e;
+
+      /* iPhone-like polish */
+      --cardBg: linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      --glass: rgba(0,0,0,.18);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+      --radiusBig: 22px;
     }
     *{box-sizing:border-box}
     body{
@@ -26,39 +33,51 @@
     }
     .wrap{max-width:860px;margin:0 auto;padding:18px 16px 40px;}
     .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+      background:var(--cardBg);
       border:1px solid var(--line);
-      border-radius:18px;
+      border-radius:var(--radiusBig);
       padding:14px;
       backdrop-filter:blur(10px);
+      box-shadow: var(--shadow);
     }
 
-    /* Top bar */
+    /* ===== Top bar (fix bright/white + overflow) ===== */
     .topBar{
       display:flex;justify-content:space-between;align-items:center;
       padding:10px 14px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
+      background:var(--glass); /* dark like the rest */
       gap:12px;
     }
-    .brand{display:flex;align-items:center;gap:10px;font-weight:900}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;min-width:0}
     .logo{
       width:34px;height:34px;border-radius:10px;
       display:grid;place-items:center;
       background:rgba(255,255,255,.06);
       border:1px solid var(--line);
       overflow:hidden;
+      flex:0 0 auto;
     }
     .logo img{width:22px;height:22px;object-fit:contain;display:block}
+    #brandText{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 46vw;
+      display:block;
+    }
     .pill{
       padding:7px 12px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
       font-size:12px;
       font-weight:900;
       white-space:nowrap;
+      max-width: 46vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .langBtn{
       font-size:12px; padding:7px 10px; border-radius:999px;
@@ -67,12 +86,13 @@
       font-weight:900;
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
+      flex:0 0 auto;
     }
 
-    /* Hero */
+    /* ===== Hero ===== */
     .hero{margin:18px 0}
     .hero h1{font-size:52px;line-height:1.05;margin:6px 0;font-weight:950}
-    .hero p{color:var(--muted);font-size:18px;max-width:580px;margin:0}
+    .hero p{color:var(--muted);font-size:18px;max-width:560px}
 
     .sectionLabel{
       margin:20px 0 10px;
@@ -81,14 +101,14 @@
       color:var(--muted);
     }
 
-    /* Locked box */
+    /* ===== Locked box ===== */
     .lockedBox{
-      background:rgba(0,0,0,.18);
+      background:var(--glass);
       border:1px solid var(--line);
       border-radius:16px;
       padding:14px;
     }
-    .lockedTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .lockedTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
     .lockedTag{
       font-size:12px;
       padding:6px 10px;
@@ -105,15 +125,40 @@
       padding:16px;
       font-family:ui-monospace,monospace;
       white-space:pre-wrap;
-      color: rgba(255,255,255,.72);
       line-height:1.45;
+      /* dimmed text inside mandatory box */
+      color: rgba(255,255,255,.72);
     }
 
-    /* Fields */
+    /* ===== Mode bar (unchanged logic) ===== */
+    .modeBar{
+      display:flex;gap:10px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px;
+      background:var(--glass);
+    }
+    .modeBtn{
+      flex:1;
+      padding:10px;
+      border-radius:12px;
+      background:transparent;
+      border:1px solid transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-weight:800;
+    }
+    .modeBtn.on{
+      background:rgba(91,92,255,.22);
+      border-color:rgba(91,92,255,.45);
+      color:var(--text);
+    }
+
+    /* ===== Inputs ===== */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
     .field{
-      background:rgba(0,0,0,.18);
+      background:var(--glass);
       border:1px solid var(--line);
       border-radius:14px;
       padding:12px;
@@ -129,70 +174,106 @@
       outline:none;
     }
 
-    /* Carousel + preview */
-    .demoCard{
+    /* ===== iPhone-like Preview + Carousel (NEW, but doesn’t change your backend logic) ===== */
+    .mediaCard{
       margin-top:14px;
       border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(0,0,0,.18);
+      border-radius:18px;
+      background:var(--glass);
       overflow:hidden;
     }
-    .preview{
+    .mainPreview{
       position:relative;
       width:100%;
-      aspect-ratio:16/9;
+      aspect-ratio:1/1; /* square like iPhone-style */
       background:#000;
     }
-    .preview img,.preview video{
-      width:100%;height:100%;
+    .mainPreview img,
+    .mainPreview video{
+      width:100%;
+      height:100%;
       object-fit:cover;
       display:block;
     }
-    .preview video{display:none}
-    .chip{
-      position:absolute;top:10px;right:10px;
+    .mainPreview video{display:none}
+    .metaChip{
+      position:absolute;
+      top:10px; right:10px;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.40);
-      font-size:12px;font-weight:900;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.35);
       backdrop-filter: blur(8px);
+      font-size:12px;
+      font-weight:900;
     }
+    .playOverlay{
+      position:absolute; inset:0;
+      display:none;
+      place-items:center;
+      pointer-events:none;
+    }
+    .playOverlay .circle{
+      width:64px;height:64px;border-radius:50%;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.25);
+      display:grid;place-items:center;
+    }
+    .playOverlay svg{width:26px;height:26px;fill:#fff}
 
-    .stripWrap{padding:12px;border-top:1px solid var(--line)}
-    .strip{
-      display:flex;gap:10px;overflow-x:auto;
+    .thumbRowWrap{
+      padding:12px;
+      border-top:1px solid var(--line);
+    }
+    .thumbRow{
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
       padding-bottom:6px;
       scroll-snap-type:x mandatory;
     }
     .thumb{
-      flex:0 0 auto;
       width:92px;height:92px;
-      border-radius:14px;
+      border-radius:18px;
       overflow:hidden;
+      flex:0 0 auto;
       border:2px solid transparent;
       background:rgba(255,255,255,.04);
-      cursor:pointer;
-      scroll-snap-align:start;
       position:relative;
+      scroll-snap-align:start;
+      cursor:pointer;
     }
-    .thumb.selected{border-color:var(--ok)}
+    .thumb.active{border-color:var(--ok)}
     .thumb img{width:100%;height:100%;object-fit:cover;display:block}
     .thumb .badge{
       position:absolute;bottom:6px;left:6px;
       font-size:11px;font-weight:900;
-      padding:3px 7px;border-radius:999px;
-      border:1px solid var(--line);
+      padding:3px 7px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
       background:rgba(0,0,0,.35);
       backdrop-filter: blur(8px);
     }
+    .thumb .play{
+      position:absolute; inset:0;
+      display:grid;place-items:center;
+      pointer-events:none;
+    }
+    .thumb .play span{
+      width:28px;height:28px;border-radius:50%;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.22);
+      display:grid;place-items:center;
+      font-weight:900;
+    }
 
     .dots{
-      display:flex;gap:6px;justify-content:center;
+      display:flex;gap:6px;
+      justify-content:center;
       padding-top:8px;
     }
     .dot{
-      width:6px;height:6px;border-radius:99px;
+      width:6px;height:6px;border-radius:999px;
       background:rgba(255,255,255,.18);
       border:1px solid rgba(255,255,255,.12);
     }
@@ -201,12 +282,7 @@
       border-color:rgba(34,197,94,.55);
     }
 
-    /* Actions inside card (not sticky) */
-    .actions{
-      display:flex;gap:10px;flex-wrap:wrap;
-      padding:12px;border-top:1px solid var(--line);
-      justify-content:flex-end;
-    }
+    /* ===== Buttons ===== */
     .btn{
       padding:12px 16px;
       border-radius:14px;
@@ -218,21 +294,23 @@
     .btn.primary{
       background:linear-gradient(180deg,var(--ok), color-mix(in srgb, var(--ok) 72%, #000));
       color:#07120a;
+      width:100%;
+      margin-top:14px;
     }
     .btn.secondary{
       background:rgba(255,255,255,.06);
       border:1px solid var(--line);
       color:var(--text);
+      text-decoration:none;
     }
-    .btn:disabled{opacity:.55;cursor:not-allowed}
 
     .result{
       display:none;
-      margin-top:12px;
+      margin-top:14px;
       border:1px solid var(--line);
       border-radius:16px;
       padding:12px;
-      background:rgba(0,0,0,.18);
+      background:var(--glass);
     }
     .progress{
       height:10px;border-radius:999px;
@@ -245,6 +323,14 @@
       background:linear-gradient(90deg,var(--accent),var(--ok));
     }
     .miniHint{font-size:12px;color:var(--muted);line-height:1.35}
+
+    video{
+      border-radius:14px;
+      border:1px solid var(--line);
+    }
+
+    /* Hide below-field descriptions (you already do placeholders) */
+    .field .miniHint{display:none}
   </style>
 </head>
 
@@ -254,11 +340,13 @@
 
   <div class="topBar">
     <div class="brand">
-      <div class="logo"><img id="brandImg" alt="logo"></div>
+      <div class="logo">
+        <img id="brandImg" alt="Brand logo">
+      </div>
       <span id="brandText">Shaga3app · AI Creative Playground</span>
     </div>
 
-    <div style="display:flex; gap:10px; align-items:center;">
+    <div style="display:flex; gap:10px; align-items:center; min-width:0;">
       <button class="langBtn" id="langToggle" type="button">AR</button>
       <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
     </div>
@@ -266,7 +354,7 @@
 
   <div class="hero">
     <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
-    <p id="heroDesc">You get up to 3 tries. The core concept is fixed by us; you just add your creative twist ✨</p>
+    <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
   </div>
 
   <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
@@ -275,48 +363,116 @@
       <div class="lockedTag" id="lockedTag">🔒 Locked</div>
       <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
     </div>
-    <div class="lockedPrompt" id="basePrompt">Loading…</div>
+
+    <div
+      class="lockedPrompt"
+      id="basePrompt"
+      data-en="YOUR_BASE_PROMPT_GOES_HERE
+
+BASE (LOCKED)
+
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
+Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.
+The scene follows this base concept, and we will inject the user details below."
+      data-ar="الأساس (مقفول)
+
+اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
+لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد — بشكل طبيعي ومتناسق مع المكان، من غير ما يبانوا متحطّين كده أو فيك.
+المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت."
+    >
+YOUR_BASE_PROMPT_GOES_HERE
+
+
+BASE (LOCKED)
+
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
+Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.
+The scene follows this base concept, and we will inject the user details below.
+    </div>
   </div>
 
-  <div class="sectionLabel" id="inputLabel">YOUR INPUT</div>
+  <!-- ✅ iPhone-like media block (carousel posters + main preview video) -->
+  <div class="sectionLabel" id="demoLabel">DEMO CAROUSEL</div>
+  <div class="mediaCard">
+    <div class="mainPreview">
+      <img id="mainPoster" alt="Selected demo poster">
+      <video id="mainVideo" controls playsinline muted></video>
+      <div class="metaChip" id="metaChip">Demo</div>
+
+      <div class="playOverlay" id="playOverlay">
+        <div class="circle">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="thumbRowWrap">
+      <div class="thumbRow" id="thumbRow"></div>
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+
+  <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
+  <div class="modeBar">
+    <button class="modeBtn on" id="modeText">📝 <span id="modeTextTxt">Text prompt</span></button>
+    <button class="modeBtn" id="modeImages">🖼️ <span id="modeImgTxt">Start + End images</span></button>
+  </div>
+
+  <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
+    <label id="lblImages">Start + End images</label>
+    <input type="file" id="startImg" accept="image/*">
+    <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+    <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
+  </div>
+
   <div class="grid">
     <div class="field">
       <label id="lblSubject">Main subject / character</label>
       <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
+      <div class="miniHint" id="hintSubject">Who is the main character? (age, style, wardrobe, vibe)</div>
     </div>
     <div class="field">
       <label id="lblLocation">Location / environment</label>
       <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
+      <div class="miniHint" id="hintLocation">Where is it happening? (city, time of day, lighting, atmosphere)</div>
     </div>
-    <div class="field span2">
+
+    <div class="field span2" id="extraBox">
       <label id="lblTwist">Extra creative twist</label>
       <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
+      <div class="miniHint" id="hintTwist">Optional: camera move, mood, style, or one special detail.</div>
     </div>
   </div>
 
-  <!-- Demo carousel (poster thumbnails) + main preview -->
-  <div class="demoCard">
-    <div class="preview">
-      <img id="mainPoster" alt="Selected poster">
-      <video id="mainVideo" controls playsinline></video>
-      <div class="chip" id="chipMeta">9:16 · 5–8s</div>
-    </div>
-
-    <div class="stripWrap">
-      <div class="strip" id="strip"></div>
-      <div class="dots" id="dots"></div>
-    </div>
-
-    <div class="actions">
-      <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
-      <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download</span></button>
-      <button class="btn primary" id="generateBtn" type="button">⚡ <span id="genBtnTxt">Generate video</span></button>
-    </div>
+  <!-- ✅ Generate button stays in same card area (not sticky) -->
+  <div style="margin-top:14px">
+    <button class="btn primary" id="generateBtn">▶ <span id="genBtnTxt">Generate video</span></button>
   </div>
 
   <div class="result" id="resultBox">
-    <div class="miniHint" id="timerText" style="margin-bottom:10px;">~60s</div>
+    <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
     <div class="progress"><div class="bar" id="bar"></div></div>
+
+    <!-- ✅ user-friendly actions -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn secondary" id="downloadBtn" type="button">
+        ⬇ <span id="dlTxt">Download video</span>
+      </button>
+
+      <button class="btn secondary" id="copyBtn" type="button">
+        🔗 <span id="copyTxt">Copy link</span>
+      </button>
+
+      <button class="btn secondary" id="backBtn" type="button">
+        ↩ <span id="backTxt">Back</span>
+      </button>
+    </div>
+
+    <div class="miniHint" id="saveWarn" style="display:block;margin-top:10px">
+      This page does not save your generated video. Please download it or copy the link before leaving.
+    </div>
+
+    <div class="miniHint" id="copyNote" style="display:none;margin-top:8px"></div>
   </div>
 
 </div>
@@ -326,7 +482,7 @@
 const $ = id => document.getElementById(id);
 
 /* ===========================
-   Your Lambda Function URL
+   ✅ Your Lambda Function URL
 =========================== */
 const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
 const MODEL_ID = "veo-3.1-generate-001";
@@ -337,7 +493,75 @@ let generating = false;
 const LAST_URL_KEY = "shaga3app_last_video_url";
 
 /* ===========================
-   Brand loader
+   ✅ Demo videos like before (MDN CC0)
+   - We DO NOT load them in the carousel.
+   - Only play when user taps a thumb.
+=========================== */
+const DEMO_VIDEOS = [
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/forest.mp4",
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/river.mp4"
+];
+
+/* ===========================
+   ✅ Posters (fast) — local data SVG
+   - No external image sites (WebView breaks them)
+=========================== */
+function makePosterDataUrl({brandKey, i, accent}) {
+  const title = (brandKey === "cocacola") ? "Coca-Cola" : (brandKey === "tui") ? "TUI" : "Shaga3app";
+  const sub = (i === 0) ? "Demo" : "Demo";
+  const bg1 = (brandKey === "cocacola") ? "#120305" : (brandKey === "tui") ? "#06121c" : "#0b0f18";
+  const bg2 = (brandKey === "cocacola") ? "#2b0406" : (brandKey === "tui") ? "#0a2b3f" : "#121a2c";
+  const x = 15 + (i*9)%70;
+  const y = 20 + (i*13)%60;
+
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${bg1}"/>
+        <stop offset="1" stop-color="${bg2}"/>
+      </linearGradient>
+      <radialGradient id="r" cx="${x}%" cy="${y}%" r="70%">
+        <stop offset="0" stop-color="${accent}" stop-opacity="0.50"/>
+        <stop offset="1" stop-color="${accent}" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="18"/>
+      </filter>
+    </defs>
+
+    <rect width="900" height="900" fill="url(#g)"/>
+    <circle cx="55%" cy="45%" r="420" fill="url(#r)" filter="url(#blur)"/>
+
+    <g opacity="0.16">
+      <path d="M90 630 C 260 520, 360 700, 540 560 S 820 640, 860 520"
+            fill="none" stroke="#ffffff" stroke-width="8"/>
+      <path d="M60 420 C 220 340, 320 520, 480 410 S 760 420, 880 360"
+            fill="none" stroke="#ffffff" stroke-width="6"/>
+    </g>
+
+    <text x="70" y="140" fill="#ffffff"
+      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      font-size="54" font-weight="900" opacity="0.92">${title}</text>
+
+    <text x="70" y="200" fill="#ffffff"
+      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      font-size="26" font-weight="700" opacity="0.72">${sub}</text>
+
+    <rect x="70" y="760" rx="28" ry="28" width="250" height="76"
+      fill="rgba(0,0,0,0.35)" stroke="rgba(255,255,255,0.18)"/>
+    <text x="104" y="808" fill="#ffffff"
+      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      font-size="26" font-weight="900" opacity="0.92">▶ Preview</text>
+  </svg>`;
+
+  const encoded = encodeURIComponent(svg).replace(/'/g,"%27").replace(/"/g,"%22");
+  return `data:image/svg+xml;charset=utf-8,${encoded}`;
+}
+
+/* ===========================
+   Brand config via ?brand=
 =========================== */
 function getBrandKey(){
   const u = new URL(location.href);
@@ -350,10 +574,8 @@ async function loadBrandConfig(){
   const r = await fetch(url);
   const txt = await r.text();
   if(!r.ok) throw new Error(`Cannot load ${url} (HTTP ${r.status})`);
-  let data;
-  try { data = JSON.parse(txt); }
+  try { return JSON.parse(txt); }
   catch(e){ throw new Error(`Bad JSON in ${url}. Make sure it is valid JSON (no trailing commas).`); }
-  return data;
 }
 
 function applyTheme(cfg){
@@ -362,89 +584,124 @@ function applyTheme(cfg){
 }
 
 /* ===========================
-   Auto demo posters (NO UPLOADS)
-   - If cfg.demoPosters is empty/missing, we generate posters automatically.
+   Arabic Toggle + RTL + Arabic Digits
 =========================== */
-function buildAutoDemoPosters(brandKey, count=8){
-  // Make different “mood” per brand so it feels intentional
-  const mood =
-    brandKey === "cocacola" ? "red-cinema-coke" :
-    brandKey === "tui" ? "travel-sea-hotel" :
-    "ai-cinema-egypt";
-
-  const baseSeed = `${brandKey}-${mood}-shaga3`;
-
-  const arr = [];
-  for(let i=1;i<=count;i++){
-    // square posters: fast + app-like
-    arr.push(`https://picsum.photos/seed/${encodeURIComponent(baseSeed+"-"+i)}/720/720`);
+const i18n = {
+  en: {
+    brandText: "Shaga3app · AI Creative Playground",
+    beta: "Beta · Shaga3app powered",
+    heroTitle: "Play with our<br>guided video<br>prompt",
+    heroDescStart: "You get up to ",
+    heroDescEnd: " tries. The core concept is fixed by us; you just add your creative twist ✨",
+    baseLabel: "BASE CONCEPT (LOCKED)",
+    locked: "🔒 Locked",
+    trialsLabel: "Trials left:",
+    demoLabel: "DEMO CAROUSEL",
+    modeLabel: "CHOOSE INPUT MODE",
+    modeText: "Text prompt",
+    modeImg: "Start + End images",
+    lblSubject: "Main subject / character",
+    lblLocation: "Location / environment",
+    lblTwist: "Extra creative twist",
+    lblImages: "Start + End images",
+    hintSubject: "Who is the main character? (age, style, wardrobe, vibe)",
+    hintLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
+    hintTwist: "Optional: camera move, mood, style, or one special detail.",
+    hintImages: "Upload a start frame and an end frame to guide the motion.",
+    phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
+    phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
+    phTwist: "Optional: camera move, mood, style, or one special detail.",
+    gen: "Generate video",
+    dl: "Download video",
+    copy: "Copy link",
+    back: "Back",
+    done: "Done",
+    waiting: "Waiting for video…",
+    saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
+    copied: "Link copied ✅"
+  },
+  ar: {
+    brandText: "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
+    beta: "بيتا · بدعم Shaga3app",
+    heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
+    heroDescStart: "لديك ",
+    heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
+    baseLabel: "المفهوم الأساسي (مقفول)",
+    locked: "🔒 مقفول",
+    trialsLabel: "المحاولات المتبقية:",
+    demoLabel: "كاروسيل ديمو",
+    modeLabel: "اختر طريقة الإدخال",
+    modeText: "نص فقط",
+    modeImg: "صورتان: بداية + نهاية",
+    lblSubject: "الشخصية / العنصر الرئيسي",
+    lblLocation: "المكان / البيئة",
+    lblTwist: "إضافة إبداعية",
+    lblImages: "صورتان: بداية + نهاية",
+    hintSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
+    hintLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
+    hintTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
+    hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
+    phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
+    phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
+    phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
+    gen: "توليد فيديو",
+    dl: "تحميل الفيديو",
+    copy: "نسخ الرابط",
+    back: "رجوع",
+    done: "تم",
+    waiting: "بنستنى الفيديو…",
+    saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
+    copied: "تم نسخ الرابط ✅"
   }
-  return arr;
-}
+};
 
-/* ===========================
-   Arabic digits helper
-=========================== */
 function toArabicDigits(str){
   const map = {"0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩"};
   return String(str).replace(/[0-9]/g, d => map[d]);
 }
 
 let currentLang = "en";
-let cfg = null;
-
-/* ===========================
-   UI labels
-=========================== */
-const labels = {
-  en: {
-    baseLabel: "BASE CONCEPT (LOCKED)",
-    locked: "🔒 Locked",
-    trialsLabel: "Trials left:",
-    inputLabel: "YOUR INPUT",
-    lblSubject: "Main subject / character",
-    lblLocation: "Location / environment",
-    lblTwist: "Extra creative twist",
-    phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
-    phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
-    phTwist: "Optional: camera move, mood, style, or one special detail.",
-    gen: "Generate video",
-    dl: "Download",
-    copy: "Copy link",
-    waiting: "Waiting for video…",
-    done: "Done ✅"
-  },
-  ar: {
-    baseLabel: "المفهوم الأساسي (مقفول)",
-    locked: "🔒 مقفول",
-    trialsLabel: "المحاولات المتبقية:",
-    inputLabel: "تفاصيلك",
-    lblSubject: "الشخصية / العنصر الرئيسي",
-    lblLocation: "المكان / البيئة",
-    lblTwist: "إضافة إبداعية",
-    phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
-    phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
-    phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
-    gen: "توليد فيديو",
-    dl: "تحميل",
-    copy: "نسخ الرابط",
-    waiting: "بنستنى الفيديو…",
-    done: "تم ✅"
-  }
-};
+let brandCfg = null;
 
 function applyLang(lang){
   currentLang = lang;
-  const t = labels[lang];
+  const t = i18n[lang];
+
+  $("brandText").textContent = brandCfg
+    ? (lang === "ar" ? (brandCfg.brandText_ar || brandCfg.brandText_en || t.brandText) : (brandCfg.brandText_en || t.brandText))
+    : t.brandText;
+
+  $("betaPill").textContent = brandCfg
+    ? (lang === "ar" ? (brandCfg.beta_ar || brandCfg.beta_en || t.beta) : (brandCfg.beta_en || t.beta))
+    : t.beta;
+
+  $("heroTitle").innerHTML = brandCfg
+    ? (lang === "ar" ? (brandCfg.heroTitle_ar || brandCfg.heroTitle_en || t.heroTitle) : (brandCfg.heroTitle_en || t.heroTitle))
+    : t.heroTitle;
+
+  // tries display
+  const triesNum = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+  $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
 
   $("baseLabel").textContent = t.baseLabel;
   $("lockedTag").textContent = t.locked;
   $("trialsLabel").textContent = t.trialsLabel;
-  $("inputLabel").textContent = t.inputLabel;
+  $("demoLabel").textContent = t.demoLabel;
+
+  $("modeLabel").textContent = t.modeLabel;
+  $("modeTextTxt").textContent = t.modeText;
+  $("modeImgTxt").textContent = t.modeImg;
 
   $("lblSubject").textContent = t.lblSubject;
   $("lblLocation").textContent = t.lblLocation;
   $("lblTwist").textContent = t.lblTwist;
+
+  $("hintSubject").textContent = t.hintSubject;
+  $("hintLocation").textContent = t.hintLocation;
+  $("hintTwist").textContent = t.hintTwist;
+
+  $("lblImages").textContent = t.lblImages;
+  $("hintImages").textContent = t.hintImages;
 
   $("subject").placeholder = t.phSubject;
   $("location").placeholder = t.phLocation;
@@ -453,20 +710,24 @@ function applyLang(lang){
   $("genBtnTxt").textContent = t.gen;
   $("dlTxt").textContent = t.dl;
   $("copyTxt").textContent = t.copy;
+  $("backTxt").textContent = t.back;
 
-  if(cfg){
-    $("brandText").textContent = (lang === "ar") ? (cfg.brandText_ar || cfg.brandText_en || "AI Lab") : (cfg.brandText_en || "AI Lab");
-    $("betaPill").textContent  = (lang === "ar") ? (cfg.beta_ar || cfg.beta_en || "Beta") : (cfg.beta_en || "Beta");
-    $("heroTitle").innerHTML   = (lang === "ar") ? (cfg.heroTitle_ar || cfg.heroTitle_en || "AI Video Lab") : (cfg.heroTitle_en || "AI Video Lab");
-    $("heroDesc").textContent  = (lang === "ar") ? (cfg.heroDesc_ar || cfg.heroDesc_en || "") : (cfg.heroDesc_en || "");
-    $("basePrompt").textContent= (lang === "ar") ? (cfg.basePrompt_ar || cfg.basePrompt_en || "") : (cfg.basePrompt_en || "");
+  $("saveWarn").textContent = t.saveWarn;
+
+  // base prompt language swap (from your original)
+  const bp = $("basePrompt");
+  if (bp) {
+    const enText = bp.getAttribute("data-en") || bp.textContent;
+    const arText = bp.getAttribute("data-ar") || bp.textContent;
+    bp.textContent = (lang === "ar") ? arText : enText;
   }
 
   document.body.dir = (lang === "ar") ? "rtl" : "ltr";
   document.documentElement.lang = (lang === "ar") ? "ar" : "en";
   $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
 
-  $("trialsLeft").textContent = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+  // timer default
+  $("timerText").textContent = (lang === "ar") ? toArabicDigits("١٠ ث") : "~10s";
 }
 
 $("langToggle").addEventListener("click", () => {
@@ -474,87 +735,24 @@ $("langToggle").addEventListener("click", () => {
 });
 
 /* ===========================
-   Carousel state
+   Mode switching (unchanged)
 =========================== */
-let items = [];     // {id, posterUrl, videoUrl, label}
-let selectedId = null;
+const imagesBox = $("imagesBox");
 
-function renderDots(){
-  const dots = $("dots");
-  dots.innerHTML = "";
-  items.forEach(it=>{
-    const d = document.createElement("div");
-    d.className = "dot" + (it.id === selectedId ? " on" : "");
-    dots.appendChild(d);
-  });
-}
+$("modeText").addEventListener("click", () => {
+  $("modeText").classList.add("on");
+  $("modeImages").classList.remove("on");
+  if(imagesBox) imagesBox.style.display = "none";
+});
 
-function renderStrip(){
-  const strip = $("strip");
-  strip.innerHTML = "";
-  items.forEach(it=>{
-    const el = document.createElement("div");
-    el.className = "thumb" + (it.id === selectedId ? " selected" : "");
-    el.innerHTML = `
-      <img src="${it.posterUrl}" alt="poster">
-      <div class="badge">${it.label || "Demo"}</div>
-    `;
-    el.onclick = ()=> selectItem(it.id);
-    strip.appendChild(el);
-  });
-  renderDots();
-}
-
-function showPoster(url){
-  $("mainPoster").src = url || "";
-  $("mainPoster").style.display = "block";
-  $("mainVideo").style.display = "none";
-  $("mainVideo").removeAttribute("src");
-  $("mainVideo").load();
-}
-
-function showVideo(url){
-  $("mainVideo").src = url;
-  $("mainVideo").style.display = "block";
-  $("mainPoster").style.display = "none";
-  $("mainVideo").load();
-  $("mainVideo").play().catch(()=>{});
-}
-
-function selectItem(id){
-  selectedId = id;
-  const it = items.find(x=>x.id===id);
-  if(!it) return;
-
-  if(it.videoUrl){
-    showVideo(it.videoUrl);
-    saveLastUrl(it.videoUrl);
-  } else {
-    showPoster(it.posterUrl);
-  }
-  renderStrip();
-}
-
-function addGeneratedToCarousel(videoUrl){
-  const id = "gen-" + Date.now();
-  const posterFallback = items[0]?.posterUrl || "";
-  items.unshift({ id, posterUrl: posterFallback, videoUrl, label:"New" });
-  selectedId = id;
-  renderStrip();
-}
+$("modeImages").addEventListener("click", () => {
+  $("modeImages").classList.add("on");
+  $("modeText").classList.remove("on");
+  if(imagesBox) imagesBox.style.display = "block";
+});
 
 /* ===========================
-   Save/restore last video
-=========================== */
-function saveLastUrl(url){
-  try { localStorage.setItem(LAST_URL_KEY, url); } catch(e) {}
-}
-function loadLastUrl(){
-  try { return localStorage.getItem(LAST_URL_KEY) || ""; } catch(e) { return ""; }
-}
-
-/* ===========================
-   Prompt builder
+   Helpers (unchanged)
 =========================== */
 function buildPrompt(){
   const base = $("basePrompt").textContent || "";
@@ -573,13 +771,15 @@ function buildPrompt(){
 async function postJSON(payload){
   const url = API_URL + "?t=" + Date.now();
   const r = await fetch(url, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify(payload)
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload),
   });
+
   const text = await r.text();
   let data;
-  try{ data = JSON.parse(text); } catch(e){ data = { raw:text }; }
+  try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
+
   if(!r.ok){
     const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
     throw new Error(msg);
@@ -587,23 +787,156 @@ async function postJSON(payload){
   return data;
 }
 
-/* ===========================
-   Progress UI
-=========================== */
 function showProgressUI(){
   $("resultBox").style.display = "block";
   $("bar").style.width = "0%";
+  $("copyNote").style.display = "none";
 }
-function setTimerText(s){
+
+function setTimerText(secondsLeft){
   if(currentLang === "ar"){
-    $("timerText").textContent = s > 0 ? toArabicDigits(`${s} ث`) : labels.ar.waiting;
+    $("timerText").textContent = secondsLeft > 0
+      ? toArabicDigits(`${secondsLeft} ث`)
+      : i18n.ar.waiting;
   } else {
-    $("timerText").textContent = s > 0 ? `~${s}s` : labels.en.waiting;
+    $("timerText").textContent = secondsLeft > 0
+      ? `~${secondsLeft}s`
+      : i18n.en.waiting;
   }
 }
 
+function setDoneText(){
+  $("timerText").textContent = (currentLang === "ar") ? i18n.ar.done : i18n.en.done;
+}
+
+/* ✅ Save/restore the last video URL */
+function saveLastUrl(url){
+  try { localStorage.setItem(LAST_URL_KEY, url); } catch(e) {}
+}
+function loadLastUrl(){
+  try { return localStorage.getItem(LAST_URL_KEY) || ""; } catch(e) { return ""; }
+}
+
 /* ===========================
-   Generate
+   ✅ Carousel state (NEW)
+   - Thumbs show posters only
+   - Main preview plays the video when selected
+=========================== */
+const thumbRow = $("thumbRow");
+const dots = $("dots");
+const mainPoster = $("mainPoster");
+const mainVideo = $("mainVideo");
+const playOverlay = $("playOverlay");
+const metaChip = $("metaChip");
+
+let carouselItems = []; // {id, posterUrl, videoUrl, label}
+let selectedId = "";
+
+function renderDots(){
+  dots.innerHTML = "";
+  carouselItems.forEach(it=>{
+    const d = document.createElement("div");
+    d.className = "dot" + (it.id === selectedId ? " on" : "");
+    dots.appendChild(d);
+  });
+}
+
+function renderThumbs(){
+  thumbRow.innerHTML = "";
+  carouselItems.forEach(it=>{
+    const el = document.createElement("div");
+    el.className = "thumb" + (it.id === selectedId ? " active" : "");
+    el.innerHTML = `
+      <img src="${it.posterUrl}" alt="poster">
+      <div class="play"><span>▶</span></div>
+      <div class="badge">${it.label || "Demo"}</div>
+    `;
+    el.addEventListener("click", ()=> selectCarouselItem(it.id));
+    thumbRow.appendChild(el);
+  });
+  renderDots();
+}
+
+function showPoster(posterUrl, chipText){
+  mainPoster.src = posterUrl || "";
+  mainPoster.style.display = "block";
+  mainVideo.style.display = "none";
+  mainVideo.removeAttribute("src");
+  mainVideo.load();
+  playOverlay.style.display = "grid";
+  metaChip.textContent = chipText || "Demo";
+}
+
+function playVideo(videoUrl, chipText){
+  mainVideo.src = videoUrl;
+  mainVideo.style.display = "block";
+  mainPoster.style.display = "none";
+  playOverlay.style.display = "none";
+  metaChip.textContent = chipText || "Preview";
+  mainVideo.load();
+  mainVideo.play().catch(()=>{});
+}
+
+function selectCarouselItem(id){
+  selectedId = id;
+  renderThumbs();
+  const it = carouselItems.find(x=>x.id===id);
+  if(!it) return;
+
+  if(it.videoUrl){
+    playVideo(it.videoUrl, it.label || "Preview");
+  }else{
+    showPoster(it.posterUrl, it.label || "Demo");
+  }
+}
+
+/* Add generated video as NEW first item + auto play in main preview */
+function pushGeneratedVideo(url){
+  const brandKey = getBrandKey();
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#5b5cff";
+  const newPoster = makePosterDataUrl({brandKey, i: 99, accent});
+
+  const item = {
+    id: "gen-" + Date.now(),
+    posterUrl: newPoster,
+    videoUrl: url,
+    label: "New"
+  };
+  carouselItems.unshift(item);
+  selectedId = item.id;
+  renderThumbs();
+  playVideo(url, "New");
+}
+
+/* Initialize demo carousel */
+function initCarousel(){
+  const brandKey = getBrandKey();
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#5b5cff";
+
+  // Make 8 poster thumbs (fast). Videos rotate from MDN list.
+  carouselItems = Array.from({length: 8}).map((_, idx) => ({
+    id: "demo-" + idx,
+    posterUrl: makePosterDataUrl({brandKey, i: idx+1, accent}),
+    videoUrl: DEMO_VIDEOS[idx % DEMO_VIDEOS.length],
+    label: "Demo"
+  }));
+
+  selectedId = carouselItems[0].id;
+
+  // Default: show poster only, no mp4 loads yet
+  renderThumbs();
+  showPoster(carouselItems[0].posterUrl, "Demo");
+}
+
+/* Make clicking the big overlay play the currently selected item's video */
+playOverlay.addEventListener("click", () => {
+  const it = carouselItems.find(x=>x.id===selectedId);
+  if(it?.videoUrl) playVideo(it.videoUrl, it.label || "Preview");
+});
+
+/* ===========================
+   Real Generate (UNCHANGED backend)
+   ✅ Change: when done, show in main preview + add as NEW in carousel
 =========================== */
 async function realGenerate(){
   if(generating || trials <= 0) return;
@@ -634,27 +967,31 @@ async function realGenerate(){
     const prompt = buildPrompt();
 
     const gen = await postJSON({
-      action:"generate",
+      action: "generate",
       modelId: MODEL_ID,
       prompt
     });
 
     const operationName = gen.operationName || gen.name;
-    const directUrl = gen.downloadUrl || gen.response?.downloadUrl;
 
-    if(gen.done && directUrl){
+    // Direct done
+    if(gen.done && gen.downloadUrl){
       $("bar").style.width = "100%";
-      $("timerText").textContent = (currentLang==="ar") ? labels.ar.done : labels.en.done;
+      setDoneText();
 
-      showVideo(directUrl);
-      saveLastUrl(directUrl);
+      saveLastUrl(gen.downloadUrl);
 
-      addGeneratedToCarousel(directUrl);
-      selectItem(items[0].id);
+      // ✅ show immediately in main preview + add NEW in carousel
+      pushGeneratedVideo(gen.downloadUrl);
+
+      generating = false;
+      cancelAnimationFrame(rafId);
       return;
     }
 
-    if(!operationName) throw new Error("No operationName returned from generate");
+    if(!operationName){
+      throw new Error("No operationName returned from generate");
+    }
 
     const pollEveryMs = 3000;
     const maxPolls = 25;
@@ -662,8 +999,9 @@ async function realGenerate(){
 
     for(let i=0;i<maxPolls;i++){
       await new Promise(res => setTimeout(res, pollEveryMs));
+
       const chk = await postJSON({
-        action:"check",
+        action: "check",
         modelId: MODEL_ID,
         operationName
       });
@@ -672,16 +1010,17 @@ async function realGenerate(){
       if(chk.done && doneUrl) break;
     }
 
-    if(!doneUrl) throw new Error("Still processing. Try again in a few seconds.");
+    if(!doneUrl){
+      throw new Error("Still processing. Try again in a few seconds.");
+    }
 
     $("bar").style.width = "100%";
-    $("timerText").textContent = (currentLang==="ar") ? labels.ar.done : labels.en.done;
+    setDoneText();
 
-    showVideo(doneUrl);
     saveLastUrl(doneUrl);
 
-    addGeneratedToCarousel(doneUrl);
-    selectItem(items[0].id);
+    // ✅ show immediately in main preview + add NEW in carousel
+    pushGeneratedVideo(doneUrl);
 
   }catch(err){
     $("timerText").textContent = "Error: " + (err?.message || "Unknown error");
@@ -692,15 +1031,17 @@ async function realGenerate(){
   }
 }
 
-$("generateBtn").addEventListener("click", realGenerate);
+$("generateBtn").onclick = realGenerate;
 
 /* ===========================
-   Download / Copy
+   Download / Copy / Back (unchanged)
 =========================== */
 function getCurrentVideoUrl(){
-  const v = $("mainVideo");
-  return (v && v.src) ? v.src : loadLastUrl();
+  // prefer currently playing main video, else last saved
+  if(mainVideo && mainVideo.src) return mainVideo.src;
+  return loadLastUrl();
 }
+
 function downloadFile(url){
   if(!url) return;
   const a = document.createElement("a");
@@ -712,66 +1053,73 @@ function downloadFile(url){
   a.click();
   a.remove();
 }
+
 $("downloadBtn").addEventListener("click", () => {
   const url = getCurrentVideoUrl();
   if(!url) return;
   saveLastUrl(url);
   downloadFile(url);
 });
+
 $("copyBtn").addEventListener("click", async () => {
   const url = getCurrentVideoUrl();
   if(!url) return;
 
   saveLastUrl(url);
+
   try{
     await navigator.clipboard.writeText(url);
-    alert(currentLang==="ar" ? "تم نسخ الرابط ✅" : "Link copied ✅");
+    $("copyNote").style.display = "block";
+    $("copyNote").textContent = (currentLang === "ar") ? i18n.ar.copied : i18n.en.copied;
   }catch(e){
-    prompt(currentLang==="ar" ? "انسخ الرابط:" : "Copy link:", url);
+    const msg = (currentLang === "ar") ? "انسخ الرابط من هنا:" : "Copy the link from here:";
+    const manual = prompt(msg, url);
+    if(manual !== null){
+      $("copyNote").style.display = "block";
+      $("copyNote").textContent = (currentLang === "ar") ? i18n.ar.copied : i18n.en.copied;
+    }
   }
 });
 
+$("backBtn").addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
 /* ===========================
-   Init
+   Logo loader (same idea)
+=========================== */
+function setBrandLogo(path){
+  const img = $("brandImg");
+  img.src = (path || "logoshaga3app.png") + "?v=" + Date.now();
+  img.onerror = () => {
+    // fallback to your existing local png
+    img.src = "logoshaga3app.png?v=3";
+  };
+}
+
+/* ===========================
+   Init: load brand config, apply theme, init carousel, restore last video
 =========================== */
 (async function init(){
   try{
-    cfg = await loadBrandConfig();
-    applyTheme(cfg);
+    brandCfg = await loadBrandConfig();
+    applyTheme(brandCfg);
 
-    // logo (fallback if missing)
-    const logoPath = cfg.logo || "assets/brand-logos/shaga3app.png";
-    $("brandImg").src = logoPath + "?v=" + Date.now();
+    // apply logo
+    setBrandLogo(brandCfg.logo);
 
-    // demo posters:
-    // If cfg.demoPosters missing/empty => auto generate (NO uploads)
-    let posters = Array.isArray(cfg.demoPosters) ? cfg.demoPosters : [];
-    if(posters.length === 0){
-      posters = buildAutoDemoPosters(getBrandKey(), 8); // change 8 -> 10/12 if you want more
-    }
+    // init carousel (posters only)
+    initCarousel();
 
-    items = posters.map((p,i)=>({
-      id: "demo-"+i,
-      posterUrl: p,
-      videoUrl: "",
-      label: "Demo"
-    }));
-
-    selectedId = items[0].id;
-    renderStrip();
-    showPoster(items[0].posterUrl);
-
-    // restore last generated video (if exists)
+    // restore last generated video if exists (show it as NEW + play)
     const last = loadLastUrl();
     if(last){
-      addGeneratedToCarousel(last);
-      showVideo(last);
-      selectItem(items[0].id);
+      pushGeneratedVideo(last);
     }
 
     applyLang("en");
-
   }catch(e){
+    // show error in base prompt area
     $("basePrompt").textContent = "Error loading brand config: " + (e?.message || e);
     console.error(e);
   }
