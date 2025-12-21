@@ -3,112 +3,115 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>AI Video Lab</title>
+  <title>Shaga3app · AI Creative Playground</title>
 
   <style>
     :root{
-      /* DEFAULT (will be overridden by JS brand theme) */
-      --pageBg1:#071021;
-      --pageBg2:#050913;
-
-      --cardBg1:rgba(255,255,255,.10);
-      --cardBg2:rgba(255,255,255,.06);
-
+      /* defaults (Shaga3app) — will be overridden by brand config */
+      --bg:#0b0f18;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(0,0,0,.18);
       --text:#e5e7eb;
       --muted:#94a3b8;
       --line:rgba(255,255,255,.12);
+      --accent:#5b5cff;
+      --accent2:#22c55e;
+      --btnText:#07120a;
 
-      --brand:#5b5cff;
-      --brand2:#22c55e;
-      --pillBorder:rgba(91,92,255,.50);
-      --pillBg:rgba(91,92,255,.20);
-      --glowA:rgba(91,92,255,.22);
-      --glowB:rgba(34,197,94,.10);
+      --radius:18px;
+      --radius2:16px;
+      --shadow:0 18px 40px rgba(0,0,0,.35);
 
-      --radiusCard:18px;
-      --radiusField:14px;
-      --shadow: 0 18px 45px rgba(0,0,0,.35);
+      --heroGradA: rgba(91,92,255,.25);
+      --heroGradB: rgba(34,197,94,.12);
     }
 
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
       background:
-        radial-gradient(1200px 900px at 25% -10%, var(--glowA), transparent 55%),
-        radial-gradient(900px 700px at 85% 10%, var(--glowB), transparent 55%),
-        linear-gradient(180deg, var(--pageBg1), var(--pageBg2));
+        radial-gradient(1200px 900px at 25% -10%, var(--heroGradA), transparent 55%),
+        radial-gradient(900px 700px at 80% 10%, var(--heroGradB), transparent 50%),
+        var(--bg);
       color:var(--text);
     }
 
-    .wrap{max-width:860px;margin:0 auto;padding:18px 16px 40px;}
+    .wrap{max-width:900px;margin:0 auto;padding:16px 14px 36px;}
     .card{
-      background:linear-gradient(180deg,var(--cardBg1),var(--cardBg2));
+      background:linear-gradient(180deg, var(--panel), rgba(255,255,255,.03));
       border:1px solid var(--line);
-      border-radius:var(--radiusCard);
+      border-radius:var(--radius);
       padding:14px;
-      backdrop-filter:blur(12px);
       box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
 
-    /* Top bar */
+    /* iPhone-like top bar */
     .topBar{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:10px 14px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
-      gap:12px;
+      background: var(--panel2); /* FIX: dark (not white) */
     }
-    .brandRow{display:flex;align-items:center;gap:10px;font-weight:900;min-width:0}
-    .logo{
-      width:34px;height:34px;border-radius:10px;
-      display:grid;place-items:center;
-      background:rgba(255,255,255,.08);
+    .brandLeft{display:flex;align-items:center;gap:10px;min-width:0;}
+    .brandLogo{
+      width:30px;height:30px;border-radius:10px;
       border:1px solid var(--line);
-      overflow:hidden;
-      flex:0 0 auto;
+      background: rgba(255,255,255,.06);
+      display:inline-flex;align-items:center;justify-content:center;
+      overflow:hidden;flex:0 0 auto;
     }
-    .logo img{width:22px;height:22px;object-fit:contain;display:block}
-    .brandRow span{
-      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-      max-width:48vw;
+    .brandLogo img{width:100%;height:100%;object-fit:contain;display:block}
+    .brandTitle{
+      font-weight:800;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:42vw;
+      opacity:.95;
     }
 
+    .topRight{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
     .pill{
-      padding:7px 12px;
-      border-radius:999px;
-      border:1px solid var(--pillBorder);
-      background:var(--pillBg);
-      font-size:12px;
-      font-weight:950;
+      padding:7px 10px;border-radius:999px;
+      border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
+      font-size:12px;font-weight:900;
       white-space:nowrap;
     }
     .langBtn{
       font-size:12px; padding:7px 10px; border-radius:999px;
       border:1px solid var(--line); color: var(--text);
-      background: rgba(255,255,255,.08);
-      font-weight:950;
-      cursor:pointer;
+      background: rgba(255,255,255,.06);
+      font-weight:900; cursor:pointer;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .hero{margin:18px 0}
-    .hero h1{font-size:52px;line-height:1.05;margin:6px 0;font-weight:950}
-    .hero p{color:var(--muted);font-size:18px;max-width:560px}
+    /* hero */
+    .hero{margin:18px 0 10px}
+    .hero h1{font-size:52px;line-height:1.05;margin:6px 0 8px;font-weight:950;letter-spacing:-.02em}
+    .hero p{color:var(--muted);font-size:16px;max-width:560px;line-height:1.4;margin:0}
 
+    /* sections */
     .sectionLabel{
-      margin:18px 0 10px;
+      margin:18px 0 8px;
       font-size:12px;
       letter-spacing:.14em;
-      color:var(--muted);
+      text-transform:uppercase;
+      color:color-mix(in srgb, var(--muted) 85%, transparent);
     }
 
+    /* locked prompt */
     .lockedBox{
-      background:rgba(0,0,0,.18);
+      background: var(--panel2);
       border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
+      border-radius:var(--radius2);
+      padding:12px;
     }
     .lockedTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
     .lockedTag{
@@ -116,235 +119,156 @@
       padding:6px 10px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:rgba(255,255,255,.05);
-      font-weight:950;
+      background: rgba(255,255,255,.04);
+      font-weight:800;
     }
-
-    /* ✅ Locked prompt: smaller + more dim + less space */
     .lockedPrompt{
       margin-top:10px;
-      border:2px dashed rgba(255,255,255,.16);
+      border:1px dashed rgba(255,255,255,.18);
       border-radius:14px;
-      padding:10px 12px;              /* less padding */
-      font-family:ui-monospace,monospace;
+      padding:12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size:12px;             /* smaller */
+      line-height:1.45;
+      color: rgba(229,231,235,.82); /* dimmed */
       white-space:pre-wrap;
-      font-size:11px;                 /* smaller */
-      line-height:1.35;
-      color: rgba(229,231,235,.62);   /* more dim */
-      max-height:140px;               /* stops taking lots of space */
+      max-height: 160px;           /* avoid taking space */
       overflow:auto;
     }
 
-    /* ===== Video section ===== */
-    .videoCard{
-      margin-top:14px;
+    /* carousel + main preview */
+    .previewCard{
+      margin-top:12px;
+      background: var(--panel2);
       border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(0,0,0,.18);
+      border-radius:var(--radius2);
       padding:12px;
     }
-    .videoTop{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      margin-bottom:10px;
-      flex-wrap:wrap;
+    .previewHeader{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:10px;margin-bottom:10px;
+      color:color-mix(in srgb, var(--muted) 90%, transparent);
+      font-size:12px;font-weight:800;
     }
-    .videoTop .title{
-      font-weight:950;
-      display:flex;align-items:center;gap:8px;
-    }
-    .chip{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.35);
-      white-space:nowrap;
-      font-weight:950;
-    }
-
-    .mainPreview{
-      position:relative;
-      width:100%;
-      aspect-ratio: 9 / 16;
-      border-radius:16px;
-      overflow:hidden;
+    .badge{
+      padding:5px 10px;border-radius:999px;
       border:1px solid var(--line);
-      background:rgba(255,255,255,.03);
-    }
-
-    .poster{
-      position:absolute; inset:0;
-      background-size:cover;
-      background-position:center;
-      filter:saturate(1.05) contrast(1.02);
-    }
-    .posterOverlay{
-      position:absolute; inset:0;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.55)),
-        radial-gradient(900px 600px at 30% 10%, rgba(255,255,255,.08), transparent 55%),
-        radial-gradient(900px 600px at 80% 30%, rgba(255,255,255,.05), transparent 60%);
-      display:flex;
-      align-items:flex-end;
-      padding:16px;
-    }
-    .posterMeta{
-      width:100%;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      font-weight:950;
-      color:#fff;
-      text-shadow:0 10px 22px rgba(0,0,0,.45);
-    }
-    .posterMeta .name{font-size:16px;opacity:.98}
-    .posterMeta .tag{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.22);
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(8px);
-      opacity:.98;
-      font-weight:950;
+      background: rgba(255,255,255,.04);
+      font-weight:900;
+      color: rgba(229,231,235,.9);
       white-space:nowrap;
     }
 
-    video#mainVideo{
-      position:absolute; inset:0;
-      width:100%;
-      height:100%;
-      display:none;
+    .mainStage{
+      position:relative;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.35);
+      overflow:hidden;
+      min-height: 320px;
+      aspect-ratio: 9 / 16;
+    }
+    .mainStage img,
+    .mainStage video{
+      width:100%;height:100%;
       object-fit:cover;
+      display:block;
+    }
+    .mainStage video{
+      display:none;
       background:#000;
     }
-
     .playOverlay{
-      position:absolute; inset:0;
-      display:grid; place-items:center;
-      pointer-events:auto;
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;
     }
     .playBtn{
-      width:74px;height:74px;border-radius:50%;
-      display:grid;place-items:center;
-      background:rgba(0,0,0,.55);
+      pointer-events:auto;
+      display:inline-flex;align-items:center;gap:8px;
+      padding:12px 14px;border-radius:999px;
       border:1px solid rgba(255,255,255,.18);
-      font-size:22px;
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.92);
+      font-weight:900;
       cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(8px);
     }
 
-    /* Carousel thumbs: poster image + badge + play */
-    .carousel{
+    /* carousel thumbnails (poster images) */
+    .thumbRowWrap{
       margin-top:10px;
-      display:flex;gap:10px;
-      overflow:auto;
-      padding-bottom:6px;
-      scrollbar-width: thin;
-    }
-    .thumb{
-      width:98px;
-      height:98px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.04);
-      flex:0 0 auto;
-      position:relative;
-      overflow:hidden;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .thumb.active{ outline:2px solid var(--brand2); outline-offset:2px; }
-    .thumbPoster{
-      position:absolute; inset:0;
-      background-size:cover;
-      background-position:center;
-      filter:saturate(1.05) contrast(1.02);
-    }
-    .thumbShade{
-      position:absolute; inset:0;
-      background:linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.72));
-    }
-    .thumbBadge{
-      position:absolute;
-      top:8px; right:8px;
-      font-size:11px;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.45);
-      color:#fff;
-      font-weight:950;
-      white-space:nowrap;
-    }
-    .thumbFooter{
-      position:absolute; left:10px; right:10px; bottom:10px;
-      display:flex;justify-content:space-between;align-items:center;gap:8px;
-      color:#fff;
-      font-weight:950;
-    }
-    .thumbFooter .lbl{font-size:11px;opacity:.98}
-    .thumbFooter .pbtn{
-      width:26px;height:26px;border-radius:50%;
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.20);
-      display:grid;place-items:center;font-size:12px;
-    }
-
-    /* pagination dots */
-    .dots{display:flex;justify-content:center;gap:6px;margin-top:8px;}
-    .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);}
-    .dot.on{background: var(--brand2);}
-
-    .actionsRow{
-      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;
-      justify-content:flex-end;
-    }
-
-    .btn{
-      padding:12px 16px;
       border-radius:14px;
-      border:none;
-      font-weight:950;
-      cursor:pointer;
-      background:linear-gradient(180deg,var(--brand2), color-mix(in srgb, var(--brand2) 75%, #000 25%));
-      color:#07120a;
-    }
-    .btn.secondary{
-      background:rgba(255,255,255,.08);
       border:1px solid var(--line);
-      color:var(--text);
-      text-decoration:none;
+      background: rgba(0,0,0,.18);
+      padding:10px;
     }
+    .thumbRow{
+      display:flex;gap:10px;
+      overflow-x:auto;
+      padding-bottom:6px;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .thumbRow::-webkit-scrollbar{height:8px}
+    .thumbRow::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
 
-    .result{
-      display:none;
-      margin-top:10px;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-      background:rgba(0,0,0,.18);
-    }
-    .progress{
-      height:10px;border-radius:999px;
-      background:rgba(255,255,255,.06);
+    .thumb{
+      flex:0 0 auto;
+      width:110px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
       overflow:hidden;
-      border:1px solid var(--line);
+      cursor:pointer;
+      scroll-snap-align:start;
+      position:relative;
+      transition: transform .12s ease, border-color .12s ease;
     }
-    .bar{
-      height:100%;width:0%;
-      background:linear-gradient(90deg,var(--brand), var(--brand2));
+    .thumb:hover{transform: translateY(-1px)}
+    .thumb.on{border-color: color-mix(in srgb, var(--accent2) 70%, white 0%); box-shadow:0 0 0 2px rgba(34,197,94,.12) inset;}
+    .thumb img{width:100%;height:70px;object-fit:cover;display:block}
+    .thumbMeta{
+      padding:7px 8px 8px;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:6px;
+      font-size:11px;
+      color: rgba(229,231,235,.9);
     }
-    .miniHint{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.35;opacity:.95}
+    .thumbTag{
+      font-size:10px;
+      padding:4px 8px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      font-weight:900;
+    }
+    .thumbPlay{
+      position:absolute;left:8px;top:8px;
+      width:28px;height:28px;border-radius:999px;
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.35);
+      color:#fff;
+      font-weight:900;
+    }
+    .thumbDots{
+      display:flex;justify-content:center;gap:6px;
+      padding-top:8px;
+    }
+    .dot{
+      width:6px;height:6px;border-radius:999px;
+      background: rgba(255,255,255,.18);
+    }
+    .dot.on{background: color-mix(in srgb, var(--accent2) 80%, transparent);}
 
-    /* Inputs area */
+    /* mode bar */
     .modeBar{
+      margin-top:14px;
       display:flex;gap:10px;
       border:1px solid var(--line);
       border-radius:14px;
       padding:8px;
-      background:rgba(0,0,0,.18);
+      background: var(--panel2);
     }
     .modeBtn{
       flex:1;
@@ -354,735 +278,910 @@
       border:1px solid transparent;
       color:var(--muted);
       cursor:pointer;
-      font-weight:950;
+      font-weight:900;
     }
     .modeBtn.on{
-      background: color-mix(in srgb, var(--brand) 25%, transparent);
-      border-color: color-mix(in srgb, var(--brand) 55%, transparent);
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
       color:var(--text);
     }
 
+    /* inputs */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
 
     .field{
-      background:rgba(0,0,0,.18);
+      background: var(--panel2);
       border:1px solid var(--line);
-      border-radius:var(--radiusField);
+      border-radius:14px;
       padding:12px;
     }
-    .field label{font-size:13px;margin-bottom:6px;display:block;font-weight:950}
+    .field label{font-size:13px;margin-bottom:6px;display:block;font-weight:800;color:rgba(229,231,235,.92)}
     .field input{
       width:100%;
       padding:12px;
       border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      outline:none;
+    }
+    .field input::placeholder{color:rgba(148,163,184,.65)}
+
+    /* result/progress */
+    .result{
+      display:none;
+      margin-top:12px;
       border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background: var(--panel2);
+    }
+    .progress{
+      height:10px;border-radius:999px;
+      background:rgba(255,255,255,.04);
+      overflow:hidden;
+      border:1px solid var(--line);
+    }
+    .bar{
+      height:100%;width:0%;
+      background:linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* actions */
+    .actionsRow{
+      display:grid;
+      gap:10px;
+      margin-top:10px;
+    }
+    .btn{
+      padding:12px 14px;
+      border-radius:14px;
+      border:none;
+      font-weight:950;
+      cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .btn.secondary{
       background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
       color:var(--text);
     }
+    .btn.primary{
+      background:linear-gradient(180deg, var(--accent2), color-mix(in srgb, var(--accent2) 70%, #000 30%));
+      color:var(--btnText);
+      border:1px solid rgba(0,0,0,.10);
+    }
+
+    /* Mobile layout (requested):
+       Row 1: Copy + Download (equal, full width)
+       Row 2: Generate full width alone
+    */
+    @media(max-width:719px){
+      .actionsRow{
+        grid-template-columns:1fr 1fr;
+      }
+      #generateBtn{
+        grid-column: 1 / -1;
+        width:100%;
+        padding:14px 16px;
+        border-radius:16px;
+        font-size:15px;
+      }
+      #copyBtn,#downloadBtn{width:100%}
+    }
+
+    /* Desktop: align right nicely */
+    @media(min-width:720px){
+      .actionsRow{
+        display:flex;
+        justify-content:flex-end;
+        flex-wrap:wrap;
+        gap:10px;
+      }
+      #generateBtn{min-width:220px}
+    }
+
+    .miniHint{
+      margin-top:10px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+      opacity:.95;
+    }
+
+    /* RTL tweaks */
+    body[dir="rtl"] .hero h1{letter-spacing:0}
+    body[dir="rtl"] .brandTitle{max-width:50vw}
   </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div class="card">
+  <div class="wrap">
+    <div class="card">
 
-    <div class="topBar">
-      <div class="brandRow">
-        <div class="logo">
-          <img id="brandImg" alt="Brand logo" />
+      <!-- Top bar -->
+      <div class="topBar">
+        <div class="brandLeft">
+          <div class="brandLogo"><img id="brandLogo" alt="logo"></div>
+          <div class="brandTitle" id="brandTitle">Shaga3app · AI Video Lab</div>
         </div>
-        <span id="brandText">AI Video Lab</span>
+
+        <div class="topRight">
+          <button class="langBtn" id="langToggle" type="button">AR</button>
+          <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
+        </div>
       </div>
 
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button class="langBtn" id="langToggle" type="button">AR</button>
-        <div class="pill" id="betaPill">Beta</div>
-      </div>
-    </div>
-
-    <div class="hero">
-      <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
-      <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
-    </div>
-
-    <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
-    <div class="lockedBox">
-      <div class="lockedTop">
-        <div class="lockedTag" id="lockedTag">🔒 Locked</div>
-        <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
+      <!-- Hero -->
+      <div class="hero">
+        <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
+        <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
       </div>
 
-      <div class="lockedPrompt" id="basePrompt"
-        data-en="BASE (LOCKED)
+      <!-- Locked prompt -->
+      <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
+      <div class="lockedBox">
+        <div class="lockedTop">
+          <div class="lockedTag" id="lockedTag">🔒 Locked</div>
+          <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
+        </div>
 
-Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
-Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated so they match the environment and do not feel placed or fake.
-The scene follows this base concept, and we will inject the user details below."
-        data-ar="الأساس (مقفول)
-
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد — بشكل طبيعي ومتناسق مع المكان، من غير ما يبانوا متحطّين كده أو فيك.
-المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.">
-BASE (LOCKED)
-Create a vertical 9:16 cinematic video...
-      </div>
-    </div>
-
-    <div class="videoCard">
-      <div class="videoTop">
-        <div class="title">🎬 <span id="videoTitle">Selected demo</span></div>
-        <div class="chip" id="metaChip">9:16 · 5–8s</div>
+        <div class="lockedPrompt" id="basePrompt"></div>
       </div>
 
-      <div class="mainPreview">
-        <div class="poster" id="mainPoster"></div>
-        <div class="posterOverlay" id="posterOverlay">
-          <div class="posterMeta">
-            <div class="name" id="posterName">Demo</div>
-            <div class="tag" id="posterTag">9:16 · 5–8s</div>
+      <!-- Preview + Carousel (right after locked prompt as requested) -->
+      <div class="previewCard">
+        <div class="previewHeader">
+          <div id="selectedLabel">Selected demo</div>
+          <div class="badge" id="formatBadge">9:16 • 5–8s</div>
+        </div>
+
+        <div class="mainStage">
+          <img id="mainPoster" alt="Selected poster" />
+          <!-- IMPORTANT: preload none to avoid slow loading in WebView -->
+          <video id="mainVideo" controls playsinline preload="none"></video>
+
+          <div class="playOverlay">
+            <button class="playBtn" id="playBtn" type="button">▶ <span id="playTxt">Play</span></button>
           </div>
         </div>
 
-        <video id="mainVideo" controls playsinline preload="metadata"></video>
+        <div class="thumbRowWrap">
+          <div class="thumbRow" id="thumbRow"></div>
+          <div class="thumbDots" id="thumbDots"></div>
+        </div>
 
-        <div class="playOverlay" id="playOverlay">
-          <div class="playBtn" id="playBtn">▶</div>
+        <!-- actions -->
+        <div class="actionsRow">
+          <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
+          <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download</span></button>
+          <button class="btn primary" id="generateBtn" type="button">⚡ <span id="genTxt">Generate video</span></button>
+        </div>
+
+        <div class="miniHint" id="saveWarn" style="margin-top:10px;">
+          This page does not save your generated video. Please download it or copy the link before leaving.
+        </div>
+
+        <div class="result" id="resultBox">
+          <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
+          <div class="progress"><div class="bar" id="bar"></div></div>
+          <div class="miniHint" id="resultNote" style="margin-top:10px;"></div>
         </div>
       </div>
 
-      <div class="carousel" id="carousel"></div>
-      <div class="dots" id="dots"></div>
-
-      <div class="actionsRow">
-        <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
-        <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download</span></button>
-        <button class="btn" id="generateBtn" type="button">⚡ <span id="genBtnTxt">Generate video</span></button>
+      <!-- Mode -->
+      <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
+      <div class="modeBar">
+        <button class="modeBtn on" id="modeText" type="button">📝 <span id="modeTextTxt">Text prompt</span></button>
+        <button class="modeBtn" id="modeImages" type="button">🖼️ <span id="modeImgTxt">Start + End images</span></button>
       </div>
 
-      <div class="result" id="resultBox">
-        <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
-        <div class="progress"><div class="bar" id="bar"></div></div>
+      <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
+        <label id="lblImages">Start + End images</label>
+        <input type="file" id="startImg" accept="image/*">
+        <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+        <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
       </div>
 
-      <div class="miniHint" id="saveWarn" style="margin-top:10px">
-        This page does not save your generated video. Please download it or copy the link before leaving.
+      <!-- Inputs -->
+      <div class="grid">
+        <div class="field">
+          <label id="lblSubject">Main subject / character</label>
+          <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
+        </div>
+        <div class="field">
+          <label id="lblLocation">Location / environment</label>
+          <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
+        </div>
+
+        <div class="field span2">
+          <label id="lblTwist">Extra creative twist</label>
+          <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
+        </div>
       </div>
-      <div class="miniHint" id="copyNote" style="display:none;margin-top:8px"></div>
+
     </div>
-
-    <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
-    <div class="modeBar">
-      <button class="modeBtn on" id="modeText" type="button">📝 <span id="modeTextTxt">Text prompt</span></button>
-      <button class="modeBtn" id="modeImages" type="button">🖼️ <span id="modeImgTxt">Start + End images</span></button>
-    </div>
-
-    <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
-      <label id="lblImages">Start + End images</label>
-      <input type="file" id="startImg" accept="image/*">
-      <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-      <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
-    </div>
-
-    <div class="grid">
-      <div class="field">
-        <label id="lblSubject">Main subject / character</label>
-        <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
-      </div>
-      <div class="field">
-        <label id="lblLocation">Location / environment</label>
-        <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
-      </div>
-
-      <div class="field span2">
-        <label id="lblTwist">Extra creative twist</label>
-        <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
-      </div>
-    </div>
-
   </div>
-</div>
 
 <script>
-const $ = id => document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
-/* ===========================
-   ✅ Your Lambda Function URL
-=========================== */
-const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
-const MODEL_ID = "veo-3.1-generate-001";
+  /* ===========================
+     API settings (your existing Lambda)
+  =========================== */
+  const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
+  const MODEL_ID = "veo-3.1-generate-001";
 
-/* ===========================
-   Brands via ?brand=
-=========================== */
-const brandKey = (new URLSearchParams(location.search).get("brand") || "shaga3").toLowerCase();
+  const LAST_URL_KEY = "shaga3app_last_video_url";
+  const LAST_BRAND_KEY = "shaga3app_last_brand";
 
-const BRANDS = {
-  shaga3: {
-    title_en: "Shaga3app · AI Creative Playground",
-    title_ar: "شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
-    beta_en: "Beta · Shaga3app powered",
-    beta_ar: "بيتا · بدعم Shaga3app",
-    brand: "#5b5cff",
-    brand2:"#22c55e",
+  /* ===========================
+     i18n
+  =========================== */
+  const i18n = {
+    en: {
+      betaDefault: "Beta · Shaga3app powered",
+      heroTitle: "Play with our<br>guided video<br>prompt",
+      heroDescStart: "You get up to ",
+      heroDescEnd: " tries. The core concept is fixed by us; you just add your creative twist ✨",
+      baseLabel: "BASE CONCEPT (LOCKED)",
+      locked: "🔒 Locked",
+      trialsLabel: "Trials left:",
+      selectedDemo: "Selected demo",
+      play: "Play",
+      modeLabel: "CHOOSE INPUT MODE",
+      modeText: "Text prompt",
+      modeImg: "Start + End images",
+      lblSubject: "Main subject / character",
+      lblLocation: "Location / environment",
+      lblTwist: "Extra creative twist",
+      lblImages: "Start + End images",
+      hintImages: "Upload a start frame and an end frame to guide the motion.",
+      phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
+      phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
+      phTwist: "Optional: camera move, mood, style, or one special detail.",
+      gen: "Generate video",
+      dl: "Download",
+      copy: "Copy link",
+      saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
+      generating: "Generating…",
+      waiting: "Waiting for video…",
+      done: "Done",
+      copied: "Link copied ✅",
+      newTag: "New",
+      demoTag: "Demo",
+      errBrand: "Error loading brand config:",
+      errJson: "Make sure it is valid JSON (no trailing commas)."
+    },
+    ar: {
+      betaDefault: "بيتا · بدعم Shaga3app",
+      heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
+      heroDescStart: "لديك ",
+      heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
+      baseLabel: "المفهوم الأساسي (مقفول)",
+      locked: "🔒 مقفول",
+      trialsLabel: "المحاولات المتبقية:",
+      selectedDemo: "الديمو المختار",
+      play: "تشغيل",
+      modeLabel: "اختر طريقة الإدخال",
+      modeText: "نص فقط",
+      modeImg: "صورتان: بداية + نهاية",
+      lblSubject: "الشخصية / العنصر الرئيسي",
+      lblLocation: "المكان / البيئة",
+      lblTwist: "إضافة إبداعية",
+      lblImages: "صورتان: بداية + نهاية",
+      hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
+      phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
+      phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
+      phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
+      gen: "توليد فيديو",
+      dl: "تحميل",
+      copy: "نسخ الرابط",
+      saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
+      generating: "جارٍ التوليد…",
+      waiting: "بنستنى الفيديو…",
+      done: "تم",
+      copied: "تم نسخ الرابط ✅",
+      newTag: "جديد",
+      demoTag: "ديمو",
+      errBrand: "خطأ في تحميل إعدادات البراند:",
+      errJson: "تأكد أن ملف JSON صحيح (بدون فاصلة في الآخر)."
+    }
+  };
 
-    /* ✅ background vibe (not dark-only, tinted) */
-    pageBg1:"#071021",
-    pageBg2:"#050913",
-    glowA:"rgba(91,92,255,.22)",
-    glowB:"rgba(34,197,94,.10)",
-    pillBorder:"rgba(91,92,255,.50)",
-    pillBg:"rgba(91,92,255,.20)",
+  function toArabicDigits(str){
+    const map = {"0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩"};
+    return String(str).replace(/[0-9]/g, d => map[d]);
+  }
 
-    /* ✅ logo path (fix) */
-    logo:"assets/brand-logos/shaga3.png?v=3",
+  let currentLang = "en";
+  function applyLang(lang){
+    currentLang = lang;
+    const t = i18n[lang];
 
-    base_en:null,
-    base_ar:null
-  },
+    $("heroTitle").innerHTML = t.heroTitle;
 
-  cocacola: {
-    title_en: "Coca-Cola · AI Video Lab",
-    title_ar: "كوكاكولا · معمل فيديو بالذكاء الاصطناعي",
-    beta_en: "Demo · Coca-Cola",
-    beta_ar: "ديمو · كوكاكولا",
-    brand:"#e11d48",
-    brand2:"#e11d48",
+    const triesNum = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
 
-    /* ✅ red theme */
-    pageBg1:"#2a020a",
-    pageBg2:"#120106",
-    glowA:"rgba(225,29,72,.25)",
-    glowB:"rgba(255,255,255,.06)",
-    pillBorder:"rgba(225,29,72,.60)",
-    pillBg:"rgba(225,29,72,.20)",
+    $("baseLabel").textContent = t.baseLabel;
+    $("lockedTag").textContent = t.locked;
+    $("trialsLabel").textContent = t.trialsLabel;
+    $("selectedLabel").textContent = t.selectedDemo;
+    $("playTxt").textContent = t.play;
 
-    logo:"assets/brand-logos/cocacola.png?v=3",
+    $("modeLabel").textContent = t.modeLabel;
+    $("modeTextTxt").textContent = t.modeText;
+    $("modeImgTxt").textContent = t.modeImg;
 
-    base_en:
+    $("lblSubject").textContent = t.lblSubject;
+    $("lblLocation").textContent = t.lblLocation;
+    $("lblTwist").textContent = t.lblTwist;
+    $("lblImages").textContent = t.lblImages;
+    $("hintImages").textContent = t.hintImages;
+
+    $("subject").placeholder = t.phSubject;
+    $("location").placeholder = t.phLocation;
+    $("twist").placeholder = t.phTwist;
+
+    $("genTxt").textContent = t.gen;
+    $("dlTxt").textContent = t.dl;
+    $("copyTxt").textContent = t.copy;
+    $("saveWarn").textContent = t.saveWarn;
+
+    document.body.dir = (lang === "ar") ? "rtl" : "ltr";
+    document.documentElement.lang = (lang === "ar") ? "ar" : "en";
+    $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
+
+    // re-render prompt text in current language from config
+    renderBasePrompt();
+    renderThumbs();
+  }
+
+  $("langToggle").addEventListener("click", () => {
+    applyLang(currentLang === "en" ? "ar" : "en");
+  });
+
+  /* ===========================
+     Brand config
+     - loads /brands/{brand}.json if exists
+     - fallback inline defaults if not
+     - brand is selected by URL: ?brand=shaga3 OR ?brand=cocacola OR ?brand=tui
+  =========================== */
+  function getBrandFromUrl(){
+    const u = new URL(location.href);
+    const b = (u.searchParams.get("brand") || "").trim().toLowerCase();
+    if(b) return b;
+    // fallback: last brand
+    try{
+      const last = localStorage.getItem(LAST_BRAND_KEY);
+      if(last) return last;
+    }catch(e){}
+    return "shaga3";
+  }
+
+  const FALLBACK_BRANDS = {
+    shaga3: {
+      id:"shaga3",
+      title_en:"Shaga3app · AI Creative Playground",
+      title_ar:"شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
+      beta_en:"Beta · Shaga3app powered",
+      beta_ar:"بيتا · بدعم Shaga3app",
+      logo:"assets/brand-logos/shaga3app.png",
+      theme:{
+        bg:"#0b0f18",
+        accent:"#5b5cff",
+        accent2:"#22c55e",
+        heroGradA:"rgba(91,92,255,.25)",
+        heroGradB:"rgba(34,197,94,.12)"
+      },
+      basePrompt_en:
 `BASE (LOCKED)
 Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
-The scene must include an ultra-realistic Coca-Cola can naturally integrated (not placed/fake).
-Keep it premium, cinematic, and believable. We will inject user details below.`,
-    base_ar:
+Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated (not placed/fake).
+The scene follows this base concept, and we will inject the user details below.`,
+      basePrompt_ar:
 `الأساس (مقفول)
 اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا ومندمجة طبيعي في المكان (من غير ما تبان متحطّة/فيك).
-خلي الإحساس بريميوم وسينمائي وواقعي. وإحنا هنضيف تفاصيل المستخدم تحت.`
-  },
-
-  tui: {
-    title_en: "TUI · AI Video Lab",
-    title_ar: "TUI · معمل فيديو بالذكاء الاصطناعي",
-    beta_en: "Demo · TUI",
-    beta_ar: "ديمو · TUI",
-    brand:"#38bdf8",
-    brand2:"#38bdf8",
-
-    /* ✅ light-blue theme (entire page tinted blue) */
-    pageBg1:"#05202c",
-    pageBg2:"#03131b",
-    glowA:"rgba(56,189,248,.28)",
-    glowB:"rgba(255,255,255,.06)",
-    pillBorder:"rgba(56,189,248,.60)",
-    pillBg:"rgba(56,189,248,.20)",
-
-    logo:"assets/brand-logos/tui.png?v=3",
-
-    base_en:
+لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد — بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين كده أو فيك.
+المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("purple")
+    },
+    cocacola: {
+      id:"cocacola",
+      title_en:"Coca-Cola · AI Video Lab",
+      title_ar:"كوكاكولا · AI Video Lab",
+      beta_en:"Demo · Coca-Cola",
+      beta_ar:"ديمو · كوكاكولا",
+      logo:"assets/brand-logos/cocacola.png",
+      theme:{
+        bg:"#12070a",
+        accent:"#e11d2e",
+        accent2:"#ffb000",
+        heroGradA:"rgba(225,29,46,.22)",
+        heroGradB:"rgba(255,176,0,.10)"
+      },
+      basePrompt_en:
 `BASE (LOCKED)
-Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and realistic lighting.
-The scene should feel like a premium holiday destination moment (relaxed, sunny, aspirational) without showing copyrighted brand signage.
-We will inject user details below.`,
-    base_ar:
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
+The scene must feature an ultra-realistic Coca-Cola can naturally integrated (not placed/fake).
+Keep it premium, cinematic, and believable. We will inject user details below.`,
+      basePrompt_ar:
 `الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية.
-خلي المشهد إحساسه سفر/ريلاكس بريميوم (شمس/هدوء/فاخر) من غير لافتات أو شعارات حقوقها محفوظة.
-وإحنا هنضيف تفاصيل المستخدم تحت.`
-  }
-};
-
-const BRAND = BRANDS[brandKey] || BRANDS.shaga3;
-
-/* Apply theme vars */
-document.documentElement.style.setProperty("--brand", BRAND.brand);
-document.documentElement.style.setProperty("--brand2", BRAND.brand2);
-document.documentElement.style.setProperty("--glowA", BRAND.glowA);
-document.documentElement.style.setProperty("--glowB", BRAND.glowB);
-document.documentElement.style.setProperty("--pillBorder", BRAND.pillBorder);
-document.documentElement.style.setProperty("--pillBg", BRAND.pillBg);
-document.documentElement.style.setProperty("--pageBg1", BRAND.pageBg1);
-document.documentElement.style.setProperty("--pageBg2", BRAND.pageBg2);
-
-/* Logo (fix path + visible) */
-$("brandImg").src = BRAND.logo;
-$("brandImg").onerror = () => {
-  // If logo missing, keep a simple fallback circle
-  $("brandImg").style.display = "none";
-  document.querySelector(".logo").style.background = "rgba(255,255,255,.10)";
-};
-
-/* ===========================
-   i18n
-=========================== */
-const i18n = {
-  en: {
-    heroTitle: "Play with our<br>guided video<br>prompt",
-    heroDescStart: "You get up to ",
-    heroDescEnd: " tries. The core concept is fixed by us; you just add your creative twist ✨",
-    baseLabel: "BASE CONCEPT (LOCKED)",
-    locked: "🔒 Locked",
-    trialsLabel: "Trials left:",
-    modeLabel: "CHOOSE INPUT MODE",
-    modeText: "Text prompt",
-    modeImg: "Start + End images",
-    lblSubject: "Main subject / character",
-    lblLocation: "Location / environment",
-    lblTwist: "Extra creative twist",
-    lblImages: "Start + End images",
-    hintImages: "Upload a start frame and an end frame to guide the motion.",
-    phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
-    phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
-    phTwist: "Optional: camera move, mood, style, or one special detail.",
-    gen: "Generate video",
-    dl: "Download",
-    copy: "Copy link",
-    saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
-    copied: "Link copied ✅",
-    waiting: "Waiting for video…",
-    done: "Done",
-    demo: "Demo",
-    newly: "New"
-  },
-  ar: {
-    heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
-    heroDescStart: "لديك ",
-    heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
-    baseLabel: "المفهوم الأساسي (مقفول)",
-    locked: "🔒 مقفول",
-    trialsLabel: "المحاولات المتبقية:",
-    modeLabel: "اختر طريقة الإدخال",
-    modeText: "نص فقط",
-    modeImg: "صورتان: بداية + نهاية",
-    lblSubject: "الشخصية / العنصر الرئيسي",
-    lblLocation: "المكان / البيئة",
-    lblTwist: "إضافة إبداعية",
-    lblImages: "صورتان: بداية + نهاية",
-    hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
-    phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
-    phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
-    phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
-    gen: "توليد فيديو",
-    dl: "تحميل",
-    copy: "نسخ الرابط",
-    saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
-    copied: "تم نسخ الرابط ✅",
-    waiting: "بنستنى الفيديو…",
-    done: "تم",
-    demo: "ديمو",
-    newly: "جديد"
-  }
-};
-
-function toArabicDigits(str){
-  const map = {"0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩"};
-  return String(str).replace(/[0-9]/g, d => map[d]);
-}
-
-let currentLang = "en";
-let trials = 3;
-let generating = false;
-
-const LAST_URL_KEY = "lab_last_video_url_" + brandKey;
-function saveLastUrl(url){ try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){} }
-function loadLastUrl(){ try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; } }
-
-function applyLang(lang){
-  currentLang = lang;
-  const t = i18n[lang];
-
-  $("brandText").textContent = (lang==="ar") ? BRAND.title_ar : BRAND.title_en;
-  $("betaPill").textContent  = (lang==="ar") ? BRAND.beta_ar : BRAND.beta_en;
-
-  $("heroTitle").innerHTML = t.heroTitle;
-  const triesNum = (lang==="ar") ? toArabicDigits("3") : "3";
-  $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
-
-  $("baseLabel").textContent = t.baseLabel;
-  $("lockedTag").textContent = t.locked;
-  $("trialsLabel").textContent = t.trialsLabel;
-
-  $("modeLabel").textContent = t.modeLabel;
-  $("modeTextTxt").textContent = t.modeText;
-  $("modeImgTxt").textContent = t.modeImg;
-
-  $("lblSubject").textContent = t.lblSubject;
-  $("lblLocation").textContent = t.lblLocation;
-  $("lblTwist").textContent = t.lblTwist;
-  $("lblImages").textContent = t.lblImages;
-
-  $("subject").placeholder = t.phSubject;
-  $("location").placeholder = t.phLocation;
-  $("twist").placeholder = t.phTwist;
-
-  $("genBtnTxt").textContent = t.gen;
-  $("dlTxt").textContent = t.dl;
-  $("copyTxt").textContent = t.copy;
-  $("saveWarn").textContent = t.saveWarn;
-
-  const bp = $("basePrompt");
-  const defaultEn = bp.getAttribute("data-en") || bp.textContent;
-  const defaultAr = bp.getAttribute("data-ar") || bp.textContent;
-  const enText = BRAND.base_en || defaultEn;
-  const arText = BRAND.base_ar || defaultAr;
-  bp.textContent = (lang==="ar") ? arText : enText;
-
-  document.body.dir = (lang==="ar") ? "rtl" : "ltr";
-  document.documentElement.lang = (lang==="ar") ? "ar" : "en";
-  $("langToggle").textContent = (lang==="ar") ? "EN" : "AR";
-
-  renderCarousel();
-}
-
-$("langToggle").addEventListener("click", () => applyLang(currentLang==="en" ? "ar" : "en"));
-
-/* Mode switching */
-const imagesBox = $("imagesBox");
-$("modeText").addEventListener("click", () => {
-  $("modeText").classList.add("on");
-  $("modeImages").classList.remove("on");
-  imagesBox.style.display = "none";
-});
-$("modeImages").addEventListener("click", () => {
-  $("modeImages").classList.add("on");
-  $("modeText").classList.remove("on");
-  imagesBox.style.display = "block";
-});
-
-/* ===========================
-   ✅ REAL FREE VIDEOS (no API keys)
-   Posters are from Unsplash (fast)
-   Videos are CC0 from MDN examples (stable)
-=========================== */
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
-}
-
-/* Posters (fast) + real videos (free) */
-const LIB = [
-  { poster:"https://images.unsplash.com/photo-1520975682071-a5a8d49bdb4b?auto=format&fit=crop&w=900&q=70",
-    video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-  { poster:"https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=70",
-    video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/bee.mp4" },
-  { poster:"https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=900&q=70",
-    video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/river.mp4" },
-  { poster:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=70",
-    video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-  { poster:"https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=70",
-    video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/bee.mp4" },
-  { poster:"https://images.unsplash.com/photo-1514923995763-768e52f5af87?auto=format&fit=crop&w=900&q=70",
-    video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/river.mp4" }
-];
-
-const mainVideo = $("mainVideo");
-const mainPoster = $("mainPoster");
-const posterOverlay = $("posterOverlay");
-const playOverlay = $("playOverlay");
-const metaChip = $("metaChip");
-const posterName = $("posterName");
-const posterTag  = $("posterTag");
-
-let items = [];
-let selectedIndex = 0;
-
-function buildDemoItems(){
-  const pool = shuffle(LIB);
-  const out = [];
-  for(let i=0;i<10;i++){
-    const p = pool[i % pool.length];
-    out.push({ id:"demo-"+i, kind:"demo", poster:p.poster, video:p.video, tag:"9:16 · 5–8s" });
-  }
-  return out;
-}
-
-function hydrateGenerated(){
-  const last = loadLastUrl();
-  if(last){
-    items = items.filter(x => x.id !== "gen-last");
-    items.unshift({ id:"gen-last", kind:"new", poster: items[0]?.poster || LIB[0].poster, video:last, tag:"9:16 · 5–8s" });
-    selectedIndex = 0;
-  }
-}
-
-function showPoster(it){
-  mainPoster.style.backgroundImage = `url("${it.poster}")`;
-  posterName.textContent = (it.kind==="new") ? (i18n[currentLang].newly) : (i18n[currentLang].demo);
-  posterTag.textContent  = it.tag || "9:16 · 5–8s";
-  metaChip.textContent   = it.tag || "9:16 · 5–8s";
-
-  mainVideo.style.display = "none";
-  posterOverlay.style.display = "flex";
-  playOverlay.style.display = "grid";
-}
-
-function playVideo(it){
-  mainVideo.style.display = "block";
-  posterOverlay.style.display = "none";
-  playOverlay.style.display = "none";
-
-  // iOS-safe
-  mainVideo.muted = true;
-  mainVideo.playsInline = true;
-
-  try{ mainVideo.pause(); }catch(e){}
-  mainVideo.removeAttribute("src");
-  mainVideo.load();
-
-  mainVideo.src = it.video;
-  mainVideo.load();
-  mainVideo.play().catch(()=>{});
-}
-
-$("playBtn").addEventListener("click", () => {
-  const it = items[selectedIndex];
-  if(it) playVideo(it);
-});
-
-function renderDots(){
-  const d = $("dots");
-  d.innerHTML = "";
-  const count = Math.min(items.length, 10);
-  for(let i=0;i<count;i++){
-    const dot = document.createElement("div");
-    dot.className = "dot" + (i===selectedIndex ? " on" : "");
-    d.appendChild(dot);
-  }
-}
-
-function renderCarousel(){
-  const c = $("carousel");
-  c.innerHTML = "";
-  const t = i18n[currentLang];
-
-  items.forEach((it, idx) => {
-    const el = document.createElement("div");
-    el.className = "thumb" + (idx===selectedIndex ? " active" : "");
-    el.innerHTML = `
-      <div class="thumbPoster" style="background-image:url('${it.poster}')"></div>
-      <div class="thumbShade"></div>
-      <div class="thumbBadge">${it.kind==="new" ? t.newly : t.demo}</div>
-      <div class="thumbFooter">
-        <span class="lbl">${it.kind==="new" ? t.newly : t.demo}</span>
-        <span class="pbtn">▶</span>
-      </div>
-    `;
-    el.addEventListener("click", () => {
-      selectedIndex = idx;
-      renderCarousel();
-      renderDots();
-      showPoster(items[selectedIndex]); // fast
-      // tap play to actually play (user gesture)
-    });
-    c.appendChild(el);
-  });
-
-  renderDots();
-}
-
-/* ===========================
-   Generate
-=========================== */
-function buildPrompt(){
-  const base = $("basePrompt").textContent || "";
-  const subject = ($("subject").value || "").trim();
-  const location = ($("location").value || "").trim();
-  const twist = ($("twist").value || "").trim();
-
-  const parts = [];
-  if(subject) parts.push(`Main subject: ${subject}`);
-  if(location) parts.push(`Location: ${location}`);
-  if(twist) parts.push(`Creative twist: ${twist}`);
-
-  return `${base}\n\n---\n${parts.join("\n")}`.trim();
-}
-
-async function postJSON(payload){
-  const url = API_URL + "?t=" + Date.now();
-  const r = await fetch(url, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(payload),
-  });
-
-  const text = await r.text();
-  let data;
-  try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
-
-  if(!r.ok){
-    const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
-    throw new Error(msg);
-  }
-  return data;
-}
-
-function showProgressUI(){
-  $("resultBox").style.display = "block";
-  $("bar").style.width = "0%";
-  $("copyNote").style.display = "none";
-}
-function setTimerText(secondsLeft){
-  if(currentLang === "ar"){
-    $("timerText").textContent = secondsLeft > 0 ? toArabicDigits(`${secondsLeft} ث`) : i18n.ar.waiting;
-  } else {
-    $("timerText").textContent = secondsLeft > 0 ? `~${secondsLeft}s` : i18n.en.waiting;
-  }
-}
-function setDoneText(){
-  $("timerText").textContent = (currentLang === "ar") ? i18n.ar.done : i18n.en.done;
-}
-
-async function realGenerate(){
-  if(generating || trials <= 0) return;
-  generating = true;
-
-  trials--;
-  $("trialsLeft").textContent = trials;
-
-  showProgressUI();
-
-  const maxSeconds = 60;
-  const start = Date.now();
-  let rafId;
-
-  const tick = () => {
-    const elapsed = (Date.now() - start) / 1000;
-    const p = Math.min(95, (elapsed / maxSeconds) * 95);
-    $("bar").style.width = p + "%";
-    const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
-    setTimerText(remain);
-    rafId = requestAnimationFrame(tick);
+اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
+لازم يظهر علبة كوكاكولا واقعية جدًا داخل المشهد بشكل طبيعي (مش متحطوطه كده).
+المشهد يبقى بريميوم وسينمائي ومقنع. وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("red")
+    },
+    tui: {
+      id:"tui",
+      title_en:"TUI · AI Video Lab",
+      title_ar:"TUI · AI Video Lab",
+      beta_en:"Demo · TUI",
+      beta_ar:"ديمو · TUI",
+      logo:"assets/brand-logos/tui.png",
+      theme:{
+        bg:"#061821",
+        accent:"#2aa8ff",
+        accent2:"#7fe0ff",
+        heroGradA:"rgba(42,168,255,.20)",
+        heroGradB:"rgba(127,224,255,.10)"
+      },
+      basePrompt_en:
+`BASE (LOCKED)
+Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and bright, realistic lighting.
+The scene should feel like a premium TUI destination moment (clean, uplifting, high-end).
+We will inject user details below.`,
+      basePrompt_ar:
+`الأساس (مقفول)
+اعمل فيديو سينمائي عمودي ٩:١٦ بطابع سفر/سياحة، مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية مشرقة.
+المشهد يحسسك بلحظة وجهة سفر بريميوم على ستايل TUI (نضيف، مبهج، راقي).
+وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("blue")
+    }
   };
-  tick();
 
-  try{
-    const prompt = buildPrompt();
+  // Demo pack uses free public MP4s (no upload needed).
+  // Posters use picsum (fast), videos are sample mp4 (light). Replace with your preferred sources anytime.
+  function demoPack(color){
+    // 10 demos
+    const posters = [
+      `https://picsum.photos/seed/${color}-a/400/700`,
+      `https://picsum.photos/seed/${color}-b/400/700`,
+      `https://picsum.photos/seed/${color}-c/400/700`,
+      `https://picsum.photos/seed/${color}-d/400/700`,
+      `https://picsum.photos/seed/${color}-e/400/700`,
+      `https://picsum.photos/seed/${color}-f/400/700`,
+      `https://picsum.photos/seed/${color}-g/400/700`,
+      `https://picsum.photos/seed/${color}-h/400/700`,
+      `https://picsum.photos/seed/${color}-i/400/700`,
+      `https://picsum.photos/seed/${color}-j/400/700`,
+    ];
 
-    const gen = await postJSON({ action:"generate", modelId:MODEL_ID, prompt });
-    const operationName = gen.operationName || gen.name;
+    // Small lightweight mp4 samples (public)
+    const vids = [
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+    ];
 
-    if(gen.done && gen.downloadUrl){
-      $("bar").style.width = "100%";
-      setDoneText();
-      saveLastUrl(gen.downloadUrl);
+    return posters.map((p, idx)=>({
+      id: "demo-" + idx,
+      kind: "demo",
+      poster: p,
+      video: vids[idx],
+      tag: "demo"
+    }));
+  }
 
-      // Replace main preview immediately + add as New tile
-      hydrateGenerated();
-      renderCarousel();
-      showPoster(items[0]);
-      playVideo(items[0]);
+  async function loadBrandConfig(brandId){
+    // persist selection
+    try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
 
-      generating = false;
-      cancelAnimationFrame(rafId);
+    // 1) try JSON file: /brands/{brand}.json
+    // (you already created brands/shaga3.json etc — this will use them if valid)
+    try{
+      const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
+      if(r.ok){
+        const txt = await r.text();
+        const parsed = JSON.parse(txt);
+        return normalizeBrand(parsed, brandId);
+      }
+    }catch(e){
+      // ignore, fallback below
+    }
+
+    // 2) fallback inline defaults
+    return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
+  }
+
+  function normalizeBrand(raw, brandId){
+    // allow small JSON format, but still work
+    const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
+
+    const theme = raw.theme || raw.colors || {};
+    const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
+
+    return {
+      id: raw.id || brandId,
+      title_en: raw.title_en || raw.title || fb.title_en,
+      title_ar: raw.title_ar || fb.title_ar,
+      beta_en: raw.beta_en || fb.beta_en,
+      beta_ar: raw.beta_ar || fb.beta_ar,
+      logo: raw.logo || fb.logo,
+      theme: {
+        bg: theme.bg || fb.theme.bg,
+        accent: theme.accent || fb.theme.accent,
+        accent2: theme.accent2 || fb.theme.accent2,
+        heroGradA: theme.heroGradA || fb.theme.heroGradA,
+        heroGradB: theme.heroGradB || fb.theme.heroGradB
+      },
+      basePrompt_en: raw.basePrompt_en || fb.basePrompt_en,
+      basePrompt_ar: raw.basePrompt_ar || fb.basePrompt_ar,
+      demos
+    };
+  }
+
+  function applyTheme(theme){
+    const root = document.documentElement.style;
+    root.setProperty("--bg", theme.bg);
+    root.setProperty("--accent", theme.accent);
+    root.setProperty("--accent2", theme.accent2);
+    root.setProperty("--heroGradA", theme.heroGradA);
+    root.setProperty("--heroGradB", theme.heroGradB);
+
+    // auto choose button text
+    root.setProperty("--btnText", "#07120a");
+  }
+
+  function setBrandUI(cfg){
+    $("brandTitle").textContent = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
+    $("betaPill").textContent = (currentLang === "ar") ? cfg.beta_ar : cfg.beta_en;
+
+    // logo (if you uploaded to GitHub)
+    const img = $("brandLogo");
+    img.src = cfg.logo || "assets/brand-logos/shaga3app.png";
+    img.onerror = () => { img.src = "assets/brand-logos/shaga3app.png"; };
+
+    // title tag
+    document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
+  }
+
+  /* ===========================
+     Carousel / preview logic
+  =========================== */
+  let brandCfg = null;
+  let items = [];          // demos + generated
+  let selectedIndex = 0;
+
+  function renderBasePrompt(){
+    if(!brandCfg) return;
+    $("basePrompt").textContent = (currentLang === "ar") ? brandCfg.basePrompt_ar : brandCfg.basePrompt_en;
+  }
+
+  function setSelected(index){
+    selectedIndex = Math.max(0, Math.min(items.length-1, index));
+    // update thumb selection
+    [...$("thumbRow").children].forEach((el,i)=>el.classList.toggle("on", i===selectedIndex));
+    updateDots();
+
+    // show poster for the selected item
+    showPoster(items[selectedIndex]);
+  }
+
+  function showPoster(it){
+    // Always show poster in main stage
+    $("mainPoster").src = it.poster || "";
+    $("mainPoster").style.display = "block";
+    // hide video (no auto-load)
+    $("mainVideo").pause();
+    $("mainVideo").removeAttribute("src");
+    $("mainVideo").load();
+    $("mainVideo").style.display = "none";
+  }
+
+  function playInline(it){
+    // demos can play inline (small)
+    $("mainVideo").src = it.video;
+    $("mainVideo").style.display = "block";
+    $("mainPoster").style.display = "none";
+    $("mainVideo").load();
+    $("mainVideo").play().catch(()=>{});
+  }
+
+  function openVideoViewer(url){
+    if(!url) return;
+    window.open(url, "_blank", "noopener");
+  }
+
+  $("playBtn").addEventListener("click", ()=>{
+    const it = items[selectedIndex];
+    if(!it) return;
+
+    // Generated videos: open viewer tab (fast in WebView)
+    if(it.kind === "new"){
+      openVideoViewer(it.video);
       return;
     }
+    // Demos: play inline
+    playInline(it);
+  });
 
-    if(!operationName) throw new Error("No operationName returned from generate");
+  function renderThumbs(){
+    const row = $("thumbRow");
+    row.innerHTML = "";
+    $("thumbDots").innerHTML = "";
 
-    const pollEveryMs = 3000;
-    const maxPolls = 25;
-    let doneUrl = "";
+    if(!items.length) return;
 
-    for(let i=0;i<maxPolls;i++){
-      await new Promise(res => setTimeout(res, pollEveryMs));
-      const chk = await postJSON({ action:"check", modelId:MODEL_ID, operationName });
-      const url = chk?.downloadUrl || chk?.response?.downloadUrl || "";
-      if(chk.done && url){ doneUrl = url; break; }
+    items.forEach((it, idx)=>{
+      const d = document.createElement("div");
+      d.className = "thumb" + (idx===selectedIndex ? " on" : "");
+      d.innerHTML = `
+        <div class="thumbPlay">▶</div>
+        <img alt="poster" src="${it.poster || ""}">
+        <div class="thumbMeta">
+          <span class="thumbTag">${(currentLang==="ar") ? (it.kind==="new" ? i18n.ar.newTag : i18n.ar.demoTag) : (it.kind==="new" ? i18n.en.newTag : i18n.en.demoTag)}</span>
+          <span style="opacity:.75">${idx+1}</span>
+        </div>
+      `;
+      d.addEventListener("click", ()=> setSelected(idx));
+      row.appendChild(d);
+    });
+
+    buildDots();
+    updateDots();
+  }
+
+  function buildDots(){
+    const dots = $("thumbDots");
+    dots.innerHTML = "";
+    // simple pagination dots: 10 max
+    const pages = Math.min(10, Math.max(1, Math.ceil(items.length / 2)));
+    for(let i=0;i<pages;i++){
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dots.appendChild(dot);
     }
+  }
 
-    if(!doneUrl) throw new Error("Still processing. Try again in a few seconds.");
+  function updateDots(){
+    const dots = [...$("thumbDots").children];
+    if(!dots.length) return;
+    const page = Math.min(dots.length-1, Math.floor(selectedIndex / 2));
+    dots.forEach((d,i)=>d.classList.toggle("on", i===page));
+  }
 
+  /* ===========================
+     Mode switching
+  =========================== */
+  const imagesBox = $("imagesBox");
+  $("modeText").addEventListener("click", ()=>{
+    $("modeText").classList.add("on");
+    $("modeImages").classList.remove("on");
+    imagesBox.style.display = "none";
+  });
+  $("modeImages").addEventListener("click", ()=>{
+    $("modeImages").classList.add("on");
+    $("modeText").classList.remove("on");
+    imagesBox.style.display = "block";
+  });
+
+  /* ===========================
+     Prompt builder + API
+  =========================== */
+  function buildPrompt(){
+    const base = $("basePrompt").textContent || "";
+    const subject = ($("subject").value || "").trim();
+    const location = ($("location").value || "").trim();
+    const twist = ($("twist").value || "").trim();
+
+    const parts = [];
+    if(subject) parts.push(`Main subject: ${subject}`);
+    if(location) parts.push(`Location: ${location}`);
+    if(twist) parts.push(`Creative twist: ${twist}`);
+
+    return `${base}\n\n---\n${parts.join("\n")}`.trim();
+  }
+
+  async function postJSON(payload){
+    const url = API_URL + "?t=" + Date.now();
+    const r = await fetch(url,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload),
+    });
+    const text = await r.text();
+    let data;
+    try{ data = JSON.parse(text); }catch(e){ data = { raw:text }; }
+    if(!r.ok){
+      const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  let trials = 3;
+  let generating = false;
+
+  function saveLastUrl(url){
+    try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){}
+  }
+  function loadLastUrl(){
+    try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; }
+  }
+
+  function setTimerText(secondsLeft){
+    if(currentLang === "ar"){
+      $("timerText").textContent = secondsLeft > 0 ? toArabicDigits(`${secondsLeft} ث`) : i18n.ar.waiting;
+    }else{
+      $("timerText").textContent = secondsLeft > 0 ? `~${secondsLeft}s` : i18n.en.waiting;
+    }
+  }
+  function setDoneText(){
+    $("timerText").textContent = (currentLang==="ar") ? i18n.ar.done : i18n.en.done;
+  }
+
+  async function generate(){
+    if(generating || trials<=0) return;
+    generating = true;
+
+    trials--;
+    $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+    applyLang(currentLang); // refresh hero tries text
+
+    $("resultBox").style.display = "block";
+    $("bar").style.width = "0%";
+    $("resultNote").textContent = "";
+
+    const maxSeconds = 60;
+    const start = Date.now();
+    let rafId;
+
+    const tick = ()=>{
+      const elapsed = (Date.now()-start)/1000;
+      const p = Math.min(95, (elapsed/maxSeconds)*95);
+      $("bar").style.width = p + "%";
+      const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
+      setTimerText(remain);
+      rafId = requestAnimationFrame(tick);
+    };
+    tick();
+
+    try{
+      const prompt = buildPrompt();
+
+      const gen = await postJSON({ action:"generate", modelId: MODEL_ID, prompt });
+      const operationName = gen.operationName || gen.name;
+
+      // immediate done
+      if(gen.done && gen.downloadUrl){
+        onGenerated(gen.downloadUrl);
+        return;
+      }
+
+      if(!operationName) throw new Error("No operationName returned from generate");
+
+      const pollEveryMs = 3000;
+      const maxPolls = 25;
+      let doneUrl = "";
+
+      for(let i=0;i<maxPolls;i++){
+        await new Promise(res=>setTimeout(res, pollEveryMs));
+        const chk = await postJSON({ action:"check", modelId: MODEL_ID, operationName });
+
+        if(chk.done && chk.downloadUrl){ doneUrl = chk.downloadUrl; break; }
+        if(chk.done && chk.response && chk.response.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
+      }
+
+      if(!doneUrl) throw new Error("Still processing. Try again in a few seconds.");
+
+      onGenerated(doneUrl);
+
+    }catch(err){
+      $("timerText").textContent = "Error: " + (err?.message || "Unknown error");
+      $("bar").style.width = "0%";
+    }finally{
+      generating = false;
+      if(rafId) cancelAnimationFrame(rafId);
+    }
+  }
+
+  function onGenerated(downloadUrl){
     $("bar").style.width = "100%";
     setDoneText();
 
-    saveLastUrl(doneUrl);
-    hydrateGenerated();
-    renderCarousel();
-    showPoster(items[0]);
-    playVideo(items[0]);
+    saveLastUrl(downloadUrl);
 
-  }catch(err){
-    $("timerText").textContent = "Error: " + (err?.message || "Unknown error");
-    $("bar").style.width = "0%";
-  }finally{
-    generating = false;
-    if(rafId) cancelAnimationFrame(rafId);
+    // Put generated result as first item (New)
+    const newItem = {
+      id: "new-" + Date.now(),
+      kind: "new",
+      // reuse currently selected poster as “thumbnail” (fast)
+      poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || ""),
+      video: downloadUrl,
+      tag: "new"
+    };
+
+    // remove old "new" items to keep clean
+    items = items.filter(x => x.kind !== "new");
+    items.unshift(newItem);
+
+    // re-render, select the generated item
+    selectedIndex = 0;
+    renderThumbs();
+    setSelected(0);
+
+    // Do NOT autoplay inline (WebView slow). User taps Play -> opens viewer tab fast.
+    $("resultNote").textContent = (currentLang==="ar")
+      ? "✅ اتولد فيديو جديد. اضغط «تشغيل» لمشاهدته بسرعة."
+      : "✅ New video generated. Tap “Play” to open it fast.";
   }
-}
 
-$("generateBtn").addEventListener("click", realGenerate);
+  $("generateBtn").addEventListener("click", generate);
 
-/* Copy / Download */
-function getCurrentVideoUrl(){
-  const it = items[selectedIndex];
-  const last = loadLastUrl();
-  if(it && it.kind==="new") return it.video;
-  if(mainVideo && mainVideo.src) return mainVideo.src;
-  return last || (it ? it.video : "");
-}
+  /* ===========================
+     Copy / Download buttons
+  =========================== */
+  function getCurrentVideoUrl(){
+    const it = items[selectedIndex];
+    if(it?.video) return it.video;
+    return loadLastUrl();
+  }
 
-function downloadFile(url){
-  if(!url) return;
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "ai-video.mp4";
-  a.target = "_blank";
-  a.rel = "noopener";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
+  $("downloadBtn").addEventListener("click", ()=>{
+    const url = getCurrentVideoUrl();
+    if(!url) return;
+    saveLastUrl(url);
 
-$("downloadBtn").addEventListener("click", () => {
-  const url = getCurrentVideoUrl();
-  if(!url) return;
-  saveLastUrl(url);
-  downloadFile(url);
-});
+    // Best effort: open to viewer (works like your download page)
+    openVideoViewer(url);
+  });
 
-$("copyBtn").addEventListener("click", async () => {
-  const url = getCurrentVideoUrl();
-  if(!url) return;
-
-  saveLastUrl(url);
-
-  try{
-    await navigator.clipboard.writeText(url);
-    $("copyNote").style.display = "block";
-    $("copyNote").textContent = (currentLang === "ar") ? i18n.ar.copied : i18n.en.copied;
-  }catch(e){
-    const msg = (currentLang === "ar") ? "انسخ الرابط من هنا:" : "Copy the link from here:";
-    const manual = prompt(msg, url);
-    if(manual !== null){
-      $("copyNote").style.display = "block";
-      $("copyNote").textContent = (currentLang === "ar") ? i18n.ar.copied : i18n.en.copied;
+  $("copyBtn").addEventListener("click", async ()=>{
+    const url = getCurrentVideoUrl();
+    if(!url) return;
+    saveLastUrl(url);
+    try{
+      await navigator.clipboard.writeText(url);
+      alert((currentLang==="ar") ? i18n.ar.copied : i18n.en.copied);
+    }catch(e){
+      const msg = (currentLang==="ar") ? "انسخ الرابط من هنا:" : "Copy link from here:";
+      prompt(msg, url);
     }
-  }
-});
+  });
 
-/* Init */
-(function init(){
-  items = buildDemoItems();   // always fresh order
-  hydrateGenerated();
-  selectedIndex = 0;
-  renderCarousel();
-  showPoster(items[0]);
-  applyLang("en");
-})();
+  /* ===========================
+     Boot
+  =========================== */
+  async function boot(){
+    const brandId = getBrandFromUrl();
+    brandCfg = await loadBrandConfig(brandId);
+
+    applyTheme(brandCfg.theme);
+    setBrandUI(brandCfg);
+
+    // build items from demos
+    items = (brandCfg.demos && brandCfg.demos.length) ? brandCfg.demos.slice() : FALLBACK_BRANDS.shaga3.demos.slice();
+    selectedIndex = 0;
+
+    renderBasePrompt();
+    renderThumbs();
+    setSelected(0);
+
+    // default language
+    applyLang("en");
+  }
+
+  boot();
 </script>
 </body>
 </html>
