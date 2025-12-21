@@ -1,1 +1,24 @@
+{
+  "brandText_en": "Coca-Cola · AI Video Lab",
+  "brandText_ar": "كوكاكولا · معمل فيديو بالذكاء الاصطناعي",
+  "beta_en": "Demo · Coca-Cola × Shaga3app",
+  "beta_ar": "ديمو · كوكاكولا × شجّع 3 آب",
+  "logo": "assets/brand-logos/cocacola.png",
+  "accent": "#E10600",
+  "ok": "#E10600",
+  "heroTitle_en": "Coca-Cola<br>AI Video Lab",
+  "heroTitle_ar": "كوكاكولا<br>معمل فيديو",
+  "heroDesc_en": "Pick a demo poster, add your twist, then generate. Your result appears instantly in the main preview.",
+  "heroDesc_ar": "اختار صورة ديمو، ضيف لمستك، وبعدين ولّد — النتيجة هتظهر فورًا في المعاينة الأساسية.",
+  "basePrompt_en": "BASE (LOCKED)\\n\\nCreate a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and realistic lighting.\\nThe Coca-Cola can must look ultra-real and naturally part of the scene.\\nKeep it emotional, human, and authentic — no fake product placement look.\\nWe will inject the user details below.",
+  "basePrompt_ar": "الأساس (مقفول)\\n\\nاعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية.\\nعلبة كوكاكولا لازم تبان واقعية جدًا وجزء طبيعي من المشهد.\\nخليه إحساسي وبشري وحقيقي — من غير إحساس إعلان متحطّ فجأة.\\nوإحنا هنضيف تفاصيل المستخدم تحت.",
+  "demoPosters": [
+    "assets/demo/coke/1.jpg",
+    "assets/demo/coke/2.jpg",
+    "assets/demo/coke/3.jpg",
+    "assets/demo/coke/4.jpg",
+    "assets/demo/coke/5.jpg",
+    "assets/demo/coke/6.jpg"
+  ]
+}
 
