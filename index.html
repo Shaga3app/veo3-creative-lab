@@ -7,7 +7,7 @@
 
   <style>
     :root{
-      /* defaults (Shaga3app) — will be overridden by brand config */
+      /* defaults */
       --bg:#0b0f18;
       --panel:rgba(255,255,255,.06);
       --panel2:rgba(0,0,0,.18);
@@ -48,7 +48,7 @@
       backdrop-filter: blur(10px);
     }
 
-    /* iPhone-like top bar */
+    /* top bar */
     .topBar{
       display:flex;align-items:center;justify-content:space-between;
       gap:12px;
@@ -136,7 +136,7 @@
       overflow:auto;
     }
 
-    /* carousel + main preview */
+    /* preview + carousel */
     .previewCard{
       margin-top:12px;
       background: var(--panel2);
@@ -195,7 +195,7 @@
       backdrop-filter: blur(8px);
     }
 
-    /* carousel thumbnails (poster images) */
+    /* carousel thumbs */
     .thumbRowWrap{
       margin-top:10px;
       border-radius:14px;
@@ -255,10 +255,7 @@
       display:flex;justify-content:center;gap:6px;
       padding-top:8px;
     }
-    .dot{
-      width:6px;height:6px;border-radius:999px;
-      background: rgba(255,255,255,.18);
-    }
+    .dot{width:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.18)}
     .dot.on{background: color-mix(in srgb, var(--accent2) 80%, transparent);}
 
     /* mode bar */
@@ -307,14 +304,7 @@
       outline:none;
     }
     .field input::placeholder{color:rgba(148,163,184,.65)}
-
-    .miniHint{
-      margin-top:10px;
-      font-size:12px;
-      color: var(--muted);
-      line-height:1.35;
-      opacity:.95;
-    }
+    .miniHint{margin-top:10px;font-size:12px;color: var(--muted);line-height:1.35;opacity:.95}
 
     /* progress */
     .result{
@@ -357,7 +347,7 @@
       border:1px solid rgba(0,0,0,.10);
     }
 
-    /* NEW: button placement under inputs */
+    /* actions under inputs */
     .actionsUnderInputs{
       margin-top:12px;
       display:grid;
@@ -368,19 +358,9 @@
       grid-template-columns:1fr 1fr;
       gap:10px;
     }
-
-    /* Desktop: keep same look but still as requested */
     @media(min-width:720px){
-      .actionsUnderInputs{
-        grid-template-columns:1fr;
-      }
-      .actionsUnderInputs .row2{
-        grid-template-columns:1fr 1fr;
-        max-width:520px;
-      }
-      .actionsUnderInputs .primaryWrap{
-        max-width:520px;
-      }
+      .actionsUnderInputs .row2{max-width:520px}
+      .actionsUnderInputs .primaryWrap{max-width:520px}
     }
 
     /* RTL tweaks */
@@ -419,11 +399,10 @@
           <div class="lockedTag" id="lockedTag">🔒 Locked</div>
           <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
         </div>
-
         <div class="lockedPrompt" id="basePrompt"></div>
       </div>
 
-      <!-- Preview + Carousel (stays exactly here) -->
+      <!-- Preview + Carousel -->
       <div class="previewCard">
         <div class="previewHeader">
           <div id="selectedLabel">Selected demo</div>
@@ -446,12 +425,6 @@
 
         <div class="miniHint" id="saveWarn" style="margin-top:10px;">
           This page does not save your generated video. Please download it or copy the link before leaving.
-        </div>
-
-        <div class="result" id="resultBox">
-          <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;">~10s</div>
-          <div class="progress"><div class="bar" id="bar"></div></div>
-          <div class="miniHint" id="resultNote" style="margin-top:10px;"></div>
         </div>
       </div>
 
@@ -486,7 +459,7 @@
         </div>
       </div>
 
-      <!-- ✅ MOVED BUTTONS HERE (ONLY CHANGE) -->
+      <!-- Buttons -->
       <div class="actionsUnderInputs">
         <div class="primaryWrap">
           <button class="btn primary" id="generateBtn" type="button">⚡ <span id="genTxt">Generate video</span></button>
@@ -497,27 +470,29 @@
         </div>
       </div>
 
+      <!-- ✅ Progress/status under Copy/Download, NEVER 100% until ready -->
+      <div class="result" id="resultBox">
+        <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;"></div>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="miniHint" id="resultNote" style="margin-top:10px;"></div>
+      </div>
+
     </div>
   </div>
 
 <script>
   const $ = id => document.getElementById(id);
 
-  /* ===========================
-     API settings (your existing Lambda)
-  =========================== */
+  /* API settings */
   const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
   const MODEL_ID = "veo-3.1-generate-001";
 
   const LAST_URL_KEY = "shaga3app_last_video_url";
   const LAST_BRAND_KEY = "shaga3app_last_brand";
 
-  /* ===========================
-     i18n
-  =========================== */
+  /* i18n */
   const i18n = {
     en: {
-      betaDefault: "Beta · Shaga3app powered",
       heroTitle: "Play with our<br>guided video<br>prompt",
       heroDescStart: "You get up to ",
       heroDescEnd: " tries. The core concept is fixed by us; you just add your creative twist ✨",
@@ -541,15 +516,13 @@
       dl: "Download",
       copy: "Copy link",
       saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
-      generating: "Generating…",
       waiting: "Waiting for video…",
-      done: "Done",
+      ready: "Ready ✅",
       copied: "Link copied ✅",
       newTag: "New",
-      demoTag: "Demo",
+      demoTag: "Demo"
     },
     ar: {
-      betaDefault: "بيتا · بدعم Shaga3app",
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
       heroDescStart: "لديك ",
       heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
@@ -573,12 +546,11 @@
       dl: "تحميل",
       copy: "نسخ الرابط",
       saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
-      generating: "جارٍ التوليد…",
       waiting: "بنستنى الفيديو…",
-      done: "تم",
+      ready: "جاهز ✅",
       copied: "تم نسخ الرابط ✅",
       newTag: "جديد",
-      demoTag: "ديمو",
+      demoTag: "ديمو"
     }
   };
 
@@ -589,9 +561,7 @@
 
   let currentLang = "en";
 
-  /* ===========================
-     Brand config (same as before)
-  =========================== */
+  /* Brand config */
   function getBrandFromUrl(){
     const u = new URL(location.href);
     const b = (u.searchParams.get("brand") || "").trim().toLowerCase();
@@ -695,7 +665,7 @@ We will inject user details below.`,
       `https://picsum.photos/seed/${color}-g/400/700`,
       `https://picsum.photos/seed/${color}-h/400/700`,
       `https://picsum.photos/seed/${color}-i/400/700`,
-      `https://picsum.photos/seed/${color}-j/400/700`,
+      `https://picsum.photos/seed/${color}-j/400/700`
     ];
     const vids = [
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
@@ -707,7 +677,7 @@ We will inject user details below.`,
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
     ];
     return posters.map((p, idx)=>({
       id: "demo-" + idx,
@@ -720,7 +690,6 @@ We will inject user details below.`,
 
   async function loadBrandConfig(brandId){
     try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
-
     try{
       const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
       if(r.ok){
@@ -729,7 +698,6 @@ We will inject user details below.`,
         return normalizeBrand(parsed, brandId);
       }
     }catch(e){}
-
     return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
   }
 
@@ -737,7 +705,6 @@ We will inject user details below.`,
     const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
     const theme = raw.theme || raw.colors || {};
     const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
-
     return {
       id: raw.id || brandId,
       title_en: raw.title_en || raw.title || fb.title_en,
@@ -779,9 +746,7 @@ We will inject user details below.`,
     document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
   }
 
-  /* ===========================
-     Carousel / preview logic
-  =========================== */
+  /* Carousel / preview */
   let brandCfg = null;
   let items = [];
   let selectedIndex = 0;
@@ -845,7 +810,11 @@ We will inject user details below.`,
         <div class="thumbPlay">▶</div>
         <img alt="poster" src="${it.poster || ""}">
         <div class="thumbMeta">
-          <span class="thumbTag">${(currentLang==="ar") ? (it.kind==="new" ? i18n.ar.newTag : i18n.ar.demoTag) : (it.kind==="new" ? i18n.en.newTag : i18n.en.demoTag)}</span>
+          <span class="thumbTag">${
+            (currentLang==="ar")
+              ? (it.kind==="new" ? i18n.ar.newTag : i18n.ar.demoTag)
+              : (it.kind==="new" ? i18n.en.newTag : i18n.en.demoTag)
+          }</span>
           <span style="opacity:.75">${idx+1}</span>
         </div>
       `;
@@ -875,9 +844,7 @@ We will inject user details below.`,
     dots.forEach((d,i)=>d.classList.toggle("on", i===page));
   }
 
-  /* ===========================
-     Mode switching
-  =========================== */
+  /* Mode switching */
   const imagesBox = $("imagesBox");
   $("modeText").addEventListener("click", ()=>{
     $("modeText").classList.add("on");
@@ -890,9 +857,7 @@ We will inject user details below.`,
     imagesBox.style.display = "block";
   });
 
-  /* ===========================
-     Prompt builder + API
-  =========================== */
+  /* Prompt builder + API */
   function buildPrompt(){
     const base = $("basePrompt").textContent || "";
     const subject = ($("subject").value || "").trim();
@@ -934,15 +899,22 @@ We will inject user details below.`,
     try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; }
   }
 
+  // ✅ UX: bar stays <= 95% until video is REALLY ready
   function setTimerText(secondsLeft){
     if(currentLang === "ar"){
-      $("timerText").textContent = secondsLeft > 0 ? toArabicDigits(`${secondsLeft} ث`) : i18n.ar.waiting;
-    }else{
-      $("timerText").textContent = secondsLeft > 0 ? `~${secondsLeft}s` : i18n.en.waiting;
+      $("timerText").textContent =
+        secondsLeft > 0
+          ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)`
+          : i18n.ar.waiting;
+    } else {
+      $("timerText").textContent =
+        secondsLeft > 0
+          ? `Generating… (~${secondsLeft}s)`
+          : i18n.en.waiting;
     }
   }
-  function setDoneText(){
-    $("timerText").textContent = (currentLang==="ar") ? i18n.ar.done : i18n.en.done;
+  function setReadyText(){
+    $("timerText").textContent = (currentLang==="ar") ? i18n.ar.ready : i18n.en.ready;
   }
 
   async function generate(){
@@ -953,9 +925,13 @@ We will inject user details below.`,
     $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
     applyLang(currentLang);
 
+    // show progress UI (under copy/download)
     $("resultBox").style.display = "block";
     $("bar").style.width = "0%";
     $("resultNote").textContent = "";
+
+    // show initial text immediately
+    setTimerText(60);
 
     const maxSeconds = 60;
     const start = Date.now();
@@ -963,10 +939,14 @@ We will inject user details below.`,
 
     const tick = ()=>{
       const elapsed = (Date.now()-start)/1000;
+
+      // ✅ NEVER 100% while waiting — cap at 95%
       const p = Math.min(95, (elapsed/maxSeconds)*95);
       $("bar").style.width = p + "%";
+
       const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
       setTimerText(remain);
+
       rafId = requestAnimationFrame(tick);
     };
     tick();
@@ -977,6 +957,7 @@ We will inject user details below.`,
       const gen = await postJSON({ action:"generate", modelId: MODEL_ID, prompt });
       const operationName = gen.operationName || gen.name;
 
+      // If API returns immediately ready
       if(gen.done && gen.downloadUrl){
         onGenerated(gen.downloadUrl);
         return;
@@ -1010,8 +991,9 @@ We will inject user details below.`,
   }
 
   function onGenerated(downloadUrl){
+    // ✅ NOW we can jump to 100%
     $("bar").style.width = "100%";
-    setDoneText();
+    setReadyText();
 
     saveLastUrl(downloadUrl);
 
@@ -1035,7 +1017,7 @@ We will inject user details below.`,
       : "✅ New video generated. Tap “Play” to open it fast.";
   }
 
-  // buttons
+  /* Buttons */
   $("generateBtn").addEventListener("click", generate);
 
   function getCurrentVideoUrl(){
@@ -1064,9 +1046,7 @@ We will inject user details below.`,
     }
   });
 
-  /* ===========================
-     Language apply
-  =========================== */
+  /* Language */
   function applyLang(lang){
     currentLang = lang;
     const t = i18n[lang];
@@ -1114,9 +1094,7 @@ We will inject user details below.`,
     applyLang(currentLang === "en" ? "ar" : "en");
   });
 
-  /* ===========================
-     Boot
-  =========================== */
+  /* Boot */
   async function boot(){
     const brandId = getBrandFromUrl();
     brandCfg = await loadBrandConfig(brandId);
