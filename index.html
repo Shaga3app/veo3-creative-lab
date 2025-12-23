@@ -487,6 +487,9 @@
   const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
   const MODEL_ID = "veo-3.1-generate-001";
 
+  // ✅ IMPORTANT: Must match Lambda env var VEO3_API_KEY exactly
+  const API_KEY = "v3_9f8c2d1a_6b7c8d9e_0a1b2c3d4e5f9n5v";
+
   const LAST_URL_KEY = "shaga3app_last_video_url";
   const LAST_BRAND_KEY = "shaga3app_last_brand";
 
@@ -876,7 +879,10 @@ We will inject user details below.`,
     const url = API_URL + "?t=" + Date.now();
     const r = await fetch(url,{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{
+        "Content-Type":"application/json",
+        "X-API-KEY": API_KEY
+      },
       body: JSON.stringify(payload),
     });
     const text = await r.text();
