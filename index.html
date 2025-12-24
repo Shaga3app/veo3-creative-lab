@@ -483,6 +483,25 @@
 <script>
   const $ = id => document.getElementById(id);
 
+  /* ===========================
+     STEP 2A — Device ID (anti-abuse)
+     - Creates a stable ID per browser/device
+     - Stored in localStorage so it stays after refresh
+  =========================== */
+  const DEVICE_ID_KEY = "shaga3_device_id";
+  function getDeviceId(){
+    try{
+      let id = localStorage.getItem(DEVICE_ID_KEY);
+      if(!id){
+        id = "dev_" + (crypto.randomUUID ? crypto.randomUUID() : (Date.now() + "_" + Math.random().toString(16).slice(2)));
+        localStorage.setItem(DEVICE_ID_KEY, id);
+      }
+      return id;
+    }catch(e){
+      return "dev_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    }
+  }
+
   /* API settings */
   const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
   const MODEL_ID = "veo-3.1-generate-001";
@@ -960,7 +979,14 @@ We will inject user details below.`,
     try{
       const prompt = buildPrompt();
 
-      const gen = await postJSON({ action:"generate", modelId: MODEL_ID, prompt });
+      // ✅ Step 2A: send deviceId with generate
+      const gen = await postJSON({
+        action:"generate",
+        modelId: MODEL_ID,
+        prompt,
+        deviceId: getDeviceId()
+      });
+
       const operationName = gen.operationName || gen.name;
 
       // If API returns immediately ready
@@ -977,7 +1003,14 @@ We will inject user details below.`,
 
       for(let i=0;i<maxPolls;i++){
         await new Promise(res=>setTimeout(res, pollEveryMs));
-        const chk = await postJSON({ action:"check", modelId: MODEL_ID, operationName });
+
+        // ✅ Step 2A: send deviceId with check
+        const chk = await postJSON({
+          action:"check",
+          modelId: MODEL_ID,
+          operationName,
+          deviceId: getDeviceId()
+        });
 
         if(chk.done && chk.downloadUrl){ doneUrl = chk.downloadUrl; break; }
         if(chk.done && chk.response && chk.response.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
