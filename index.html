@@ -389,7 +389,7 @@
       <!-- Hero -->
       <div class="hero">
         <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
-        <p id="heroDesc">You get up to <b id="triesInline">3</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
+        <p id="heroDesc">You get up to <b id="triesInline">2</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
       </div>
 
       <!-- Locked prompt -->
@@ -397,7 +397,7 @@
       <div class="lockedBox">
         <div class="lockedTop">
           <div class="lockedTag" id="lockedTag">🔒 Locked</div>
-          <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">3</b></div>
+          <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">2</b></div>
         </div>
         <div class="lockedPrompt" id="basePrompt"></div>
       </div>
@@ -914,7 +914,7 @@ We will inject user details below.`,
     return data;
   }
 
-  let trials = 3;
+  let trials = 2;
   let generating = false;
 
   function saveLastUrl(url){
