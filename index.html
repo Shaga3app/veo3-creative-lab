@@ -485,8 +485,6 @@
 
   /* ===========================
      STEP 2A — Device ID (anti-abuse)
-     - Creates a stable ID per browser/device
-     - Stored in localStorage so it stays after refresh
   =========================== */
   const DEVICE_ID_KEY = "shaga3_device_id";
   function getDeviceId(){
@@ -500,6 +498,67 @@
     }catch(e){
       return "dev_" + Date.now() + "_" + Math.random().toString(16).slice(2);
     }
+  }
+
+  /* ===========================
+     ✅ Trials UI persistence (client-side mirror)
+     - Server is the truth (MongoDB rate limit).
+     - This keeps the NUMBER consistent after refresh.
+     - Resets after 24h locally.
+  =========================== */
+  const TRIALS_MAX = 2; // match MAX_TRIALS in Lambda (default 2)
+  const TRIALS_STATE_KEY = "shaga3_trials_state_v1";
+  const TRIALS_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+  function loadTrialsState(){
+    try{
+      const raw = localStorage.getItem(TRIALS_STATE_KEY);
+      if(!raw) return { windowStart: Date.now(), used: 0 };
+      const s = JSON.parse(raw);
+      if(!s || typeof s.windowStart !== "number" || typeof s.used !== "number"){
+        return { windowStart: Date.now(), used: 0 };
+      }
+      // reset if window expired
+      if(Date.now() - s.windowStart >= TRIALS_WINDOW_MS){
+        return { windowStart: Date.now(), used: 0 };
+      }
+      // clamp
+      s.used = Math.max(0, Math.min(TRIALS_MAX, Math.floor(s.used)));
+      return s;
+    }catch(e){
+      return { windowStart: Date.now(), used: 0 };
+    }
+  }
+
+  function saveTrialsState(state){
+    try{ localStorage.setItem(TRIALS_STATE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  function getTrialsLeftFromState(state){
+    return Math.max(0, TRIALS_MAX - (state.used || 0));
+  }
+
+  function setTrialsLeft(n){
+    trials = Math.max(0, Math.min(TRIALS_MAX, Number(n||0)));
+    $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+    const triesNum = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+    // update hero line (keeps same template)
+    const t = i18n[currentLang];
+    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
+  }
+
+  function consumeOneTrial(){
+    const s = loadTrialsState();
+    s.used = Math.min(TRIALS_MAX, (s.used||0) + 1);
+    saveTrialsState(s);
+    setTrialsLeft(getTrialsLeftFromState(s));
+  }
+
+  function hardLockTrialsToZero(){
+    const s = loadTrialsState();
+    s.used = TRIALS_MAX;
+    saveTrialsState(s);
+    setTrialsLeft(0);
   }
 
   /* API settings */
@@ -542,7 +601,8 @@
       ready: "Ready ✅",
       copied: "Link copied ✅",
       newTag: "New",
-      demoTag: "Demo"
+      demoTag: "Demo",
+      limitReached: "❌ You reached the max trials for today. Try again tomorrow."
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
@@ -572,7 +632,8 @@
       ready: "جاهز ✅",
       copied: "تم نسخ الرابط ✅",
       newTag: "جديد",
-      demoTag: "ديمو"
+      demoTag: "ديمو",
+      limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة."
     }
   };
 
@@ -909,19 +970,23 @@ We will inject user details below.`,
     try{ data = JSON.parse(text); }catch(e){ data = { raw:text }; }
     if(!r.ok){
       const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
-      throw new Error(msg);
+      // keep status visible inside message for detection
+      throw new Error(`${msg} (HTTP ${r.status})`);
     }
     return data;
   }
 
-  let trials = 2;
+  // ✅ initialize trials from localStorage mirror
+  let trialsState = loadTrialsState();
+  let trials = getTrialsLeftFromState(trialsState);
   let generating = false;
 
+  const LAST_URL_KEY2 = "shaga3app_last_video_url"; // keep original key name usage
   function saveLastUrl(url){
-    try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){}
+    try{ localStorage.setItem(LAST_URL_KEY2, url); }catch(e){}
   }
   function loadLastUrl(){
-    try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; }
+    try{ return localStorage.getItem(LAST_URL_KEY2) || ""; }catch(e){ return ""; }
   }
 
   // ✅ UX: bar stays <= 95% until video is REALLY ready
@@ -942,13 +1007,34 @@ We will inject user details below.`,
     $("timerText").textContent = (currentLang==="ar") ? i18n.ar.ready : i18n.en.ready;
   }
 
-  async function generate(){
-    if(generating || trials<=0) return;
-    generating = true;
+  function showLimitReached(){
+    $("resultBox").style.display = "block";
+    $("bar").style.width = "0%";
+    $("timerText").textContent = (currentLang==="ar") ? i18n.ar.limitReached : i18n.en.limitReached;
+    $("resultNote").textContent = "";
+  }
 
-    trials--;
-    $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
-    applyLang(currentLang);
+  function isTrialLimitErrorMessage(msg){
+    const m = String(msg||"").toUpperCase();
+    return (
+      m.includes("TRIAL_LIMIT_REACHED") ||
+      m.includes("LIMIT_REACHED") ||
+      m.includes("HTTP 429") ||
+      m.includes("(HTTP 429)") ||
+      m.includes("429")
+    );
+  }
+
+  async function generate(){
+    if(generating) return;
+
+    // ✅ if UI says 0 trials, block immediately (prevents fake “2” after refresh)
+    if(trials <= 0){
+      showLimitReached();
+      return;
+    }
+
+    generating = true;
 
     // show progress UI (under copy/download)
     $("resultBox").style.display = "block";
@@ -979,13 +1065,15 @@ We will inject user details below.`,
     try{
       const prompt = buildPrompt();
 
-      // ✅ Step 2A: send deviceId with generate
       const gen = await postJSON({
         action:"generate",
         modelId: MODEL_ID,
         prompt,
         deviceId: getDeviceId()
       });
+
+      // ✅ ONLY NOW we consume a trial locally (server accepted)
+      consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
 
@@ -1004,7 +1092,6 @@ We will inject user details below.`,
       for(let i=0;i<maxPolls;i++){
         await new Promise(res=>setTimeout(res, pollEveryMs));
 
-        // ✅ Step 2A: send deviceId with check
         const chk = await postJSON({
           action:"check",
           modelId: MODEL_ID,
@@ -1021,8 +1108,16 @@ We will inject user details below.`,
       onGenerated(doneUrl);
 
     }catch(err){
-      $("timerText").textContent = "Error: " + (err?.message || "Unknown error");
-      $("bar").style.width = "0%";
+      const msg = (err?.message || "Unknown error");
+
+      // ✅ If server says limit reached → show Arabic/English + lock local to 0
+      if(isTrialLimitErrorMessage(msg)){
+        hardLockTrialsToZero();
+        showLimitReached();
+      }else{
+        $("timerText").textContent = "Error: " + msg;
+        $("bar").style.width = "0%";
+      }
     }finally{
       generating = false;
       if(rafId) cancelAnimationFrame(rafId);
@@ -1124,6 +1219,9 @@ We will inject user details below.`,
     document.documentElement.lang = (lang === "ar") ? "ar" : "en";
     $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
 
+    // keep trials numbers consistent after toggle
+    $("trialsLeft").textContent = (lang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+
     renderBasePrompt();
     renderThumbs();
     setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
@@ -1135,6 +1233,11 @@ We will inject user details below.`,
 
   /* Boot */
   async function boot(){
+    // ✅ load trials from local mirror FIRST (fix refresh showing 2)
+    trialsState = loadTrialsState();
+    trials = getTrialsLeftFromState(trialsState);
+    setTrialsLeft(trials); // updates both hero + locked box
+
     const brandId = getBrandFromUrl();
     brandCfg = await loadBrandConfig(brandId);
 
