@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -445,13 +446,13 @@
           <div style="display:flex; flex-direction:column; gap:6px;">
             <div style="font-size:12px; opacity:.75;" id="startPrevLbl">Start image</div>
             <img id="startPreview" alt="start preview"
-                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:none;">
+                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
           </div>
 
           <div style="display:flex; flex-direction:column; gap:6px;">
             <div style="font-size:12px; opacity:.75;" id="endPrevLbl">End image</div>
             <img id="endPreview" alt="end preview"
-                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:none;">
+                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
           </div>
         </div>
 
@@ -509,12 +510,12 @@
     if(!imgEl) return;
     if(!file){
       imgEl.src = "";
-      imgEl.style.display = "none";
+      imgEl.style.opacity = "0";
       return;
     }
     const url = URL.createObjectURL(file);
     imgEl.src = url;
-    imgEl.style.display = "block";
+    imgEl.style.opacity = "1";
   }
 
   function initI2VInputs(){
@@ -702,6 +703,49 @@
   }
 
   let currentLang = "en";
+
+  /* ===========================
+     ✅ INPUT MODE FLAG (added)
+  =========================== */
+  let INPUT_MODE = "text"; // "text" or "images"
+
+  /* ===========================
+     ✅ Helpers to send images (added)
+  =========================== */
+  function fileToBase64(file){
+    return new Promise((resolve, reject)=>{
+      try{
+        const fr = new FileReader();
+        fr.onload = () => {
+          const dataUrl = String(fr.result || "");
+          const b64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
+          if(!b64) return reject(new Error("Failed to read image"));
+          resolve(b64);
+        };
+        fr.onerror = () => reject(new Error("Failed to read image"));
+        fr.readAsDataURL(file);
+      }catch(e){
+        reject(new Error("Failed to read image"));
+      }
+    });
+  }
+
+  function assertI2VFiles(){
+    if(!I2V_START_FILE || !I2V_END_FILE){
+      const msg = (currentLang === "ar")
+        ? "من فضلك ارفع صورة البداية وصورة النهاية."
+        : "Please upload both Start and End images.";
+      throw new Error(msg);
+    }
+
+    const maxBytes = 3 * 1024 * 1024; // 3MB each
+    if(I2V_START_FILE.size > maxBytes || I2V_END_FILE.size > maxBytes){
+      const msg = (currentLang === "ar")
+        ? "الصور كبيرة جدًا. جرّب صور أصغر (أقل من 3MB)."
+        : "Images are too large. Please use smaller images (under 3MB).";
+      throw new Error(msg);
+    }
+  }
 
   /* Brand config */
   function getBrandFromUrl(){
@@ -989,11 +1033,13 @@ We will inject user details below.`,
   /* Mode switching */
   const imagesBox = $("imagesBox");
   $("modeText").addEventListener("click", ()=>{
+    INPUT_MODE = "text";
     $("modeText").classList.add("on");
     $("modeImages").classList.remove("on");
     imagesBox.style.display = "none";
   });
   $("modeImages").addEventListener("click", ()=>{
+    INPUT_MODE = "images";
     $("modeImages").classList.add("on");
     $("modeText").classList.remove("on");
     imagesBox.style.display = "block";
@@ -1109,7 +1155,7 @@ We will inject user details below.`,
     const tick = ()=>{
       const elapsed = (Date.now()-start)/1000;
 
-      // ✅ NEVER 100% while waiting — cap at 95%
+      // ✅ NEVER 100% while waiting . cap at 95%
       const p = Math.min(95, (elapsed/maxSeconds)*95);
       $("bar").style.width = p + "%";
 
@@ -1123,11 +1169,39 @@ We will inject user details below.`,
     try{
       const prompt = buildPrompt();
 
+      // ✅ If Image Mode: attach start+end images (added)
+      let i2v = null;
+      if(INPUT_MODE === "images"){
+        assertI2VFiles();
+
+        $("resultNote").textContent = (currentLang === "ar")
+          ? "جارٍ رفع الصور وتجهيز الفيديو…"
+          : "Preparing images and generating video…";
+
+        const startB64 = await fileToBase64(I2V_START_FILE);
+        const endB64 = await fileToBase64(I2V_END_FILE);
+
+        i2v = {
+          start: {
+            name: I2V_START_FILE.name || "start.jpg",
+            mime: I2V_START_FILE.type || "image/jpeg",
+            b64: startB64
+          },
+          end: {
+            name: I2V_END_FILE.name || "end.jpg",
+            mime: I2V_END_FILE.type || "image/jpeg",
+            b64: endB64
+          }
+        };
+      }
+
       const gen = await postJSON({
         action:"generate",
         modelId: MODEL_ID,
         prompt,
-        deviceId: getDeviceId()
+        deviceId: getDeviceId(),
+        inputMode: INPUT_MODE,
+        i2v
       });
 
       // ✅ ONLY NOW we consume a trial locally (server accepted)
@@ -1168,7 +1242,7 @@ We will inject user details below.`,
     }catch(err){
       const msg = (err?.message || "Unknown error");
 
-      // ✅ If server says limit reached → show Arabic/English + lock local to 0
+      // ✅ If server says limit reached . show Arabic/English . lock local to 0
       if(isTrialLimitErrorMessage(msg)){
         hardLockTrialsToZero();
         showLimitReached();
@@ -1322,3 +1396,4 @@ We will inject user details below.`,
 </script>
 </body>
 </html>
+```
