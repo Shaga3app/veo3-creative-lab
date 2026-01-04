@@ -486,7 +486,7 @@
         </div>
       </div>
 
-      <!-- Progress/status -->
+      <!-- Progress -->
       <div class="result" id="resultBox">
         <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;"></div>
         <div class="progress"><div class="bar" id="bar"></div></div>
@@ -539,7 +539,7 @@
   }
 
   /* ===========================
-     Device ID (anti-abuse)
+     Device ID
   =========================== */
   const DEVICE_ID_KEY = "shaga3_device_id";
   function getDeviceId(){
@@ -610,18 +610,19 @@
     setTrialsLeft(0);
   }
 
-  /* API settings */
+  /* ===========================
+     API settings
+  =========================== */
   const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
   const MODEL_ID = "veo-3.1-generate-001";
   const API_KEY = "v3_9f8c2d1a_6b7c8d9e_0a1b2c3d4e5f9n5v";
 
-  const LAST_URL_KEY2 = "shaga3app_last_video_url";
-  function saveLastUrl(url){ try{ localStorage.setItem(LAST_URL_KEY2, url); }catch(e){} }
-  function loadLastUrl(){ try{ return localStorage.getItem(LAST_URL_KEY2) || ""; }catch(e){ return ""; } }
-
+  const LAST_URL_KEY = "shaga3app_last_video_url";
   const LAST_BRAND_KEY = "shaga3app_last_brand";
 
-  /* i18n (keep as you had) */
+  /* ===========================
+     i18n
+  =========================== */
   const i18n = {
     en: {
       heroTitle: "Play with our<br>guided video<br>prompt",
@@ -655,9 +656,9 @@
       limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
       startPrev: "Start image",
       endPrev: "End image",
-      imgMissing: "Please upload BOTH start and end images.",
-      imgTooBig: "Each image must be under 2MB.",
-      imgType: "Allowed types: PNG, JPG, or WEBP."
+      imgPrep: "Preparing images and generating video…",
+      imgTooBig: "Images are still too large after compression. Use smaller images.",
+      needBoth: "Please upload both Start and End images."
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
@@ -691,9 +692,9 @@
       limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
       startPrev: "صورة البداية",
       endPrev: "صورة النهاية",
-      imgMissing: "لازم ترفع صورة البداية وصورة النهاية.",
-      imgTooBig: "كل صورة لازم تكون أقل من ٢ ميجا.",
-      imgType: "الأنواع المسموحة: PNG أو JPG أو WEBP."
+      imgPrep: "جارٍ تجهيز الصور وتوليد الفيديو…",
+      imgTooBig: "الصور مازالت كبيرة بعد الضغط. جرّب صور أصغر.",
+      needBoth: "من فضلك ارفع صورة البداية وصورة النهاية."
     }
   };
 
@@ -705,53 +706,98 @@
   let currentLang = "en";
 
   /* ===========================
-     ✅ Input mode
+     Input mode flag
   =========================== */
-  let INPUT_MODE = "text"; // "text" | "images"
+  let INPUT_MODE = "text";
 
   /* ===========================
-     ✅ Image → base64 helpers
-     IMPORTANT: We send i2v in the EXACT shape your Lambda needs
-     {
-       i2v: {
-         mode: "first_last_frames",
-         startImage: { mimeType, bytesBase64 },
-         endImage: { mimeType, bytesBase64 }
-       }
-     }
+     I2V. Resize and compress to avoid 502
+     Goal. Keep payload small and consistent across phones and browsers
   =========================== */
-  function fileToBase64(file){
+  function approxBytesFromBase64(b64){
+    return Math.floor((b64.length * 3) / 4);
+  }
+
+  function loadImageFromFile(file){
     return new Promise((resolve, reject)=>{
-      const fr = new FileReader();
-      fr.onload = () => {
-        const dataUrl = String(fr.result || "");
-        const comma = dataUrl.indexOf(",");
-        if(comma < 0) return reject(new Error("Invalid data URL"));
-        resolve(dataUrl.slice(comma + 1));
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = ()=>{
+        URL.revokeObjectURL(url);
+        resolve(img);
       };
-      fr.onerror = () => reject(new Error("Failed to read image"));
-      fr.readAsDataURL(file);
+      img.onerror = ()=>{
+        URL.revokeObjectURL(url);
+        reject(new Error("Failed to decode image"));
+      };
+      img.src = url;
     });
   }
 
-  function validateI2VFiles(){
+  async function fileToResizedJpegBase64(file, maxDim = 1024, quality = 0.82){
+    const img = await loadImageFromFile(file);
+
+    let w = img.naturalWidth || img.width;
+    let h = img.naturalHeight || img.height;
+    if(!w || !h) throw new Error("Invalid image dimensions");
+
+    const scale = Math.min(1, maxDim / Math.max(w, h));
+    const outW = Math.max(1, Math.round(w * scale));
+    const outH = Math.max(1, Math.round(h * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = outW;
+    canvas.height = outH;
+
+    const ctx = canvas.getContext("2d", { alpha: false });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, outW, outH);
+
+    const dataUrl = canvas.toDataURL("image/jpeg", quality);
+    const b64 = (dataUrl.split(",")[1] || "");
+    if(!b64) throw new Error("Failed to encode image");
+
+    return { b64, mime: "image/jpeg", width: outW, height: outH };
+  }
+
+  async function fileToSafeBase64(file){
+    // Try a few steps to fit under a safe payload size
+    // Step 1. 1024 @ 0.82
+    // Step 2. 896 @ 0.78
+    // Step 3. 768 @ 0.72
+    const tries = [
+      { maxDim: 1024, q: 0.82 },
+      { maxDim: 896,  q: 0.78 },
+      { maxDim: 768,  q: 0.72 }
+    ];
+
+    let last = null;
+    for(const t of tries){
+      last = await fileToResizedJpegBase64(file, t.maxDim, t.q);
+      if(approxBytesFromBase64(last.b64) <= 2.1 * 1024 * 1024){
+        return last;
+      }
+    }
+    return last;
+  }
+
+  function assertI2VFiles(){
     if(!I2V_START_FILE || !I2V_END_FILE){
-      throw new Error(i18n[currentLang].imgMissing);
+      throw new Error(i18n[currentLang].needBoth);
     }
-    const okTypes = new Set(["image/png","image/jpeg","image/jpg","image/webp"]);
-    const sType = (I2V_START_FILE.type || "").toLowerCase();
-    const eType = (I2V_END_FILE.type || "").toLowerCase();
-    if(!okTypes.has(sType) || !okTypes.has(eType)){
-      throw new Error(i18n[currentLang].imgType);
-    }
-    // keep conservative. If you want 3MB, also raise Lambda limits.
-    const MAX_BYTES = 2 * 1024 * 1024;
-    if(I2V_START_FILE.size > MAX_BYTES || I2V_END_FILE.size > MAX_BYTES){
-      throw new Error(i18n[currentLang].imgTooBig);
+
+    // Very loose raw cap. We compress anyway.
+    const rawCap = 12 * 1024 * 1024;
+    if(I2V_START_FILE.size > rawCap || I2V_END_FILE.size > rawCap){
+      const msg = (currentLang === "ar")
+        ? "حجم الصور كبير جدًا. جرّب صور أصغر."
+        : "Images are too large. Please use smaller files.";
+      throw new Error(msg);
     }
   }
 
-  /* Brand config (keep as you had) */
+  /* Brand config */
   function getBrandFromUrl(){
     const u = new URL(location.href);
     const b = (u.searchParams.get("brand") || "").trim().toLowerCase();
@@ -789,6 +835,58 @@ The scene follows this base concept, and we will inject the user details below.`
 لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد . بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين كده أو فيك.
 المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.`,
       demos: demoPack("purple")
+    },
+    cocacola: {
+      id:"cocacola",
+      title_en:"Coca-Cola · AI Video Lab",
+      title_ar:"كوكاكولا · AI Video Lab",
+      beta_en:"Demo · Coca-Cola",
+      beta_ar:"ديمو · كوكاكولا",
+      logo:"assets/brand-logos/cocacola.png",
+      theme:{
+        bg:"#12070a",
+        accent:"#e11d2e",
+        accent2:"#ffb000",
+        heroGradA:"rgba(225,29,46,.22)",
+        heroGradB:"rgba(255,176,0,.10)"
+      },
+      basePrompt_en:
+`BASE (LOCKED)
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
+The scene must feature an ultra-realistic Coca-Cola can naturally integrated (not placed/fake).
+Keep it premium, cinematic, and believable. We will inject user details below.`,
+      basePrompt_ar:
+`الأساس (مقفول)
+اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
+لازم يظهر علبة كوكاكولا واقعية جدًا داخل المشهد بشكل طبيعي (مش متحطوطه كده).
+المشهد يبقى بريميوم وسينمائي ومقنع. وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("red")
+    },
+    tui: {
+      id:"tui",
+      title_en:"TUI · AI Video Lab",
+      title_ar:"TUI · AI Video Lab",
+      beta_en:"Demo · TUI",
+      beta_ar:"ديمو · TUI",
+      logo:"assets/brand-logos/tui.png",
+      theme:{
+        bg:"#061821",
+        accent:"#2aa8ff",
+        accent2:"#7fe0ff",
+        heroGradA:"rgba(42,168,255,.20)",
+        heroGradB:"rgba(127,224,255,.10)"
+      },
+      basePrompt_en:
+`BASE (LOCKED)
+Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and bright, realistic lighting.
+The scene should feel like a premium TUI destination moment (clean, uplifting, high-end).
+We will inject user details below.`,
+      basePrompt_ar:
+`الأساس (مقفول)
+اعمل فيديو سينمائي عمودي ٩:١٦ بطابع سفر/سياحة، مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية مشرقة.
+المشهد يحسسك بلحظة وجهة سفر بريميوم على ستايل TUI (نضيف، مبهج، راقي).
+وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("blue")
     }
   };
 
@@ -828,7 +926,39 @@ The scene follows this base concept, and we will inject the user details below.`
 
   async function loadBrandConfig(brandId){
     try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
+    try{
+      const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
+      if(r.ok){
+        const txt = await r.text();
+        const parsed = JSON.parse(txt);
+        return normalizeBrand(parsed, brandId);
+      }
+    }catch(e){}
     return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
+  }
+
+  function normalizeBrand(raw, brandId){
+    const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
+    const theme = raw.theme || raw.colors || {};
+    const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
+    return {
+      id: raw.id || brandId,
+      title_en: raw.title_en || raw.title || fb.title_en,
+      title_ar: raw.title_ar || fb.title_ar,
+      beta_en: raw.beta_en || fb.beta_en,
+      beta_ar: raw.beta_ar || fb.beta_ar,
+      logo: raw.logo || fb.logo,
+      theme: {
+        bg: theme.bg || fb.theme.bg,
+        accent: theme.accent || fb.theme.accent,
+        accent2: theme.accent2 || fb.theme.accent2,
+        heroGradA: theme.heroGradA || fb.theme.heroGradA,
+        heroGradB: theme.heroGradB || fb.theme.heroGradB
+      },
+      basePrompt_en: raw.basePrompt_en || fb.basePrompt_en,
+      basePrompt_ar: raw.basePrompt_ar || fb.basePrompt_ar,
+      demos
+    };
   }
 
   function applyTheme(theme){
@@ -852,7 +982,7 @@ The scene follows this base concept, and we will inject the user details below.`
     document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
   }
 
-  /* Carousel / preview */
+  /* Carousel */
   let brandCfg = null;
   let items = [];
   let selectedIndex = 0;
@@ -895,7 +1025,6 @@ The scene follows this base concept, and we will inject the user details below.`
   $("playBtn").addEventListener("click", ()=>{
     const it = items[selectedIndex];
     if(!it) return;
-
     if(it.kind === "new"){
       openVideoViewer(it.video);
       return;
@@ -1000,17 +1129,30 @@ The scene follows this base concept, and we will inject the user details below.`
     return data;
   }
 
+  // init trials from local mirror
   let trialsState = loadTrialsState();
   let trials = getTrialsLeftFromState(trialsState);
   let generating = false;
 
+  function saveLastUrl(url){
+    try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){}
+  }
+  function loadLastUrl(){
+    try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; }
+  }
+
+  // UX. Bar stays <= 95% until ready
   function setTimerText(secondsLeft){
     if(currentLang === "ar"){
       $("timerText").textContent =
-        secondsLeft > 0 ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)` : i18n.ar.waiting;
+        secondsLeft > 0
+          ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)`
+          : i18n.ar.waiting;
     } else {
       $("timerText").textContent =
-        secondsLeft > 0 ? `Generating… (~${secondsLeft}s)` : i18n.en.waiting;
+        secondsLeft > 0
+          ? `Generating… (~${secondsLeft}s)`
+          : i18n.en.waiting;
     }
   }
   function setReadyText(){
@@ -1059,8 +1201,10 @@ The scene follows this base concept, and we will inject the user details below.`
       const elapsed = (Date.now()-start)/1000;
       const p = Math.min(95, (elapsed/maxSeconds)*95);
       $("bar").style.width = p + "%";
+
       const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
       setTimerText(remain);
+
       rafId = requestAnimationFrame(tick);
     };
     tick();
@@ -1068,34 +1212,42 @@ The scene follows this base concept, and we will inject the user details below.`
     try{
       const prompt = buildPrompt();
 
-      // ✅ Build payload
-      const payload = {
-        action:"generate",
-        modelId: MODEL_ID,
-        prompt,
-        deviceId: getDeviceId()
-      };
-
-      // ✅ If images mode, attach i2v in the CORRECT shape expected by your Lambda
+      let i2v = null;
       if(INPUT_MODE === "images"){
-        validateI2VFiles();
+        assertI2VFiles();
+        $("resultNote").textContent = i18n[currentLang].imgPrep;
 
-        $("resultNote").textContent = (currentLang === "ar")
-          ? "جارٍ تجهيز الصور…"
-          : "Preparing images…";
+        // Compress both images aggressively to avoid 502
+        const startEnc = await fileToSafeBase64(I2V_START_FILE);
+        const endEnc   = await fileToSafeBase64(I2V_END_FILE);
 
-        const startB64 = await fileToBase64(I2V_START_FILE);
-        const endB64 = await fileToBase64(I2V_END_FILE);
+        const startBytes = approxBytesFromBase64(startEnc.b64);
+        const endBytes   = approxBytesFromBase64(endEnc.b64);
+        const totalBytes = startBytes + endBytes;
 
-        payload.i2v = {
-          mode: "first_last_frames",
-          startImage: { mimeType: I2V_START_FILE.type || "image/jpeg", bytesBase64: startB64 },
-          endImage: { mimeType: I2V_END_FILE.type || "image/jpeg", bytesBase64: endB64 }
+        // Keep total under ~4.2MB base64 payload for i2v combined
+        // This is conservative for Lambda URL and JSON parsing overhead
+        const safeTotal = 4.2 * 1024 * 1024;
+        if(totalBytes > safeTotal){
+          throw new Error(i18n[currentLang].imgTooBig);
+        }
+
+        i2v = {
+          start: { name: "start.jpg", mime: startEnc.mime, b64: startEnc.b64, w: startEnc.width, h: startEnc.height },
+          end:   { name: "end.jpg",   mime: endEnc.mime,   b64: endEnc.b64,   w: endEnc.width,   h: endEnc.height }
         };
       }
 
-      const gen = await postJSON(payload);
+      const gen = await postJSON({
+        action:"generate",
+        modelId: MODEL_ID,
+        prompt,
+        deviceId: getDeviceId(),
+        inputMode: INPUT_MODE,
+        i2v
+      });
 
+      // only now consume locally
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
@@ -1200,6 +1352,7 @@ The scene follows this base concept, and we will inject the user details below.`
     }
   });
 
+  /* Language */
   function applyLang(lang){
     currentLang = lang;
     const t = i18n[lang];
