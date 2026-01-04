@@ -1,4 +1,3 @@
-```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -441,7 +440,7 @@
         <input type="file" id="startImg" accept="image/*">
         <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
 
-        <!-- I2V previews (added) -->
+        <!-- I2V previews -->
         <div id="i2vPreview" style="display:flex; gap:12px; margin-top:10px; flex-wrap:wrap;">
           <div style="display:flex; flex-direction:column; gap:6px;">
             <div style="font-size:12px; opacity:.75;" id="startPrevLbl">Start image</div>
@@ -487,7 +486,7 @@
         </div>
       </div>
 
-      <!-- ✅ Progress/status under Copy/Download, NEVER 100% until ready -->
+      <!-- Progress/status -->
       <div class="result" id="resultBox">
         <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;"></div>
         <div class="progress"><div class="bar" id="bar"></div></div>
@@ -501,7 +500,7 @@
   const $ = id => document.getElementById(id);
 
   /* ===========================
-     I2V. Store selected images + show previews (added)
+     I2V. Store selected images + show previews
   =========================== */
   let I2V_START_FILE = null;
   let I2V_END_FILE = null;
@@ -540,7 +539,7 @@
   }
 
   /* ===========================
-     STEP 2A . Device ID (anti-abuse)
+     Device ID (anti-abuse)
   =========================== */
   const DEVICE_ID_KEY = "shaga3_device_id";
   function getDeviceId(){
@@ -557,12 +556,9 @@
   }
 
   /* ===========================
-     ✅ Trials UI persistence (client-side mirror)
-     . Server is the truth (MongoDB rate limit).
-     . This keeps the NUMBER consistent after refresh.
-     . Resets after 24h locally.
+     Trials UI persistence
   =========================== */
-  const TRIALS_MAX = 2; // match MAX_TRIALS in Lambda (default 2)
+  const TRIALS_MAX = 2;
   const TRIALS_STATE_KEY = "shaga3_trials_state_v1";
   const TRIALS_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -574,11 +570,9 @@
       if(!s || typeof s.windowStart !== "number" || typeof s.used !== "number"){
         return { windowStart: Date.now(), used: 0 };
       }
-      // reset if window expired
       if(Date.now() - s.windowStart >= TRIALS_WINDOW_MS){
         return { windowStart: Date.now(), used: 0 };
       }
-      // clamp
       s.used = Math.max(0, Math.min(TRIALS_MAX, Math.floor(s.used)));
       return s;
     }catch(e){
@@ -598,7 +592,6 @@
     trials = Math.max(0, Math.min(TRIALS_MAX, Number(n||0)));
     $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
     const triesNum = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
-    // update hero line (keeps same template)
     const t = i18n[currentLang];
     $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
   }
@@ -620,14 +613,15 @@
   /* API settings */
   const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
   const MODEL_ID = "veo-3.1-generate-001";
-
-  // ✅ IMPORTANT: Must match Lambda env var VEO3_API_KEY exactly
   const API_KEY = "v3_9f8c2d1a_6b7c8d9e_0a1b2c3d4e5f9n5v";
 
-  const LAST_URL_KEY = "shaga3app_last_video_url";
+  const LAST_URL_KEY2 = "shaga3app_last_video_url";
+  function saveLastUrl(url){ try{ localStorage.setItem(LAST_URL_KEY2, url); }catch(e){} }
+  function loadLastUrl(){ try{ return localStorage.getItem(LAST_URL_KEY2) || ""; }catch(e){ return ""; } }
+
   const LAST_BRAND_KEY = "shaga3app_last_brand";
 
-  /* i18n */
+  /* i18n (keep as you had) */
   const i18n = {
     en: {
       heroTitle: "Play with our<br>guided video<br>prompt",
@@ -660,7 +654,10 @@
       demoTag: "Demo",
       limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
       startPrev: "Start image",
-      endPrev: "End image"
+      endPrev: "End image",
+      imgMissing: "Please upload BOTH start and end images.",
+      imgTooBig: "Each image must be under 2MB.",
+      imgType: "Allowed types: PNG, JPG, or WEBP."
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
@@ -693,7 +690,10 @@
       demoTag: "ديمو",
       limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
       startPrev: "صورة البداية",
-      endPrev: "صورة النهاية"
+      endPrev: "صورة النهاية",
+      imgMissing: "لازم ترفع صورة البداية وصورة النهاية.",
+      imgTooBig: "كل صورة لازم تكون أقل من ٢ ميجا.",
+      imgType: "الأنواع المسموحة: PNG أو JPG أو WEBP."
     }
   };
 
@@ -705,49 +705,53 @@
   let currentLang = "en";
 
   /* ===========================
-     ✅ INPUT MODE FLAG (added)
+     ✅ Input mode
   =========================== */
-  let INPUT_MODE = "text"; // "text" or "images"
+  let INPUT_MODE = "text"; // "text" | "images"
 
   /* ===========================
-     ✅ Helpers to send images (added)
+     ✅ Image → base64 helpers
+     IMPORTANT: We send i2v in the EXACT shape your Lambda needs
+     {
+       i2v: {
+         mode: "first_last_frames",
+         startImage: { mimeType, bytesBase64 },
+         endImage: { mimeType, bytesBase64 }
+       }
+     }
   =========================== */
   function fileToBase64(file){
     return new Promise((resolve, reject)=>{
-      try{
-        const fr = new FileReader();
-        fr.onload = () => {
-          const dataUrl = String(fr.result || "");
-          const b64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
-          if(!b64) return reject(new Error("Failed to read image"));
-          resolve(b64);
-        };
-        fr.onerror = () => reject(new Error("Failed to read image"));
-        fr.readAsDataURL(file);
-      }catch(e){
-        reject(new Error("Failed to read image"));
-      }
+      const fr = new FileReader();
+      fr.onload = () => {
+        const dataUrl = String(fr.result || "");
+        const comma = dataUrl.indexOf(",");
+        if(comma < 0) return reject(new Error("Invalid data URL"));
+        resolve(dataUrl.slice(comma + 1));
+      };
+      fr.onerror = () => reject(new Error("Failed to read image"));
+      fr.readAsDataURL(file);
     });
   }
 
-  function assertI2VFiles(){
+  function validateI2VFiles(){
     if(!I2V_START_FILE || !I2V_END_FILE){
-      const msg = (currentLang === "ar")
-        ? "من فضلك ارفع صورة البداية وصورة النهاية."
-        : "Please upload both Start and End images.";
-      throw new Error(msg);
+      throw new Error(i18n[currentLang].imgMissing);
     }
-
-    const maxBytes = 3 * 1024 * 1024; // 3MB each
-    if(I2V_START_FILE.size > maxBytes || I2V_END_FILE.size > maxBytes){
-      const msg = (currentLang === "ar")
-        ? "الصور كبيرة جدًا. جرّب صور أصغر (أقل من 3MB)."
-        : "Images are too large. Please use smaller images (under 3MB).";
-      throw new Error(msg);
+    const okTypes = new Set(["image/png","image/jpeg","image/jpg","image/webp"]);
+    const sType = (I2V_START_FILE.type || "").toLowerCase();
+    const eType = (I2V_END_FILE.type || "").toLowerCase();
+    if(!okTypes.has(sType) || !okTypes.has(eType)){
+      throw new Error(i18n[currentLang].imgType);
+    }
+    // keep conservative. If you want 3MB, also raise Lambda limits.
+    const MAX_BYTES = 2 * 1024 * 1024;
+    if(I2V_START_FILE.size > MAX_BYTES || I2V_END_FILE.size > MAX_BYTES){
+      throw new Error(i18n[currentLang].imgTooBig);
     }
   }
 
-  /* Brand config */
+  /* Brand config (keep as you had) */
   function getBrandFromUrl(){
     const u = new URL(location.href);
     const b = (u.searchParams.get("brand") || "").trim().toLowerCase();
@@ -785,58 +789,6 @@ The scene follows this base concept, and we will inject the user details below.`
 لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد . بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين كده أو فيك.
 المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.`,
       demos: demoPack("purple")
-    },
-    cocacola: {
-      id:"cocacola",
-      title_en:"Coca-Cola · AI Video Lab",
-      title_ar:"كوكاكولا · AI Video Lab",
-      beta_en:"Demo · Coca-Cola",
-      beta_ar:"ديمو · كوكاكولا",
-      logo:"assets/brand-logos/cocacola.png",
-      theme:{
-        bg:"#12070a",
-        accent:"#e11d2e",
-        accent2:"#ffb000",
-        heroGradA:"rgba(225,29,46,.22)",
-        heroGradB:"rgba(255,176,0,.10)"
-      },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
-The scene must feature an ultra-realistic Coca-Cola can naturally integrated (not placed/fake).
-Keep it premium, cinematic, and believable. We will inject user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا داخل المشهد بشكل طبيعي (مش متحطوطه كده).
-المشهد يبقى بريميوم وسينمائي ومقنع. وإحنا هنضيف تفاصيل المستخدم تحت.`,
-      demos: demoPack("red")
-    },
-    tui: {
-      id:"tui",
-      title_en:"TUI · AI Video Lab",
-      title_ar:"TUI · AI Video Lab",
-      beta_en:"Demo · TUI",
-      beta_ar:"ديمو · TUI",
-      logo:"assets/brand-logos/tui.png",
-      theme:{
-        bg:"#061821",
-        accent:"#2aa8ff",
-        accent2:"#7fe0ff",
-        heroGradA:"rgba(42,168,255,.20)",
-        heroGradB:"rgba(127,224,255,.10)"
-      },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and bright, realistic lighting.
-The scene should feel like a premium TUI destination moment (clean, uplifting, high-end).
-We will inject user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ بطابع سفر/سياحة، مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية مشرقة.
-المشهد يحسسك بلحظة وجهة سفر بريميوم على ستايل TUI (نضيف، مبهج، راقي).
-وإحنا هنضيف تفاصيل المستخدم تحت.`,
-      demos: demoPack("blue")
     }
   };
 
@@ -876,39 +828,7 @@ We will inject user details below.`,
 
   async function loadBrandConfig(brandId){
     try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
-    try{
-      const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
-      if(r.ok){
-        const txt = await r.text();
-        const parsed = JSON.parse(txt);
-        return normalizeBrand(parsed, brandId);
-      }
-    }catch(e){}
     return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
-  }
-
-  function normalizeBrand(raw, brandId){
-    const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
-    const theme = raw.theme || raw.colors || {};
-    const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
-    return {
-      id: raw.id || brandId,
-      title_en: raw.title_en || raw.title || fb.title_en,
-      title_ar: raw.title_ar || fb.title_ar,
-      beta_en: raw.beta_en || fb.beta_en,
-      beta_ar: raw.beta_ar || fb.beta_ar,
-      logo: raw.logo || fb.logo,
-      theme: {
-        bg: theme.bg || fb.theme.bg,
-        accent: theme.accent || fb.theme.accent,
-        accent2: theme.accent2 || fb.theme.accent2,
-        heroGradA: theme.heroGradA || fb.theme.heroGradA,
-        heroGradB: theme.heroGradB || fb.theme.heroGradB
-      },
-      basePrompt_en: raw.basePrompt_en || fb.basePrompt_en,
-      basePrompt_ar: raw.basePrompt_ar || fb.basePrompt_ar,
-      demos
-    };
   }
 
   function applyTheme(theme){
@@ -1080,31 +1000,17 @@ We will inject user details below.`,
     return data;
   }
 
-  // ✅ initialize trials from localStorage mirror
   let trialsState = loadTrialsState();
   let trials = getTrialsLeftFromState(trialsState);
   let generating = false;
 
-  const LAST_URL_KEY2 = "shaga3app_last_video_url"; // keep original key name usage
-  function saveLastUrl(url){
-    try{ localStorage.setItem(LAST_URL_KEY2, url); }catch(e){}
-  }
-  function loadLastUrl(){
-    try{ return localStorage.getItem(LAST_URL_KEY2) || ""; }catch(e){ return ""; }
-  }
-
-  // ✅ UX: bar stays <= 95% until video is REALLY ready
   function setTimerText(secondsLeft){
     if(currentLang === "ar"){
       $("timerText").textContent =
-        secondsLeft > 0
-          ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)`
-          : i18n.ar.waiting;
+        secondsLeft > 0 ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)` : i18n.ar.waiting;
     } else {
       $("timerText").textContent =
-        secondsLeft > 0
-          ? `Generating… (~${secondsLeft}s)`
-          : i18n.en.waiting;
+        secondsLeft > 0 ? `Generating… (~${secondsLeft}s)` : i18n.en.waiting;
     }
   }
   function setReadyText(){
@@ -1132,7 +1038,6 @@ We will inject user details below.`,
   async function generate(){
     if(generating) return;
 
-    // ✅ if UI says 0 trials, block immediately (prevents fake “2” after refresh)
     if(trials <= 0){
       showLimitReached();
       return;
@@ -1140,12 +1045,10 @@ We will inject user details below.`,
 
     generating = true;
 
-    // show progress UI (under copy/download)
     $("resultBox").style.display = "block";
     $("bar").style.width = "0%";
     $("resultNote").textContent = "";
 
-    // show initial text immediately
     setTimerText(60);
 
     const maxSeconds = 60;
@@ -1154,14 +1057,10 @@ We will inject user details below.`,
 
     const tick = ()=>{
       const elapsed = (Date.now()-start)/1000;
-
-      // ✅ NEVER 100% while waiting . cap at 95%
       const p = Math.min(95, (elapsed/maxSeconds)*95);
       $("bar").style.width = p + "%";
-
       const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
       setTimerText(remain);
-
       rafId = requestAnimationFrame(tick);
     };
     tick();
@@ -1169,47 +1068,38 @@ We will inject user details below.`,
     try{
       const prompt = buildPrompt();
 
-      // ✅ If Image Mode: attach start+end images (added)
-      let i2v = null;
+      // ✅ Build payload
+      const payload = {
+        action:"generate",
+        modelId: MODEL_ID,
+        prompt,
+        deviceId: getDeviceId()
+      };
+
+      // ✅ If images mode, attach i2v in the CORRECT shape expected by your Lambda
       if(INPUT_MODE === "images"){
-        assertI2VFiles();
+        validateI2VFiles();
 
         $("resultNote").textContent = (currentLang === "ar")
-          ? "جارٍ رفع الصور وتجهيز الفيديو…"
-          : "Preparing images and generating video…";
+          ? "جارٍ تجهيز الصور…"
+          : "Preparing images…";
 
         const startB64 = await fileToBase64(I2V_START_FILE);
         const endB64 = await fileToBase64(I2V_END_FILE);
 
-        i2v = {
-          start: {
-            name: I2V_START_FILE.name || "start.jpg",
-            mime: I2V_START_FILE.type || "image/jpeg",
-            b64: startB64
-          },
-          end: {
-            name: I2V_END_FILE.name || "end.jpg",
-            mime: I2V_END_FILE.type || "image/jpeg",
-            b64: endB64
-          }
+        payload.i2v = {
+          mode: "first_last_frames",
+          startImage: { mimeType: I2V_START_FILE.type || "image/jpeg", bytesBase64: startB64 },
+          endImage: { mimeType: I2V_END_FILE.type || "image/jpeg", bytesBase64: endB64 }
         };
       }
 
-      const gen = await postJSON({
-        action:"generate",
-        modelId: MODEL_ID,
-        prompt,
-        deviceId: getDeviceId(),
-        inputMode: INPUT_MODE,
-        i2v
-      });
+      const gen = await postJSON(payload);
 
-      // ✅ ONLY NOW we consume a trial locally (server accepted)
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
 
-      // If API returns immediately ready
       if(gen.done && gen.downloadUrl){
         onGenerated(gen.downloadUrl);
         return;
@@ -1242,7 +1132,6 @@ We will inject user details below.`,
     }catch(err){
       const msg = (err?.message || "Unknown error");
 
-      // ✅ If server says limit reached . show Arabic/English . lock local to 0
       if(isTrialLimitErrorMessage(msg)){
         hardLockTrialsToZero();
         showLimitReached();
@@ -1257,7 +1146,6 @@ We will inject user details below.`,
   }
 
   function onGenerated(downloadUrl){
-    // ✅ NOW we can jump to 100%
     $("bar").style.width = "100%";
     setReadyText();
 
@@ -1312,7 +1200,6 @@ We will inject user details below.`,
     }
   });
 
-  /* Language */
   function applyLang(lang){
     currentLang = lang;
     const t = i18n[lang];
@@ -1338,7 +1225,6 @@ We will inject user details below.`,
     $("lblImages").textContent = t.lblImages;
     $("hintImages").textContent = t.hintImages;
 
-    // I2V preview labels (added)
     if($("startPrevLbl")) $("startPrevLbl").textContent = t.startPrev;
     if($("endPrevLbl")) $("endPrevLbl").textContent = t.endPrev;
 
@@ -1355,7 +1241,6 @@ We will inject user details below.`,
     document.documentElement.lang = (lang === "ar") ? "ar" : "en";
     $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
 
-    // keep trials numbers consistent after toggle
     $("trialsLeft").textContent = (lang==="ar") ? toArabicDigits(String(trials)) : String(trials);
 
     renderBasePrompt();
@@ -1369,10 +1254,9 @@ We will inject user details below.`,
 
   /* Boot */
   async function boot(){
-    // ✅ load trials from local mirror FIRST (fix refresh showing 2)
     trialsState = loadTrialsState();
     trials = getTrialsLeftFromState(trialsState);
-    setTrialsLeft(trials); // updates both hero + locked box
+    setTrialsLeft(trials);
 
     const brandId = getBrandFromUrl();
     brandCfg = await loadBrandConfig(brandId);
@@ -1388,7 +1272,6 @@ We will inject user details below.`,
     renderThumbs();
     setSelected(0);
 
-    // init I2V inputs after UI exists (added)
     initI2VInputs();
   }
 
@@ -1396,4 +1279,3 @@ We will inject user details below.`,
 </script>
 </body>
 </html>
-```
