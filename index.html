@@ -7,7 +7,6 @@
 
   <style>
     :root{
-      /* defaults */
       --bg:#0b0f18;
       --panel:rgba(255,255,255,.06);
       --panel2:rgba(0,0,0,.18);
@@ -48,7 +47,6 @@
       backdrop-filter: blur(10px);
     }
 
-    /* top bar */
     .topBar{
       display:flex;align-items:center;justify-content:space-between;
       gap:12px;
@@ -92,12 +90,10 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* hero */
     .hero{margin:18px 0 10px}
     .hero h1{font-size:52px;line-height:1.05;margin:6px 0 8px;font-weight:950;letter-spacing:-.02em}
     .hero p{color:var(--muted);font-size:16px;max-width:560px;line-height:1.4;margin:0}
 
-    /* sections */
     .sectionLabel{
       margin:18px 0 8px;
       font-size:12px;
@@ -106,7 +102,6 @@
       color:color-mix(in srgb, var(--muted) 85%, transparent);
     }
 
-    /* locked prompt */
     .lockedBox{
       background: var(--panel2);
       border:1px solid var(--line);
@@ -136,7 +131,6 @@
       overflow:auto;
     }
 
-    /* preview + carousel */
     .previewCard{
       margin-top:12px;
       background: var(--panel2);
@@ -195,7 +189,6 @@
       backdrop-filter: blur(8px);
     }
 
-    /* carousel thumbs */
     .thumbRowWrap{
       margin-top:10px;
       border-radius:14px;
@@ -258,7 +251,6 @@
     .dot{width:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.18)}
     .dot.on{background: color-mix(in srgb, var(--accent2) 80%, transparent);}
 
-    /* mode bar */
     .modeBar{
       margin-top:14px;
       display:flex;gap:10px;
@@ -283,7 +275,6 @@
       color:var(--text);
     }
 
-    /* inputs */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
 
@@ -306,7 +297,6 @@
     .field input::placeholder{color:rgba(148,163,184,.65)}
     .miniHint{margin-top:10px;font-size:12px;color: var(--muted);line-height:1.35;opacity:.95}
 
-    /* progress */
     .result{
       display:none;
       margin-top:12px;
@@ -326,7 +316,6 @@
       background:linear-gradient(90deg, var(--accent), var(--accent2));
     }
 
-    /* buttons */
     .btn{
       padding:12px 14px;
       border-radius:14px;
@@ -347,7 +336,6 @@
       border:1px solid rgba(0,0,0,.10);
     }
 
-    /* actions under inputs */
     .actionsUnderInputs{
       margin-top:12px;
       display:grid;
@@ -363,7 +351,6 @@
       .actionsUnderInputs .primaryWrap{max-width:520px}
     }
 
-    /* RTL tweaks */
     body[dir="rtl"] .hero h1{letter-spacing:0}
     body[dir="rtl"] .brandTitle{max-width:50vw}
   </style>
@@ -373,7 +360,6 @@
   <div class="wrap">
     <div class="card">
 
-      <!-- Top bar -->
       <div class="topBar">
         <div class="brandLeft">
           <div class="brandLogo"><img id="brandLogo" alt="logo"></div>
@@ -386,13 +372,11 @@
         </div>
       </div>
 
-      <!-- Hero -->
       <div class="hero">
         <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
         <p id="heroDesc">You get up to <b id="triesInline">2</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
       </div>
 
-      <!-- Locked prompt -->
       <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
       <div class="lockedBox">
         <div class="lockedTop">
@@ -402,7 +386,6 @@
         <div class="lockedPrompt" id="basePrompt"></div>
       </div>
 
-      <!-- Preview + Carousel -->
       <div class="previewCard">
         <div class="previewHeader">
           <div id="selectedLabel">Selected demo</div>
@@ -428,37 +411,36 @@
         </div>
       </div>
 
-      <!-- Mode -->
       <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
       <div class="modeBar">
         <button class="modeBtn on" id="modeText" type="button">📝 <span id="modeTextTxt">Text prompt</span></button>
-        <button class="modeBtn" id="modeImages" type="button">🖼️ <span id="modeImgTxt">Start + End images</span></button>
+        <button class="modeBtn" id="modeImages" type="button">🖼️ <span id="modeImgTxt">Image guidance</span></button>
       </div>
 
       <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
-        <label id="lblImages">Start + End images</label>
+        <label id="lblImages">Start image (required) + End image (optional)</label>
         <input type="file" id="startImg" accept="image/*">
         <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
 
-        <!-- I2V previews -->
         <div id="i2vPreview" style="display:flex; gap:12px; margin-top:10px; flex-wrap:wrap;">
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <div style="font-size:12px; opacity:.75;" id="startPrevLbl">Start image</div>
+            <div style="font-size:12px; opacity:.75;" id="startPrevLbl">Start image (required)</div>
             <img id="startPreview" alt="start preview"
                  style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
           </div>
 
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <div style="font-size:12px; opacity:.75;" id="endPrevLbl">End image</div>
+            <div style="font-size:12px; opacity:.75;" id="endPrevLbl">End image (optional)</div>
             <img id="endPreview" alt="end preview"
                  style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
           </div>
         </div>
 
-        <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
+        <div class="miniHint" id="hintImages">
+          Upload a start image to guide the video. Add an optional end image if you want the motion to land on a final frame.
+        </div>
       </div>
 
-      <!-- Inputs -->
       <div class="grid">
         <div class="field">
           <label id="lblSubject">Main subject / character</label>
@@ -475,7 +457,6 @@
         </div>
       </div>
 
-      <!-- Buttons -->
       <div class="actionsUnderInputs">
         <div class="primaryWrap">
           <button class="btn primary" id="generateBtn" type="button">⚡ <span id="genTxt">Generate video</span></button>
@@ -486,11 +467,10 @@
         </div>
       </div>
 
-      <!-- Progress -->
       <div class="result" id="resultBox">
         <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;"></div>
         <div class="progress"><div class="bar" id="bar"></div></div>
-        <div class="miniHint" id="resultNote" style="margin-top:10px;"></div>
+        <div class="miniHint" id="resultNote" style="margin-top:10px; white-space:pre-wrap;"></div>
       </div>
 
     </div>
@@ -499,9 +479,6 @@
 <script>
   const $ = id => document.getElementById(id);
 
-  /* ===========================
-     I2V. Store selected images + show previews
-  =========================== */
   let I2V_START_FILE = null;
   let I2V_END_FILE = null;
 
@@ -523,24 +500,17 @@
     const startPreview = $("startPreview");
     const endPreview = $("endPreview");
 
-    if(startInput){
-      startInput.addEventListener("change", () => {
-        I2V_START_FILE = (startInput.files && startInput.files[0]) ? startInput.files[0] : null;
-        setPreview(startPreview, I2V_START_FILE);
-      });
-    }
+    startInput.addEventListener("change", () => {
+      I2V_START_FILE = startInput.files && startInput.files[0] ? startInput.files[0] : null;
+      setPreview(startPreview, I2V_START_FILE);
+    });
 
-    if(endInput){
-      endInput.addEventListener("change", () => {
-        I2V_END_FILE = (endInput.files && endInput.files[0]) ? endInput.files[0] : null;
-        setPreview(endPreview, I2V_END_FILE);
-      });
-    }
+    endInput.addEventListener("change", () => {
+      I2V_END_FILE = endInput.files && endInput.files[0] ? endInput.files[0] : null;
+      setPreview(endPreview, I2V_END_FILE);
+    });
   }
 
-  /* ===========================
-     Device ID
-  =========================== */
   const DEVICE_ID_KEY = "shaga3_device_id";
   function getDeviceId(){
     try{
@@ -555,9 +525,6 @@
     }
   }
 
-  /* ===========================
-     Trials UI persistence
-  =========================== */
   const TRIALS_MAX = 2;
   const TRIALS_STATE_KEY = "shaga3_trials_state_v1";
   const TRIALS_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -588,6 +555,9 @@
     return Math.max(0, TRIALS_MAX - (state.used || 0));
   }
 
+  let trialsState = loadTrialsState();
+  let trials = getTrialsLeftFromState(trialsState);
+
   function setTrialsLeft(n){
     trials = Math.max(0, Math.min(TRIALS_MAX, Number(n||0)));
     $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
@@ -610,19 +580,14 @@
     setTrialsLeft(0);
   }
 
-  /* ===========================
-     API settings
-  =========================== */
   const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
   const MODEL_ID = "veo-3.1-generate-001";
   const API_KEY = "v3_9f8c2d1a_6b7c8d9e_0a1b2c3d4e5f9n5v";
 
   const LAST_URL_KEY = "shaga3app_last_video_url";
-  const LAST_BRAND_KEY = "shaga3app_last_brand";
+  function saveLastUrl(url){ try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){} }
+  function loadLastUrl(){ try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; } }
 
-  /* ===========================
-     i18n
-  =========================== */
   const i18n = {
     en: {
       heroTitle: "Play with our<br>guided video<br>prompt",
@@ -635,12 +600,12 @@
       play: "Play",
       modeLabel: "CHOOSE INPUT MODE",
       modeText: "Text prompt",
-      modeImg: "Start + End images",
+      modeImg: "Image guidance",
       lblSubject: "Main subject / character",
       lblLocation: "Location / environment",
       lblTwist: "Extra creative twist",
-      lblImages: "Start + End images",
-      hintImages: "Upload a start frame and an end frame to guide the motion.",
+      lblImages: "Start image (required) + End image (optional)",
+      hintImages: "Upload a start image to guide the video. Add an optional end image if you want the motion to land on a final frame.",
       phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
       phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
       phTwist: "Optional: camera move, mood, style, or one special detail.",
@@ -654,11 +619,8 @@
       newTag: "New",
       demoTag: "Demo",
       limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
-      startPrev: "Start image",
-      endPrev: "End image",
-      imgPrep: "Preparing images and generating video…",
-      imgTooBig: "Images are still too large after compression. Use smaller images.",
-      needBoth: "Please upload both Start and End images."
+      startPrev: "Start image (required)",
+      endPrev: "End image (optional)"
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
@@ -671,12 +633,12 @@
       play: "تشغيل",
       modeLabel: "اختر طريقة الإدخال",
       modeText: "نص فقط",
-      modeImg: "صورتان: بداية + نهاية",
+      modeImg: "توجيه بالصور",
       lblSubject: "الشخصية / العنصر الرئيسي",
       lblLocation: "المكان / البيئة",
       lblTwist: "إضافة إبداعية",
-      lblImages: "صورتان: بداية + نهاية",
-      hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
+      lblImages: "صورة بداية (إجباري) + صورة نهاية (اختياري)",
+      hintImages: "ارفع صورة البداية لتوجيه الفيديو. وصورة النهاية اختيارية لو عايز الحركة تنتهي على فريم محدد.",
       phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
       phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
       phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
@@ -690,11 +652,8 @@
       newTag: "جديد",
       demoTag: "ديمو",
       limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
-      startPrev: "صورة البداية",
-      endPrev: "صورة النهاية",
-      imgPrep: "جارٍ تجهيز الصور وتوليد الفيديو…",
-      imgTooBig: "الصور مازالت كبيرة بعد الضغط. جرّب صور أصغر.",
-      needBoth: "من فضلك ارفع صورة البداية وصورة النهاية."
+      startPrev: "صورة البداية (إجباري)",
+      endPrev: "صورة النهاية (اختياري)"
     }
   };
 
@@ -705,408 +664,31 @@
 
   let currentLang = "en";
 
-  /* ===========================
-     Input mode flag
-  =========================== */
-  let INPUT_MODE = "text";
-
-  /* ===========================
-     I2V. Resize and compress to avoid 502
-     Goal. Keep payload small and consistent across phones and browsers
-  =========================== */
-  function approxBytesFromBase64(b64){
-    return Math.floor((b64.length * 3) / 4);
-  }
-
-  function loadImageFromFile(file){
+  function fileToBase64(file){
     return new Promise((resolve, reject)=>{
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = ()=>{
-        URL.revokeObjectURL(url);
-        resolve(img);
+      const fr = new FileReader();
+      fr.onload = () => {
+        const dataUrl = String(fr.result || "");
+        const b64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
+        if(!b64) return reject(new Error("Failed to read image"));
+        resolve(b64);
       };
-      img.onerror = ()=>{
-        URL.revokeObjectURL(url);
-        reject(new Error("Failed to decode image"));
-      };
-      img.src = url;
+      fr.onerror = () => reject(new Error("Failed to read image"));
+      fr.readAsDataURL(file);
     });
   }
 
-  async function fileToResizedJpegBase64(file, maxDim = 1024, quality = 0.82){
-    const img = await loadImageFromFile(file);
-
-    let w = img.naturalWidth || img.width;
-    let h = img.naturalHeight || img.height;
-    if(!w || !h) throw new Error("Invalid image dimensions");
-
-    const scale = Math.min(1, maxDim / Math.max(w, h));
-    const outW = Math.max(1, Math.round(w * scale));
-    const outH = Math.max(1, Math.round(h * scale));
-
-    const canvas = document.createElement("canvas");
-    canvas.width = outW;
-    canvas.height = outH;
-
-    const ctx = canvas.getContext("2d", { alpha: false });
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(img, 0, 0, outW, outH);
-
-    const dataUrl = canvas.toDataURL("image/jpeg", quality);
-    const b64 = (dataUrl.split(",")[1] || "");
-    if(!b64) throw new Error("Failed to encode image");
-
-    return { b64, mime: "image/jpeg", width: outW, height: outH };
-  }
-
-  async function fileToSafeBase64(file){
-    // Try a few steps to fit under a safe payload size
-    // Step 1. 1024 @ 0.82
-    // Step 2. 896 @ 0.78
-    // Step 3. 768 @ 0.72
-    const tries = [
-      { maxDim: 1024, q: 0.82 },
-      { maxDim: 896,  q: 0.78 },
-      { maxDim: 768,  q: 0.72 }
-    ];
-
-    let last = null;
-    for(const t of tries){
-      last = await fileToResizedJpegBase64(file, t.maxDim, t.q);
-      if(approxBytesFromBase64(last.b64) <= 2.1 * 1024 * 1024){
-        return last;
-      }
+  function assertStartFile(){
+    if(!I2V_START_FILE){
+      throw new Error(currentLang==="ar" ? "من فضلك ارفع صورة البداية." : "Please upload a Start image.");
     }
-    return last;
-  }
-
-  function assertI2VFiles(){
-    if(!I2V_START_FILE || !I2V_END_FILE){
-      throw new Error(i18n[currentLang].needBoth);
+    const maxBytes = 3 * 1024 * 1024;
+    if(I2V_START_FILE.size > maxBytes){
+      throw new Error(currentLang==="ar" ? "صورة البداية كبيرة جدًا. جرّب أقل من 3MB." : "Start image is too large. Please use under 3MB.");
     }
-
-    // Very loose raw cap. We compress anyway.
-    const rawCap = 12 * 1024 * 1024;
-    if(I2V_START_FILE.size > rawCap || I2V_END_FILE.size > rawCap){
-      const msg = (currentLang === "ar")
-        ? "حجم الصور كبير جدًا. جرّب صور أصغر."
-        : "Images are too large. Please use smaller files.";
-      throw new Error(msg);
+    if(I2V_END_FILE && I2V_END_FILE.size > maxBytes){
+      throw new Error(currentLang==="ar" ? "صورة النهاية كبيرة جدًا. جرّب أقل من 3MB." : "End image is too large. Please use under 3MB.");
     }
-  }
-
-  /* Brand config */
-  function getBrandFromUrl(){
-    const u = new URL(location.href);
-    const b = (u.searchParams.get("brand") || "").trim().toLowerCase();
-    if(b) return b;
-    try{
-      const last = localStorage.getItem(LAST_BRAND_KEY);
-      if(last) return last;
-    }catch(e){}
-    return "shaga3";
-  }
-
-  const FALLBACK_BRANDS = {
-    shaga3: {
-      id:"shaga3",
-      title_en:"Shaga3app · AI Creative Playground",
-      title_ar:"شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
-      beta_en:"Beta · Shaga3app powered",
-      beta_ar:"بيتا · بدعم Shaga3app",
-      logo:"assets/brand-logos/shaga3app.png",
-      theme:{
-        bg:"#0b0f18",
-        accent:"#5b5cff",
-        accent2:"#22c55e",
-        heroGradA:"rgba(91,92,255,.25)",
-        heroGradB:"rgba(34,197,94,.12)"
-      },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
-Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated (not placed/fake).
-The scene follows this base concept, and we will inject the user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد . بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين كده أو فيك.
-المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.`,
-      demos: demoPack("purple")
-    },
-    cocacola: {
-      id:"cocacola",
-      title_en:"Coca-Cola · AI Video Lab",
-      title_ar:"كوكاكولا · AI Video Lab",
-      beta_en:"Demo · Coca-Cola",
-      beta_ar:"ديمو · كوكاكولا",
-      logo:"assets/brand-logos/cocacola.png",
-      theme:{
-        bg:"#12070a",
-        accent:"#e11d2e",
-        accent2:"#ffb000",
-        heroGradA:"rgba(225,29,46,.22)",
-        heroGradB:"rgba(255,176,0,.10)"
-      },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
-The scene must feature an ultra-realistic Coca-Cola can naturally integrated (not placed/fake).
-Keep it premium, cinematic, and believable. We will inject user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا داخل المشهد بشكل طبيعي (مش متحطوطه كده).
-المشهد يبقى بريميوم وسينمائي ومقنع. وإحنا هنضيف تفاصيل المستخدم تحت.`,
-      demos: demoPack("red")
-    },
-    tui: {
-      id:"tui",
-      title_en:"TUI · AI Video Lab",
-      title_ar:"TUI · AI Video Lab",
-      beta_en:"Demo · TUI",
-      beta_ar:"ديمو · TUI",
-      logo:"assets/brand-logos/tui.png",
-      theme:{
-        bg:"#061821",
-        accent:"#2aa8ff",
-        accent2:"#7fe0ff",
-        heroGradA:"rgba(42,168,255,.20)",
-        heroGradB:"rgba(127,224,255,.10)"
-      },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and bright, realistic lighting.
-The scene should feel like a premium TUI destination moment (clean, uplifting, high-end).
-We will inject user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ بطابع سفر/سياحة، مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية مشرقة.
-المشهد يحسسك بلحظة وجهة سفر بريميوم على ستايل TUI (نضيف، مبهج، راقي).
-وإحنا هنضيف تفاصيل المستخدم تحت.`,
-      demos: demoPack("blue")
-    }
-  };
-
-  function demoPack(color){
-    const posters = [
-      `https://picsum.photos/seed/${color}-a/400/700`,
-      `https://picsum.photos/seed/${color}-b/400/700`,
-      `https://picsum.photos/seed/${color}-c/400/700`,
-      `https://picsum.photos/seed/${color}-d/400/700`,
-      `https://picsum.photos/seed/${color}-e/400/700`,
-      `https://picsum.photos/seed/${color}-f/400/700`,
-      `https://picsum.photos/seed/${color}-g/400/700`,
-      `https://picsum.photos/seed/${color}-h/400/700`,
-      `https://picsum.photos/seed/${color}-i/400/700`,
-      `https://picsum.photos/seed/${color}-j/400/700`
-    ];
-    const vids = [
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
-    ];
-    return posters.map((p, idx)=>({
-      id: "demo-" + idx,
-      kind: "demo",
-      poster: p,
-      video: vids[idx],
-      tag: "demo"
-    }));
-  }
-
-  async function loadBrandConfig(brandId){
-    try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
-    try{
-      const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
-      if(r.ok){
-        const txt = await r.text();
-        const parsed = JSON.parse(txt);
-        return normalizeBrand(parsed, brandId);
-      }
-    }catch(e){}
-    return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
-  }
-
-  function normalizeBrand(raw, brandId){
-    const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
-    const theme = raw.theme || raw.colors || {};
-    const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
-    return {
-      id: raw.id || brandId,
-      title_en: raw.title_en || raw.title || fb.title_en,
-      title_ar: raw.title_ar || fb.title_ar,
-      beta_en: raw.beta_en || fb.beta_en,
-      beta_ar: raw.beta_ar || fb.beta_ar,
-      logo: raw.logo || fb.logo,
-      theme: {
-        bg: theme.bg || fb.theme.bg,
-        accent: theme.accent || fb.theme.accent,
-        accent2: theme.accent2 || fb.theme.accent2,
-        heroGradA: theme.heroGradA || fb.theme.heroGradA,
-        heroGradB: theme.heroGradB || fb.theme.heroGradB
-      },
-      basePrompt_en: raw.basePrompt_en || fb.basePrompt_en,
-      basePrompt_ar: raw.basePrompt_ar || fb.basePrompt_ar,
-      demos
-    };
-  }
-
-  function applyTheme(theme){
-    const root = document.documentElement.style;
-    root.setProperty("--bg", theme.bg);
-    root.setProperty("--accent", theme.accent);
-    root.setProperty("--accent2", theme.accent2);
-    root.setProperty("--heroGradA", theme.heroGradA);
-    root.setProperty("--heroGradB", theme.heroGradB);
-    root.setProperty("--btnText", "#07120a");
-  }
-
-  function setBrandUI(cfg){
-    $("brandTitle").textContent = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
-    $("betaPill").textContent = (currentLang === "ar") ? cfg.beta_ar : cfg.beta_en;
-
-    const img = $("brandLogo");
-    img.src = cfg.logo || "assets/brand-logos/shaga3app.png";
-    img.onerror = () => { img.src = "assets/brand-logos/shaga3app.png"; };
-
-    document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
-  }
-
-  /* Carousel */
-  let brandCfg = null;
-  let items = [];
-  let selectedIndex = 0;
-
-  function renderBasePrompt(){
-    if(!brandCfg) return;
-    $("basePrompt").textContent = (currentLang === "ar") ? brandCfg.basePrompt_ar : brandCfg.basePrompt_en;
-  }
-
-  function setSelected(index){
-    selectedIndex = Math.max(0, Math.min(items.length-1, index));
-    [...$("thumbRow").children].forEach((el,i)=>el.classList.toggle("on", i===selectedIndex));
-    updateDots();
-    showPoster(items[selectedIndex]);
-  }
-
-  function showPoster(it){
-    $("mainPoster").src = it.poster || "";
-    $("mainPoster").style.display = "block";
-
-    $("mainVideo").pause();
-    $("mainVideo").removeAttribute("src");
-    $("mainVideo").load();
-    $("mainVideo").style.display = "none";
-  }
-
-  function playInline(it){
-    $("mainVideo").src = it.video;
-    $("mainVideo").style.display = "block";
-    $("mainPoster").style.display = "none";
-    $("mainVideo").load();
-    $("mainVideo").play().catch(()=>{});
-  }
-
-  function openVideoViewer(url){
-    if(!url) return;
-    window.open(url, "_blank", "noopener");
-  }
-
-  $("playBtn").addEventListener("click", ()=>{
-    const it = items[selectedIndex];
-    if(!it) return;
-    if(it.kind === "new"){
-      openVideoViewer(it.video);
-      return;
-    }
-    playInline(it);
-  });
-
-  function renderThumbs(){
-    const row = $("thumbRow");
-    row.innerHTML = "";
-    $("thumbDots").innerHTML = "";
-    if(!items.length) return;
-
-    items.forEach((it, idx)=>{
-      const d = document.createElement("div");
-      d.className = "thumb" + (idx===selectedIndex ? " on" : "");
-      d.innerHTML = `
-        <div class="thumbPlay">▶</div>
-        <img alt="poster" src="${it.poster || ""}">
-        <div class="thumbMeta">
-          <span class="thumbTag">${
-            (currentLang==="ar")
-              ? (it.kind==="new" ? i18n.ar.newTag : i18n.ar.demoTag)
-              : (it.kind==="new" ? i18n.en.newTag : i18n.en.demoTag)
-          }</span>
-          <span style="opacity:.75">${idx+1}</span>
-        </div>
-      `;
-      d.addEventListener("click", ()=> setSelected(idx));
-      row.appendChild(d);
-    });
-
-    buildDots();
-    updateDots();
-  }
-
-  function buildDots(){
-    const dots = $("thumbDots");
-    dots.innerHTML = "";
-    const pages = Math.min(10, Math.max(1, Math.ceil(items.length / 2)));
-    for(let i=0;i<pages;i++){
-      const dot = document.createElement("div");
-      dot.className = "dot";
-      dots.appendChild(dot);
-    }
-  }
-
-  function updateDots(){
-    const dots = [...$("thumbDots").children];
-    if(!dots.length) return;
-    const page = Math.min(dots.length-1, Math.floor(selectedIndex / 2));
-    dots.forEach((d,i)=>d.classList.toggle("on", i===page));
-  }
-
-  /* Mode switching */
-  const imagesBox = $("imagesBox");
-  $("modeText").addEventListener("click", ()=>{
-    INPUT_MODE = "text";
-    $("modeText").classList.add("on");
-    $("modeImages").classList.remove("on");
-    imagesBox.style.display = "none";
-  });
-  $("modeImages").addEventListener("click", ()=>{
-    INPUT_MODE = "images";
-    $("modeImages").classList.add("on");
-    $("modeText").classList.remove("on");
-    imagesBox.style.display = "block";
-  });
-
-  /* Prompt builder + API */
-  function buildPrompt(){
-    const base = $("basePrompt").textContent || "";
-    const subject = ($("subject").value || "").trim();
-    const location = ($("location").value || "").trim();
-    const twist = ($("twist").value || "").trim();
-
-    const parts = [];
-    if(subject) parts.push(`Main subject: ${subject}`);
-    if(location) parts.push(`Location: ${location}`);
-    if(twist) parts.push(`Creative twist: ${twist}`);
-
-    return `${base}\n\n---\n${parts.join("\n")}`.trim();
   }
 
   async function postJSON(payload){
@@ -1119,9 +701,12 @@ We will inject user details below.`,
       },
       body: JSON.stringify(payload),
     });
+
     const text = await r.text();
     let data;
-    try{ data = JSON.parse(text); }catch(e){ data = { raw:text }; }
+    try{ data = JSON.parse(text); }
+    catch(e){ data = { raw:text }; }
+
     if(!r.ok){
       const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
       throw new Error(`${msg} (HTTP ${r.status})`);
@@ -1129,30 +714,43 @@ We will inject user details below.`,
     return data;
   }
 
-  // init trials from local mirror
-  let trialsState = loadTrialsState();
-  let trials = getTrialsLeftFromState(trialsState);
+  // Minimal brand/base prompt for your current Coca-Cola locked prompt
+  const basePromptEN =
+`BASE (LOCKED)
+
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and realistic lighting.
+The Coca-Cola can must look ultra-real and naturally part of the scene.
+Keep it emotional, human, and authentic. no fake product placement look.
+We will inject the user details below.
+
+---`;
+
+  $("basePrompt").textContent = basePromptEN;
+
+  let INPUT_MODE = "text";
   let generating = false;
 
-  function saveLastUrl(url){
-    try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){}
-  }
-  function loadLastUrl(){
-    try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; }
+  function buildPrompt(){
+    const base = $("basePrompt").textContent || "";
+    const subject = ($("subject").value || "").trim();
+    const location = ($("location").value || "").trim();
+    const twist = ($("twist").value || "").trim();
+
+    const parts = [];
+    if(subject) parts.push(`Main subject: ${subject}`);
+    if(location) parts.push(`Location: ${location}`);
+    if(twist) parts.push(`Creative twist: ${twist}`);
+
+    return `${base}\n${parts.join("\n")}`.trim();
   }
 
-  // UX. Bar stays <= 95% until ready
   function setTimerText(secondsLeft){
     if(currentLang === "ar"){
       $("timerText").textContent =
-        secondsLeft > 0
-          ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)`
-          : i18n.ar.waiting;
+        secondsLeft > 0 ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)` : i18n.ar.waiting;
     } else {
       $("timerText").textContent =
-        secondsLeft > 0
-          ? `Generating… (~${secondsLeft}s)`
-          : i18n.en.waiting;
+        secondsLeft > 0 ? `Generating… (~${secondsLeft}s)` : i18n.en.waiting;
     }
   }
   function setReadyText(){
@@ -1168,13 +766,7 @@ We will inject user details below.`,
 
   function isTrialLimitErrorMessage(msg){
     const m = String(msg||"").toUpperCase();
-    return (
-      m.includes("TRIAL_LIMIT_REACHED") ||
-      m.includes("LIMIT_REACHED") ||
-      m.includes("HTTP 429") ||
-      m.includes("(HTTP 429)") ||
-      m.includes("429")
-    );
+    return m.includes("TRIAL_LIMIT_REACHED") || m.includes("HTTP 429") || m.includes("(HTTP 429)") || m.trim()==="429";
   }
 
   async function generate(){
@@ -1186,12 +778,9 @@ We will inject user details below.`,
     }
 
     generating = true;
-
     $("resultBox").style.display = "block";
     $("bar").style.width = "0%";
     $("resultNote").textContent = "";
-
-    setTimerText(60);
 
     const maxSeconds = 60;
     const start = Date.now();
@@ -1201,10 +790,8 @@ We will inject user details below.`,
       const elapsed = (Date.now()-start)/1000;
       const p = Math.min(95, (elapsed/maxSeconds)*95);
       $("bar").style.width = p + "%";
-
       const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
       setTimerText(remain);
-
       rafId = requestAnimationFrame(tick);
     };
     tick();
@@ -1214,28 +801,30 @@ We will inject user details below.`,
 
       let i2v = null;
       if(INPUT_MODE === "images"){
-        assertI2VFiles();
-        $("resultNote").textContent = i18n[currentLang].imgPrep;
+        assertStartFile();
 
-        // Compress both images aggressively to avoid 502
-        const startEnc = await fileToSafeBase64(I2V_START_FILE);
-        const endEnc   = await fileToSafeBase64(I2V_END_FILE);
+        $("resultNote").textContent = (currentLang === "ar")
+          ? "جارٍ تجهيز الصور…"
+          : "Preparing images…";
 
-        const startBytes = approxBytesFromBase64(startEnc.b64);
-        const endBytes   = approxBytesFromBase64(endEnc.b64);
-        const totalBytes = startBytes + endBytes;
-
-        // Keep total under ~4.2MB base64 payload for i2v combined
-        // This is conservative for Lambda URL and JSON parsing overhead
-        const safeTotal = 4.2 * 1024 * 1024;
-        if(totalBytes > safeTotal){
-          throw new Error(i18n[currentLang].imgTooBig);
-        }
+        const startB64 = await fileToBase64(I2V_START_FILE);
+        const endB64 = I2V_END_FILE ? await fileToBase64(I2V_END_FILE) : null;
 
         i2v = {
-          start: { name: "start.jpg", mime: startEnc.mime, b64: startEnc.b64, w: startEnc.width, h: startEnc.height },
-          end:   { name: "end.jpg",   mime: endEnc.mime,   b64: endEnc.b64,   w: endEnc.width,   h: endEnc.height }
+          start: {
+            name: I2V_START_FILE.name || "start.jpg",
+            mime: I2V_START_FILE.type || "image/jpeg",
+            b64: startB64
+          }
         };
+
+        if(endB64){
+          i2v.end = {
+            name: I2V_END_FILE.name || "end.jpg",
+            mime: I2V_END_FILE.type || "image/jpeg",
+            b64: endB64
+          };
+        }
       }
 
       const gen = await postJSON({
@@ -1247,16 +836,13 @@ We will inject user details below.`,
         i2v
       });
 
-      // only now consume locally
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
-
       if(gen.done && gen.downloadUrl){
         onGenerated(gen.downloadUrl);
         return;
       }
-
       if(!operationName) throw new Error("No operationName returned from generate");
 
       const pollEveryMs = 3000;
@@ -1274,7 +860,6 @@ We will inject user details below.`,
         });
 
         if(chk.done && chk.downloadUrl){ doneUrl = chk.downloadUrl; break; }
-        if(chk.done && chk.response && chk.response.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
       }
 
       if(!doneUrl) throw new Error("Still processing. Try again in a few seconds.");
@@ -1290,6 +875,8 @@ We will inject user details below.`,
       }else{
         $("timerText").textContent = "Error: " + msg;
         $("bar").style.width = "0%";
+        $("resultNote").textContent =
+          "If this is image mode and you still get 502. the backend is not converting images to GCS URIs yet.";
       }
     }finally{
       generating = false;
@@ -1300,59 +887,47 @@ We will inject user details below.`,
   function onGenerated(downloadUrl){
     $("bar").style.width = "100%";
     setReadyText();
-
     saveLastUrl(downloadUrl);
-
-    const newItem = {
-      id: "new-" + Date.now(),
-      kind: "new",
-      poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || ""),
-      video: downloadUrl,
-      tag: "new"
-    };
-
-    items = items.filter(x => x.kind !== "new");
-    items.unshift(newItem);
-
-    selectedIndex = 0;
-    renderThumbs();
-    setSelected(0);
-
     $("resultNote").textContent = (currentLang==="ar")
-      ? "✅ اتولد فيديو جديد. اضغط «تشغيل» لمشاهدته بسرعة."
-      : "✅ New video generated. Tap “Play” to open it fast.";
+      ? "✅ اتولد فيديو جديد. استخدم «تحميل» أو «نسخ الرابط»."
+      : "✅ New video generated. Use Download or Copy link.";
   }
 
-  /* Buttons */
   $("generateBtn").addEventListener("click", generate);
 
-  function getCurrentVideoUrl(){
-    const it = items[selectedIndex];
-    if(it?.video) return it.video;
-    return loadLastUrl();
-  }
+  function getCurrentVideoUrl(){ return loadLastUrl(); }
 
   $("downloadBtn").addEventListener("click", ()=>{
     const url = getCurrentVideoUrl();
     if(!url) return;
-    saveLastUrl(url);
-    openVideoViewer(url);
+    window.open(url, "_blank", "noopener");
   });
 
   $("copyBtn").addEventListener("click", async ()=>{
     const url = getCurrentVideoUrl();
     if(!url) return;
-    saveLastUrl(url);
     try{
       await navigator.clipboard.writeText(url);
       alert((currentLang==="ar") ? i18n.ar.copied : i18n.en.copied);
     }catch(e){
-      const msg = (currentLang==="ar") ? "انسخ الرابط من هنا:" : "Copy link from here:";
-      prompt(msg, url);
+      prompt((currentLang==="ar") ? "انسخ الرابط من هنا:" : "Copy link from here:", url);
     }
   });
 
-  /* Language */
+  const imagesBox = $("imagesBox");
+  $("modeText").addEventListener("click", ()=>{
+    INPUT_MODE = "text";
+    $("modeText").classList.add("on");
+    $("modeImages").classList.remove("on");
+    imagesBox.style.display = "none";
+  });
+  $("modeImages").addEventListener("click", ()=>{
+    INPUT_MODE = "images";
+    $("modeImages").classList.add("on");
+    $("modeText").classList.remove("on");
+    imagesBox.style.display = "block";
+  });
+
   function applyLang(lang){
     currentLang = lang;
     const t = i18n[lang];
@@ -1375,11 +950,11 @@ We will inject user details below.`,
     $("lblSubject").textContent = t.lblSubject;
     $("lblLocation").textContent = t.lblLocation;
     $("lblTwist").textContent = t.lblTwist;
+
     $("lblImages").textContent = t.lblImages;
     $("hintImages").textContent = t.hintImages;
-
-    if($("startPrevLbl")) $("startPrevLbl").textContent = t.startPrev;
-    if($("endPrevLbl")) $("endPrevLbl").textContent = t.endPrev;
+    $("startPrevLbl").textContent = t.startPrev;
+    $("endPrevLbl").textContent = t.endPrev;
 
     $("subject").placeholder = t.phSubject;
     $("location").placeholder = t.phLocation;
@@ -1395,36 +970,15 @@ We will inject user details below.`,
     $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
 
     $("trialsLeft").textContent = (lang==="ar") ? toArabicDigits(String(trials)) : String(trials);
-
-    renderBasePrompt();
-    renderThumbs();
-    setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
   }
 
   $("langToggle").addEventListener("click", () => {
     applyLang(currentLang === "en" ? "ar" : "en");
   });
 
-  /* Boot */
-  async function boot(){
-    trialsState = loadTrialsState();
-    trials = getTrialsLeftFromState(trialsState);
+  function boot(){
     setTrialsLeft(trials);
-
-    const brandId = getBrandFromUrl();
-    brandCfg = await loadBrandConfig(brandId);
-
-    applyTheme(brandCfg.theme);
     applyLang("en");
-    setBrandUI(brandCfg);
-
-    items = (brandCfg.demos && brandCfg.demos.length) ? brandCfg.demos.slice() : FALLBACK_BRANDS.shaga3.demos.slice();
-    selectedIndex = 0;
-
-    renderBasePrompt();
-    renderThumbs();
-    setSelected(0);
-
     initI2VInputs();
   }
 
