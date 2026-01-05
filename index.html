@@ -394,14 +394,14 @@
 
         <div class="mainStage">
           <img id="mainPoster" alt="Selected poster" />
-          <video id="mainVideo" controls playsinline preload="none"></video>
+          <video id="mainVideo" controls playsinline preload="metadata"></video>
 
           <div class="playOverlay">
             <button class="playBtn" id="playBtn" type="button">▶ <span id="playTxt">Play</span></button>
           </div>
         </div>
 
-        <div class="thumbRowWrap">
+        <div class="thumbRowWrap" id="thumbRowWrap">
           <div class="thumbRow" id="thumbRow"></div>
           <div class="thumbDots" id="thumbDots"></div>
         </div>
@@ -616,7 +616,6 @@
       waiting: "Waiting for video…",
       ready: "Ready ✅",
       copied: "Link copied ✅",
-      newTag: "New",
       demoTag: "Demo",
       limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
       startPrev: "Start image (required)",
@@ -649,7 +648,6 @@
       waiting: "بنستنى الفيديو…",
       ready: "جاهز ✅",
       copied: "تم نسخ الرابط ✅",
-      newTag: "جديد",
       demoTag: "ديمو",
       limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
       startPrev: "صورة البداية (إجباري)",
@@ -664,6 +662,9 @@
 
   let currentLang = "en";
 
+  // =========================
+  // FIX #1. Image uploads MUST include b64
+  // =========================
   function fileToBase64(file){
     return new Promise((resolve, reject)=>{
       const fr = new FileReader();
@@ -714,7 +715,6 @@
     return data;
   }
 
-  // Minimal brand/base prompt for your current Coca-Cola locked prompt
   const basePromptEN =
 `BASE (LOCKED)
 
@@ -729,6 +729,120 @@ We will inject the user details below.
 
   let INPUT_MODE = "text";
   let generating = false;
+
+  // =========================
+  // FIX #2. Restore demo strip + show videos correctly
+  // =========================
+  // Put your real demo MP4 + poster URLs here.
+  // If you leave this empty. the demo strip will hide automatically.
+  const DEMOS = [
+    // Example:
+    // { poster: "https://your-cdn/demo1.jpg", video: "https://your-cdn/demo1.mp4", tag: "Demo 1" },
+    // { poster: "https://your-cdn/demo2.jpg", video: "https://your-cdn/demo2.mp4", tag: "Demo 2" },
+  ];
+
+  let selectedDemoIndex = 0;
+
+  function showPosterOnly(posterUrl){
+    const poster = $("mainPoster");
+    const vid = $("mainVideo");
+    vid.pause();
+    vid.removeAttribute("src");
+    vid.load();
+
+    vid.style.display = "none";
+    poster.style.display = "block";
+    poster.src = posterUrl || "";
+    $("playBtn").style.display = "inline-flex";
+  }
+
+  function showVideo(videoUrl, posterUrl){
+    const poster = $("mainPoster");
+    const vid = $("mainVideo");
+
+    // Show video
+    vid.style.display = "block";
+    poster.style.display = "none";
+
+    // Some browsers like having a poster even if we hide the <img>
+    vid.poster = posterUrl || "";
+
+    // Force reload
+    vid.pause();
+    vid.src = videoUrl;
+    vid.load();
+
+    $("playBtn").style.display = "inline-flex";
+  }
+
+  function setMainToDemo(i){
+    const d = DEMOS[i];
+    if(!d) return;
+
+    selectedDemoIndex = i;
+    $("selectedLabel").textContent = (currentLang==="ar") ? i18n.ar.selectedDemo : i18n.en.selectedDemo;
+
+    // We show demo as poster first. Play button will start it.
+    showPosterOnly(d.poster);
+
+    // highlight
+    renderDemoStrip();
+  }
+
+  function renderDemoStrip(){
+    const wrap = $("thumbRowWrap");
+    const row = $("thumbRow");
+    const dots = $("thumbDots");
+
+    if(!Array.isArray(DEMOS) || DEMOS.length === 0){
+      wrap.style.display = "none";
+      return;
+    }
+    wrap.style.display = "block";
+
+    row.innerHTML = "";
+    dots.innerHTML = "";
+
+    DEMOS.forEach((d, idx)=>{
+      const el = document.createElement("div");
+      el.className = "thumb" + (idx === selectedDemoIndex ? " on" : "");
+      el.innerHTML = `
+        <div class="thumbPlay">▶</div>
+        <img src="${d.poster || ""}" alt="demo"/>
+        <div class="thumbMeta">
+          <span>${(currentLang==="ar") ? i18n.ar.demoTag : i18n.en.demoTag}</span>
+          <span class="thumbTag">${d.tag || ("#" + (idx+1))}</span>
+        </div>
+      `;
+      el.addEventListener("click", ()=> setMainToDemo(idx));
+      row.appendChild(el);
+
+      const dot = document.createElement("div");
+      dot.className = "dot" + (idx === selectedDemoIndex ? " on" : "");
+      dots.appendChild(dot);
+    });
+  }
+
+  // Play button behavior:
+  // - If main video is hidden and we are on a demo. it loads demo mp4 then plays.
+  // - If main video is already set. toggles play/pause.
+  $("playBtn").addEventListener("click", async ()=>{
+    const vid = $("mainVideo");
+
+    // If no video loaded yet. load selected demo video
+    const d = DEMOS[selectedDemoIndex];
+    if(vid.style.display === "none" && d && d.video){
+      showVideo(d.video, d.poster);
+    }
+
+    // Toggle play
+    try{
+      if(vid.paused) await vid.play();
+      else vid.pause();
+    }catch(e){
+      // If autoplay is blocked. user can press play inside controls
+    }
+  });
 
   function buildPrompt(){
     const base = $("basePrompt").textContent || "";
@@ -753,6 +867,7 @@ We will inject the user details below.
         secondsLeft > 0 ? `Generating… (~${secondsLeft}s)` : i18n.en.waiting;
     }
   }
+
   function setReadyText(){
     $("timerText").textContent = (currentLang==="ar") ? i18n.ar.ready : i18n.en.ready;
   }
@@ -876,7 +991,9 @@ We will inject the user details below.
         $("timerText").textContent = "Error: " + msg;
         $("bar").style.width = "0%";
         $("resultNote").textContent =
-          "If this is image mode and you still get 502. the backend is not converting images to GCS URIs yet.";
+          (INPUT_MODE==="images")
+            ? "If image mode still behaves like text. the backend may still ignore i2v. But now your browser is sending b64 correctly."
+            : "";
       }
     }finally{
       generating = false;
@@ -888,6 +1005,10 @@ We will inject the user details below.
     $("bar").style.width = "100%";
     setReadyText();
     saveLastUrl(downloadUrl);
+
+    // SHOW the generated video in the main player (this was missing before)
+    showVideo(downloadUrl, DEMOS[selectedDemoIndex]?.poster || "");
+
     $("resultNote").textContent = (currentLang==="ar")
       ? "✅ اتولد فيديو جديد. استخدم «تحميل» أو «نسخ الرابط»."
       : "✅ New video generated. Use Download or Copy link.";
@@ -970,6 +1091,9 @@ We will inject the user details below.
     $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
 
     $("trialsLeft").textContent = (lang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+
+    // Re-render demo tags in the correct language
+    renderDemoStrip();
   }
 
   $("langToggle").addEventListener("click", () => {
@@ -980,6 +1104,21 @@ We will inject the user details below.
     setTrialsLeft(trials);
     applyLang("en");
     initI2VInputs();
+
+    // If you have demos, show them. If not, hide strip safely.
+    renderDemoStrip();
+    if(Array.isArray(DEMOS) && DEMOS.length > 0){
+      setMainToDemo(0);
+    }else{
+      // No demos. show a neutral poster (empty)
+      showPosterOnly("");
+    }
+
+    // Restore last generated video on refresh (so it "displays again" like before)
+    const last = loadLastUrl();
+    if(last){
+      showVideo(last, DEMOS[selectedDemoIndex]?.poster || "");
+    }
   }
 
   boot();
