@@ -1,455 +1,1399 @@
-/**
- * ================================
- *  FINAL – STABLE – WORKING BUILD
- * ================================
- * Shaga3app Veo Video Generator (Vertex AI → S3)
- *
- * ✔ Google WIF auth (GOOGLE_WIF_JSON → /tmp creds)
- * ✔ Vertex AI Veo 3.1 long-running generate
- * ✔ Poll operation → decode base64 MP4
- * ✔ Upload MP4 to S3 (SigV4, no aws-sdk)
- * ✔ Return presigned GET URL (supports session token)
- * ✔ CORS handled by Lambda Function URL settings (avoid duplicate headers)
- *
- * Security:
- * ✔ Optional X-API-KEY protection (ONLY if VEO3_API_KEY env var is set)
- *
- * Last verified: 2025-12-23
- */
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Shaga3app · AI Creative Playground</title>
 
-import fs from "fs";
-import crypto from "crypto";
-import { GoogleAuth } from "google-auth-library";
-import fetch from "node-fetch";
+  <style>
+    :root{
+      /* defaults */
+      --bg:#0b0f18;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(0,0,0,.18);
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --line:rgba(255,255,255,.12);
+      --accent:#5b5cff;
+      --accent2:#22c55e;
+      --btnText:#07120a;
 
-// ✅ ADD (MongoDB driver import)
-import { MongoClient } from "mongodb";
+      --radius:18px;
+      --radius2:16px;
+      --shadow:0 18px 40px rgba(0,0,0,.35);
 
-/* =========================
-   Google credentials (WIF)
-========================= */
-function ensureGoogleCredsFile() {
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) return;
+      --heroGradA: rgba(91,92,255,.25);
+      --heroGradB: rgba(34,197,94,.12);
+    }
 
-  const raw = process.env.GOOGLE_WIF_JSON;
-  if (!raw) throw new Error("Missing GOOGLE_WIF_JSON env var");
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:
+        radial-gradient(1200px 900px at 25% -10%, var(--heroGradA), transparent 55%),
+        radial-gradient(900px 700px at 80% 10%, var(--heroGradB), transparent 50%),
+        var(--bg);
+      color:var(--text);
+    }
 
-  const path = "/tmp/gcp-wif-creds.json";
-  fs.writeFileSync(path, raw, "utf8");
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = path;
-}
+    .wrap{max-width:900px;margin:0 auto;padding:16px 14px 36px;}
+    .card{
+      background:linear-gradient(180deg, var(--panel), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
 
-/* =========================
-   Base headers
-   (CORS is handled by Function URL settings)
-========================= */
-function baseHeaders() {
-  return { "Content-Type": "application/json" };
-}
+    /* top bar */
+    .topBar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: var(--panel2);
+    }
+    .brandLeft{display:flex;align-items:center;gap:10px;min-width:0;}
+    .brandLogo{
+      width:30px;height:30px;border-radius:10px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      display:inline-flex;align-items:center;justify-content:center;
+      overflow:hidden;flex:0 0 auto;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:contain;display:block}
+    .brandTitle{
+      font-weight:800;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:42vw;
+      opacity:.95;
+    }
 
-/* =========================
-   OPTIONAL API KEY GUARD
-   - If VEO3_API_KEY is NOT set => no auth required (works now)
-   - If VEO3_API_KEY is set => webview must send header x-api-key
-========================= */
-function maybeRequireApiKey(event) {
-  const expected = process.env.VEO3_API_KEY;
-  if (!expected) return; // ✅ not enabled yet
+    .topRight{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+    .pill{
+      padding:7px 10px;border-radius:999px;
+      border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
+      font-size:12px;font-weight:900;
+      white-space:nowrap;
+    }
+    .langBtn{
+      font-size:12px; padding:7px 10px; border-radius:999px;
+      border:1px solid var(--line); color: var(--text);
+      background: rgba(255,255,255,.06);
+      font-weight:900; cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  const h = event?.headers || {};
-  // Lambda headers can be different casing; normalize:
-  const got =
-    h["x-api-key"] ||
-    h["X-API-KEY"] ||
-    h["X-Api-Key"] ||
-    h["x-api-key".toLowerCase()];
+    /* hero */
+    .hero{margin:18px 0 10px}
+    .hero h1{font-size:52px;line-height:1.05;margin:6px 0 8px;font-weight:950;letter-spacing:-.02em}
+    .hero p{color:var(--muted);font-size:16px;max-width:560px;line-height:1.4;margin:0}
 
-  if (!got || got !== expected) {
-    const err = new Error("Unauthorized");
-    err.statusCode = 401;
-    throw err;
+    /* sections */
+    .sectionLabel{
+      margin:18px 0 8px;
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:color-mix(in srgb, var(--muted) 85%, transparent);
+    }
+
+    /* locked prompt */
+    .lockedBox{
+      background: var(--panel2);
+      border:1px solid var(--line);
+      border-radius:var(--radius2);
+      padding:12px;
+    }
+    .lockedTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .lockedTag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-weight:800;
+    }
+    .lockedPrompt{
+      margin-top:10px;
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius:14px;
+      padding:12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size:12px;
+      line-height:1.45;
+      color: rgba(229,231,235,.82);
+      white-space:pre-wrap;
+      max-height: 160px;
+      overflow:auto;
+    }
+
+    /* preview + carousel */
+    .previewCard{
+      margin-top:12px;
+      background: var(--panel2);
+      border:1px solid var(--line);
+      border-radius:var(--radius2);
+      padding:12px;
+    }
+    .previewHeader{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:10px;margin-bottom:10px;
+      color:color-mix(in srgb, var(--muted) 90%, transparent);
+      font-size:12px;font-weight:800;
+    }
+    .badge{
+      padding:5px 10px;border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-weight:900;
+      color: rgba(229,231,235,.9);
+      white-space:nowrap;
+    }
+
+    .mainStage{
+      position:relative;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.35);
+      overflow:hidden;
+      min-height: 320px;
+      aspect-ratio: 9 / 16;
+    }
+    .mainStage img,
+    .mainStage video{
+      width:100%;height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .mainStage video{
+      display:none;
+      background:#000;
+    }
+    .playOverlay{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;
+    }
+    .playBtn{
+      pointer-events:auto;
+      display:inline-flex;align-items:center;gap:8px;
+      padding:12px 14px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.92);
+      font-weight:900;
+      cursor:pointer;
+      backdrop-filter: blur(8px);
+    }
+
+    /* carousel thumbs */
+    .thumbRowWrap{
+      margin-top:10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      padding:10px;
+    }
+    .thumbRow{
+      display:flex;gap:10px;
+      overflow-x:auto;
+      padding-bottom:6px;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .thumbRow::-webkit-scrollbar{height:8px}
+    .thumbRow::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
+
+    .thumb{
+      flex:0 0 auto;
+      width:110px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+      cursor:pointer;
+      scroll-snap-align:start;
+      position:relative;
+      transition: transform .12s ease, border-color .12s ease;
+    }
+    .thumb:hover{transform: translateY(-1px)}
+    .thumb.on{border-color: color-mix(in srgb, var(--accent2) 70%, white 0%); box-shadow:0 0 0 2px rgba(34,197,94,.12) inset;}
+    .thumb img{width:100%;height:70px;object-fit:cover;display:block}
+    .thumbMeta{
+      padding:7px 8px 8px;
+      display:flex;justify-content:space-between;align-items:center;
+      gap:6px;
+      font-size:11px;
+      color: rgba(229,231,235,.9);
+    }
+    .thumbTag{
+      font-size:10px;
+      padding:4px 8px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      font-weight:900;
+    }
+    .thumbPlay{
+      position:absolute;left:8px;top:8px;
+      width:28px;height:28px;border-radius:999px;
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.35);
+      color:#fff;
+      font-weight:900;
+    }
+    .thumbDots{
+      display:flex;justify-content:center;gap:6px;
+      padding-top:8px;
+    }
+    .dot{width:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.18)}
+    .dot.on{background: color-mix(in srgb, var(--accent2) 80%, transparent);}
+
+    /* mode bar */
+    .modeBar{
+      margin-top:14px;
+      display:flex;gap:10px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px;
+      background: var(--panel2);
+    }
+    .modeBtn{
+      flex:1;
+      padding:10px;
+      border-radius:12px;
+      background:transparent;
+      border:1px solid transparent;
+      color:var(--muted);
+      cursor:pointer;
+      font-weight:900;
+    }
+    .modeBtn.on{
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      color:var(--text);
+    }
+
+    /* inputs */
+    .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+    @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
+
+    .field{
+      background: var(--panel2);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+    .field label{font-size:13px;margin-bottom:6px;display:block;font-weight:800;color:rgba(229,231,235,.92)}
+    .field input{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      outline:none;
+    }
+    .field input::placeholder{color:rgba(148,163,184,.65)}
+    .miniHint{margin-top:10px;font-size:12px;color: var(--muted);line-height:1.35;opacity:.95}
+
+    /* progress */
+    .result{
+      display:none;
+      margin-top:12px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background: var(--panel2);
+    }
+    .progress{
+      height:10px;border-radius:999px;
+      background:rgba(255,255,255,.04);
+      overflow:hidden;
+      border:1px solid var(--line);
+    }
+    .bar{
+      height:100%;width:0%;
+      background:linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* buttons */
+    .btn{
+      padding:12px 14px;
+      border-radius:14px;
+      border:none;
+      font-weight:950;
+      cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      color:var(--text);
+    }
+    .btn.primary{
+      background:linear-gradient(180deg, var(--accent2), color-mix(in srgb, var(--accent2) 70%, #000 30%));
+      color:var(--btnText);
+      border:1px solid rgba(0,0,0,.10);
+    }
+
+    /* actions under inputs */
+    .actionsUnderInputs{
+      margin-top:12px;
+      display:grid;
+      gap:10px;
+    }
+    .actionsUnderInputs .row2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    @media(min-width:720px){
+      .actionsUnderInputs .row2{max-width:520px}
+      .actionsUnderInputs .primaryWrap{max-width:520px}
+    }
+
+    /* RTL tweaks */
+    body[dir="rtl"] .hero h1{letter-spacing:0}
+    body[dir="rtl"] .brandTitle{max-width:50vw}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <!-- Top bar -->
+      <div class="topBar">
+        <div class="brandLeft">
+          <div class="brandLogo"><img id="brandLogo" alt="logo"></div>
+          <div class="brandTitle" id="brandTitle">Shaga3app · AI Video Lab</div>
+        </div>
+
+        <div class="topRight">
+          <button class="langBtn" id="langToggle" type="button">AR</button>
+          <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero">
+        <h1 id="heroTitle">Play with our<br>guided video<br>prompt</h1>
+        <p id="heroDesc">You get up to <b id="triesInline">2</b> tries. The core concept is fixed by us; you just add your creative twist ✨</p>
+      </div>
+
+      <!-- Locked prompt -->
+      <div class="sectionLabel" id="baseLabel">BASE CONCEPT (LOCKED)</div>
+      <div class="lockedBox">
+        <div class="lockedTop">
+          <div class="lockedTag" id="lockedTag">🔒 Locked</div>
+          <div class="lockedTag"><span id="trialsLabel">Trials left:</span> <b id="trialsLeft">2</b></div>
+        </div>
+        <div class="lockedPrompt" id="basePrompt"></div>
+      </div>
+
+      <!-- Preview + Carousel -->
+      <div class="previewCard">
+        <div class="previewHeader">
+          <div id="selectedLabel">Selected demo</div>
+          <div class="badge" id="formatBadge">9:16 • 5–8s</div>
+        </div>
+
+        <div class="mainStage">
+          <img id="mainPoster" alt="Selected poster" />
+          <video id="mainVideo" controls playsinline preload="none"></video>
+
+          <div class="playOverlay">
+            <button class="playBtn" id="playBtn" type="button">▶ <span id="playTxt">Play</span></button>
+          </div>
+        </div>
+
+        <div class="thumbRowWrap">
+          <div class="thumbRow" id="thumbRow"></div>
+          <div class="thumbDots" id="thumbDots"></div>
+        </div>
+
+        <div class="miniHint" id="saveWarn" style="margin-top:10px;">
+          This page does not save your generated video. Please download it or copy the link before leaving.
+        </div>
+      </div>
+
+      <!-- Mode -->
+      <div class="sectionLabel" id="modeLabel">CHOOSE INPUT MODE</div>
+      <div class="modeBar">
+        <button class="modeBtn on" id="modeText" type="button">📝 <span id="modeTextTxt">Text prompt</span></button>
+        <button class="modeBtn" id="modeImages" type="button">🖼️ <span id="modeImgTxt">Start + End images</span></button>
+      </div>
+
+      <div class="field span2" id="imagesBox" style="display:none; margin-top:10px;">
+        <label id="lblImages">Start + End images</label>
+        <input type="file" id="startImg" accept="image/*">
+        <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
+
+        <!-- I2V previews (added) -->
+        <div id="i2vPreview" style="display:flex; gap:12px; margin-top:10px; flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:12px; opacity:.75;" id="startPrevLbl">Start image</div>
+            <img id="startPreview" alt="start preview"
+                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:12px; opacity:.75;" id="endPrevLbl">End image</div>
+            <img id="endPreview" alt="end preview"
+                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
+          </div>
+        </div>
+
+        <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
+      </div>
+
+      <!-- Inputs -->
+      <div class="grid">
+        <div class="field">
+          <label id="lblSubject">Main subject / character</label>
+          <input id="subject" placeholder="Who is the main character? (age, style, wardrobe, vibe)">
+        </div>
+        <div class="field">
+          <label id="lblLocation">Location / environment</label>
+          <input id="location" placeholder="Where is it happening? (city, time of day, lighting, atmosphere)">
+        </div>
+
+        <div class="field span2">
+          <label id="lblTwist">Extra creative twist</label>
+          <input id="twist" placeholder="Optional: camera move, mood, style, or one special detail.">
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="actionsUnderInputs">
+        <div class="primaryWrap">
+          <button class="btn primary" id="generateBtn" type="button">⚡ <span id="genTxt">Generate video</span></button>
+        </div>
+        <div class="row2">
+          <button class="btn secondary" id="copyBtn" type="button">🔗 <span id="copyTxt">Copy link</span></button>
+          <button class="btn secondary" id="downloadBtn" type="button">⬇ <span id="dlTxt">Download</span></button>
+        </div>
+      </div>
+
+      <!-- ✅ Progress/status under Copy/Download, NEVER 100% until ready -->
+      <div class="result" id="resultBox">
+        <div class="miniHint" id="timerText" style="display:block;margin-top:0;margin-bottom:10px;"></div>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="miniHint" id="resultNote" style="margin-top:10px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  /* ===========================
+     I2V. Store selected images + show previews (added)
+  =========================== */
+  let I2V_START_FILE = null;
+  let I2V_END_FILE = null;
+
+  function setPreview(imgEl, file){
+    if(!imgEl) return;
+    if(!file){
+      imgEl.src = "";
+      imgEl.style.opacity = "0";
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    imgEl.src = url;
+    imgEl.style.opacity = "1";
   }
-}
 
-/* =========================
-   AWS SigV4 helpers (NO aws-sdk)
-========================= */
-function hmac(key, str) {
-  return crypto.createHmac("sha256", key).update(str, "utf8").digest();
-}
-function sha256Hex(data) {
-  return crypto.createHash("sha256").update(data).digest("hex");
-}
-function amzDate(d) {
-  return d.toISOString().replace(/[:-]|\.\d{3}/g, "");
-}
-function dateStamp(d) {
-  return d.toISOString().slice(0, 10).replace(/-/g, "");
-}
-function signingKey(secret, date, region, service) {
-  const kDate = hmac("AWS4" + secret, date);
-  const kRegion = hmac(kDate, region);
-  const kService = hmac(kRegion, service);
-  return hmac(kService, "aws4_request");
-}
+  function initI2VInputs(){
+    const startInput = $("startImg");
+    const endInput = $("endImg");
+    const startPreview = $("startPreview");
+    const endPreview = $("endPreview");
 
-/* =========================
-   ✅ ADD — MongoDB rate limiting (server-side, persists across refresh)
-   Uses:
-   - MONGODB_URI
-   - MONGODB_DB (default: ai_video_lab)
-   - MONGODB_RATE_COLLECTION (default: rate_limits)
-   - MAX_TRIALS (default: 2)
-========================= */
-let _mongoClient; // cached across Lambda warm invocations
+    if(startInput){
+      startInput.addEventListener("change", () => {
+        I2V_START_FILE = (startInput.files && startInput.files[0]) ? startInput.files[0] : null;
+        setPreview(startPreview, I2V_START_FILE);
+      });
+    }
 
-async function getMongoClient() {
-  if (_mongoClient) return _mongoClient;
-
-  const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error("Missing MONGODB_URI env var");
-
-  _mongoClient = new MongoClient(uri, {
-    maxPoolSize: 2,
-    serverSelectionTimeoutMS: 5000,
-  });
-
-  await _mongoClient.connect();
-  return _mongoClient;
-}
-
-// Default: 2 trials per 24h per deviceId
-async function enforceTrials(deviceId) {
-  const MAX_TRIALS = Number(process.env.MAX_TRIALS || 2);
-
-  const dbName = process.env.MONGODB_DB || "ai_video_lab";
-  const colName = process.env.MONGODB_RATE_COLLECTION || "rate_limits";
-
-  const client = await getMongoClient();
-  const col = client.db(dbName).collection(colName);
-
-  const now = new Date();
-
-  // 24h rolling window (simple + effective)
-  const windowMs = 24 * 60 * 60 * 1000;
-  const windowStart = new Date(now.getTime() - windowMs);
-
-  // Count generate events within last 24h
-  const count = await col.countDocuments({
-    deviceId,
-    kind: "generate",
-    createdAt: { $gte: windowStart },
-  });
-
-  if (count >= MAX_TRIALS) {
-    const err = new Error("TRIAL_LIMIT_REACHED");
-    err.statusCode = 429;
-    throw err;
+    if(endInput){
+      endInput.addEventListener("change", () => {
+        I2V_END_FILE = (endInput.files && endInput.files[0]) ? endInput.files[0] : null;
+        setPreview(endPreview, I2V_END_FILE);
+      });
+    }
   }
 
-  // Record this generate attempt
-  await col.insertOne({
-    deviceId,
-    kind: "generate",
-    createdAt: now,
-  });
-}
+  /* ===========================
+     STEP 2A . Device ID (anti-abuse)
+  =========================== */
+  const DEVICE_ID_KEY = "shaga3_device_id";
+  function getDeviceId(){
+    try{
+      let id = localStorage.getItem(DEVICE_ID_KEY);
+      if(!id){
+        id = "dev_" + (crypto.randomUUID ? crypto.randomUUID() : (Date.now() + "_" + Math.random().toString(16).slice(2)));
+        localStorage.setItem(DEVICE_ID_KEY, id);
+      }
+      return id;
+    }catch(e){
+      return "dev_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    }
+  }
 
-/* =========================
-   ✅ ADD — Trial status (for UI sync after refresh)
-   Returns: maxTrials / used / left / windowHours
-========================= */
-async function getTrialStatus(deviceId) {
-  const MAX_TRIALS = Number(process.env.MAX_TRIALS || 2);
+  /* ===========================
+     ✅ Trials UI persistence (client-side mirror)
+     . Server is the truth (MongoDB rate limit).
+     . This keeps the NUMBER consistent after refresh.
+     . Resets after 24h locally.
+  =========================== */
+  const TRIALS_MAX = 2; // match MAX_TRIALS in Lambda (default 2)
+  const TRIALS_STATE_KEY = "shaga3_trials_state_v1";
+  const TRIALS_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-  const dbName = process.env.MONGODB_DB || "ai_video_lab";
-  const colName = process.env.MONGODB_RATE_COLLECTION || "rate_limits";
+  function loadTrialsState(){
+    try{
+      const raw = localStorage.getItem(TRIALS_STATE_KEY);
+      if(!raw) return { windowStart: Date.now(), used: 0 };
+      const s = JSON.parse(raw);
+      if(!s || typeof s.windowStart !== "number" || typeof s.used !== "number"){
+        return { windowStart: Date.now(), used: 0 };
+      }
+      // reset if window expired
+      if(Date.now() - s.windowStart >= TRIALS_WINDOW_MS){
+        return { windowStart: Date.now(), used: 0 };
+      }
+      // clamp
+      s.used = Math.max(0, Math.min(TRIALS_MAX, Math.floor(s.used)));
+      return s;
+    }catch(e){
+      return { windowStart: Date.now(), used: 0 };
+    }
+  }
 
-  const client = await getMongoClient();
-  const col = client.db(dbName).collection(colName);
+  function saveTrialsState(state){
+    try{ localStorage.setItem(TRIALS_STATE_KEY, JSON.stringify(state)); }catch(e){}
+  }
 
-  const now = new Date();
-  const windowMs = 24 * 60 * 60 * 1000;
-  const windowStart = new Date(now.getTime() - windowMs);
+  function getTrialsLeftFromState(state){
+    return Math.max(0, TRIALS_MAX - (state.used || 0));
+  }
 
-  const used = await col.countDocuments({
-    deviceId,
-    kind: "generate",
-    createdAt: { $gte: windowStart },
-  });
+  function setTrialsLeft(n){
+    trials = Math.max(0, Math.min(TRIALS_MAX, Number(n||0)));
+    $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+    const triesNum = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+    // update hero line (keeps same template)
+    const t = i18n[currentLang];
+    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
+  }
 
-  const left = Math.max(0, MAX_TRIALS - used);
+  function consumeOneTrial(){
+    const s = loadTrialsState();
+    s.used = Math.min(TRIALS_MAX, (s.used||0) + 1);
+    saveTrialsState(s);
+    setTrialsLeft(getTrialsLeftFromState(s));
+  }
 
-  return { maxTrials: MAX_TRIALS, used, left, windowHours: 24 };
-}
+  function hardLockTrialsToZero(){
+    const s = loadTrialsState();
+    s.used = TRIALS_MAX;
+    saveTrialsState(s);
+    setTrialsLeft(0);
+  }
 
-/* =========================
-   S3 PUT upload (signed)
-========================= */
-async function s3Put({ region, bucket, key, body }) {
-  const AK = process.env.AWS_ACCESS_KEY_ID;
-  const SK = process.env.AWS_SECRET_ACCESS_KEY;
-  const ST = process.env.AWS_SESSION_TOKEN;
+  /* API settings */
+  const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
+  const MODEL_ID = "veo-3.1-generate-001";
 
-  if (!AK || !SK) throw new Error("Missing AWS credentials");
-  if (!region) throw new Error("Missing S3_REGION env var");
-  if (!bucket) throw new Error("Missing S3_BUCKET env var");
+  // ✅ IMPORTANT: Must match Lambda env var VEO3_API_KEY exactly
+  const API_KEY = "v3_9f8c2d1a_6b7c8d9e_0a1b2c3d4e5f9n5v";
 
-  const service = "s3";
-  const method = "PUT";
-  const host = `${bucket}.s3.${region}.amazonaws.com`;
-  const uri = `/${encodeURIComponent(key).replace(/%2F/g, "/")}`;
+  const LAST_URL_KEY = "shaga3app_last_video_url";
+  const LAST_BRAND_KEY = "shaga3app_last_brand";
 
-  const now = new Date();
-  const amz = amzDate(now);
-  const date = dateStamp(now);
-  const payloadHash = sha256Hex(body);
-
-  const headersToSign = {
-    host,
-    "x-amz-date": amz,
-    "x-amz-content-sha256": payloadHash,
-    "content-type": "video/mp4",
+  /* i18n */
+  const i18n = {
+    en: {
+      heroTitle: "Play with our<br>guided video<br>prompt",
+      heroDescStart: "You get up to ",
+      heroDescEnd: " tries. The core concept is fixed by us; you just add your creative twist ✨",
+      baseLabel: "BASE CONCEPT (LOCKED)",
+      locked: "🔒 Locked",
+      trialsLabel: "Trials left:",
+      selectedDemo: "Selected demo",
+      play: "Play",
+      modeLabel: "CHOOSE INPUT MODE",
+      modeText: "Text prompt",
+      modeImg: "Start + End images",
+      lblSubject: "Main subject / character",
+      lblLocation: "Location / environment",
+      lblTwist: "Extra creative twist",
+      lblImages: "Start + End images",
+      hintImages: "Upload a start frame and an end frame to guide the motion.",
+      phSubject: "Who is the main character? (age, style, wardrobe, vibe)",
+      phLocation: "Where is it happening? (city, time of day, lighting, atmosphere)",
+      phTwist: "Optional: camera move, mood, style, or one special detail.",
+      gen: "Generate video",
+      dl: "Download",
+      copy: "Copy link",
+      saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
+      waiting: "Waiting for video…",
+      ready: "Ready ✅",
+      copied: "Link copied ✅",
+      newTag: "New",
+      demoTag: "Demo",
+      limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
+      startPrev: "Start image",
+      endPrev: "End image"
+    },
+    ar: {
+      heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
+      heroDescStart: "لديك ",
+      heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
+      baseLabel: "المفهوم الأساسي (مقفول)",
+      locked: "🔒 مقفول",
+      trialsLabel: "المحاولات المتبقية:",
+      selectedDemo: "الديمو المختار",
+      play: "تشغيل",
+      modeLabel: "اختر طريقة الإدخال",
+      modeText: "نص فقط",
+      modeImg: "صورتان: بداية + نهاية",
+      lblSubject: "الشخصية / العنصر الرئيسي",
+      lblLocation: "المكان / البيئة",
+      lblTwist: "إضافة إبداعية",
+      lblImages: "صورتان: بداية + نهاية",
+      hintImages: "ارفع صورة البداية وصورة النهاية لتوجيه الحركة.",
+      phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
+      phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
+      phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
+      gen: "توليد فيديو",
+      dl: "تحميل",
+      copy: "نسخ الرابط",
+      saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
+      waiting: "بنستنى الفيديو…",
+      ready: "جاهز ✅",
+      copied: "تم نسخ الرابط ✅",
+      newTag: "جديد",
+      demoTag: "ديمو",
+      limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
+      startPrev: "صورة البداية",
+      endPrev: "صورة النهاية"
+    }
   };
-  if (ST) headersToSign["x-amz-security-token"] = ST;
 
-  const signedHeaders = Object.keys(headersToSign).sort().join(";");
-  const canonicalHeaders = Object.keys(headersToSign)
-    .sort()
-    .map((k) => `${k}:${headersToSign[k]}\n`)
-    .join("");
-
-  const canonicalRequest =
-    `${method}\n${uri}\n\n${canonicalHeaders}\n${signedHeaders}\n${payloadHash}`;
-
-  const scope = `${date}/${region}/${service}/aws4_request`;
-  const stringToSign =
-    `AWS4-HMAC-SHA256\n${amz}\n${scope}\n${sha256Hex(canonicalRequest)}`;
-
-  const sig = crypto
-    .createHmac("sha256", signingKey(SK, date, region, service))
-    .update(stringToSign)
-    .digest("hex");
-
-  const auth =
-    `AWS4-HMAC-SHA256 Credential=${AK}/${scope}, SignedHeaders=${signedHeaders}, Signature=${sig}`;
-
-  const putHeaders = {
-    Authorization: auth,
-    "x-amz-date": amz,
-    "x-amz-content-sha256": payloadHash,
-    "Content-Type": "video/mp4",
-  };
-  if (ST) putHeaders["x-amz-security-token"] = ST;
-
-  const r = await fetch(`https://${host}${uri}`, {
-    method: "PUT",
-    headers: putHeaders,
-    body,
-  });
-
-  if (!r.ok) {
-    const errText = await r.text().catch(() => "");
-    throw new Error(`S3 PUT failed: ${r.status} ${errText}`);
+  function toArabicDigits(str){
+    const map = {"0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩"};
+    return String(str).replace(/[0-9]/g, d => map[d]);
   }
-}
 
-/* =========================
-   Presigned GET (with token)
-========================= */
-function presignGet({ region, bucket, key }) {
-  const AK = process.env.AWS_ACCESS_KEY_ID;
-  const SK = process.env.AWS_SECRET_ACCESS_KEY;
-  const ST = process.env.AWS_SESSION_TOKEN;
+  let currentLang = "en";
 
-  if (!AK || !SK) throw new Error("Missing AWS credentials");
-  if (!region) throw new Error("Missing S3_REGION env var");
-  if (!bucket) throw new Error("Missing S3_BUCKET env var");
+  /* ===========================
+     ✅ INPUT MODE FLAG (added)
+  =========================== */
+  let INPUT_MODE = "text"; // "text" or "images"
 
-  const now = new Date();
-  const amz = amzDate(now);
-  const date = dateStamp(now);
-  const scope = `${date}/${region}/s3/aws4_request`;
-
-  const params = [
-    ["X-Amz-Algorithm", "AWS4-HMAC-SHA256"],
-    ["X-Amz-Credential", `${AK}/${scope}`],
-    ["X-Amz-Date", amz],
-    ["X-Amz-Expires", "3600"],
-    ["X-Amz-SignedHeaders", "host"],
-  ];
-  if (ST) params.push(["X-Amz-Security-Token", ST]);
-
-  params.sort(([a], [b]) => a.localeCompare(b));
-
-  const query = params
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-    .join("&");
-
-  const host = `${bucket}.s3.${region}.amazonaws.com`;
-  const uri = `/${encodeURIComponent(key).replace(/%2F/g, "/")}`;
-
-  const canonicalRequest =
-    `GET\n${uri}\n${query}\nhost:${host}\n\nhost\nUNSIGNED-PAYLOAD`;
-
-  const stringToSign =
-    `AWS4-HMAC-SHA256\n${amz}\n${scope}\n${sha256Hex(canonicalRequest)}`;
-
-  const sig = crypto
-    .createHmac("sha256", signingKey(SK, date, region, "s3"))
-    .update(stringToSign)
-    .digest("hex");
-
-  return `https://${host}${uri}?${query}&X-Amz-Signature=${sig}`;
-}
-
-/* =========================
-   LAMBDA HANDLER (STABLE)
-========================= */
-export const handler = async (event) => {
-  try {
-    // ✅ Optional protection (disabled unless env var is set)
-    maybeRequireApiKey(event);
-
-    ensureGoogleCredsFile();
-
-    // Parse body (API Gateway string body OR direct Lambda test)
-    let body = {};
-    if (typeof event?.body === "string") body = JSON.parse(event.body);
-    else if (event?.body) body = event.body;
-    else body = event;
-
-    const action = body.action || (body.operationName ? "check" : "generate");
-
-    const projectId = process.env.GOOGLE_CLOUD_PROJECT;
-    const location = process.env.GOOGLE_LOCATION || "us-central1";
-    const modelId = body.modelId || "veo-3.1-generate-001";
-
-    if (!projectId) throw new Error("Missing GOOGLE_CLOUD_PROJECT env var");
-
-    // Google Auth (WIF)
-    const auth = new GoogleAuth({
-      scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+  /* ===========================
+     ✅ Helpers to send images (added)
+  =========================== */
+  function fileToBase64(file){
+    return new Promise((resolve, reject)=>{
+      try{
+        const fr = new FileReader();
+        fr.onload = () => {
+          const dataUrl = String(fr.result || "");
+          const b64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
+          if(!b64) return reject(new Error("Failed to read image"));
+          resolve(b64);
+        };
+        fr.onerror = () => reject(new Error("Failed to read image"));
+        fr.readAsDataURL(file);
+      }catch(e){
+        reject(new Error("Failed to read image"));
+      }
     });
-    const client = await auth.getClient();
-    const token = (await client.getAccessToken()).token;
-    if (!token) throw new Error("Failed to obtain Google access token");
+  }
 
-    /* =========================
-       ✅ ADD — STATUS (for UI sync after refresh)
-       Called by webview: { action:"status", deviceId:"..." }
-    ========================= */
-    if (action === "status") {
-      const deviceId = (body.deviceId || "").trim();
-      if (!deviceId) {
-        const err = new Error("Missing deviceId");
-        err.statusCode = 400;
-        throw err;
-      }
-
-      const st = await getTrialStatus(deviceId);
-
-      return {
-        statusCode: 200,
-        headers: baseHeaders(),
-        body: JSON.stringify({ ok: true, ...st }),
-      };
+  function assertI2VFiles(){
+    if(!I2V_START_FILE || !I2V_END_FILE){
+      const msg = (currentLang === "ar")
+        ? "من فضلك ارفع صورة البداية وصورة النهاية."
+        : "Please upload both Start and End images.";
+      throw new Error(msg);
     }
 
-    /* ===== CHECK ===== */
-    if (action === "check") {
-      if (!body.operationName) throw new Error("Missing operationName for check");
-
-      const r = await fetch(
-        `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:fetchPredictOperation`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ operationName: body.operationName }),
-        }
-      );
-
-      const data = await r.json();
-      const b64 = data?.response?.videos?.[0]?.bytesBase64Encoded;
-
-      if (!data.done || !b64) {
-        return { statusCode: 200, headers: baseHeaders(), body: JSON.stringify(data) };
-      }
-
-      const video = Buffer.from(b64, "base64");
-
-      const bucket = process.env.S3_BUCKET;
-      const region = process.env.S3_REGION;
-      const prefix = process.env.S3_PREFIX || "veo/";
-
-      if (!bucket) throw new Error("Missing S3_BUCKET env var");
-      if (!region) throw new Error("Missing S3_REGION env var");
-
-      const key = `${prefix}veo-${Date.now()}-${crypto.randomUUID()}.mp4`;
-
-      await s3Put({ region, bucket, key, body: video });
-      const url = presignGet({ region, bucket, key });
-
-      return {
-        statusCode: 200,
-        headers: baseHeaders(),
-        body: JSON.stringify({
-          done: true,
-          bytes: video.length,
-          s3: { bucket, key },
-          downloadUrl: url,
-          expiresInSeconds: 3600,
-        }),
-      };
+    const maxBytes = 3 * 1024 * 1024; // 3MB each
+    if(I2V_START_FILE.size > maxBytes || I2V_END_FILE.size > maxBytes){
+      const msg = (currentLang === "ar")
+        ? "الصور كبيرة جدًا. جرّب صور أصغر (أقل من 3MB)."
+        : "Images are too large. Please use smaller images (under 3MB).";
+      throw new Error(msg);
     }
+  }
 
-    /* ===== GENERATE ===== */
-    // ✅ ADD: enforce trials ONLY on generate
-    // Your webview already sends deviceId. If missing, we block.
-    const deviceId = (body.deviceId || "").trim();
-    if (!deviceId) {
-      const err = new Error("Missing deviceId");
-      err.statusCode = 400;
-      throw err;
+  /* Brand config */
+  function getBrandFromUrl(){
+    const u = new URL(location.href);
+    const b = (u.searchParams.get("brand") || "").trim().toLowerCase();
+    if(b) return b;
+    try{
+      const last = localStorage.getItem(LAST_BRAND_KEY);
+      if(last) return last;
+    }catch(e){}
+    return "shaga3";
+  }
+
+  const FALLBACK_BRANDS = {
+    shaga3: {
+      id:"shaga3",
+      title_en:"Shaga3app · AI Creative Playground",
+      title_ar:"شجّع 3 آب · ملعب الإبداع بالذكاء الاصطناعي",
+      beta_en:"Beta · Shaga3app powered",
+      beta_ar:"بيتا · بدعم Shaga3app",
+      logo:"assets/brand-logos/shaga3app.png",
+      theme:{
+        bg:"#0b0f18",
+        accent:"#5b5cff",
+        accent2:"#22c55e",
+        heroGradA:"rgba(91,92,255,.25)",
+        heroGradB:"rgba(34,197,94,.12)"
+      },
+      basePrompt_en:
+`BASE (LOCKED)
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
+Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated (not placed/fake).
+The scene follows this base concept, and we will inject the user details below.`,
+      basePrompt_ar:
+`الأساس (مقفول)
+اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
+لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد . بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين كده أو فيك.
+المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("purple")
+    },
+    cocacola: {
+      id:"cocacola",
+      title_en:"Coca-Cola · AI Video Lab",
+      title_ar:"كوكاكولا · AI Video Lab",
+      beta_en:"Demo · Coca-Cola",
+      beta_ar:"ديمو · كوكاكولا",
+      logo:"assets/brand-logos/cocacola.png",
+      theme:{
+        bg:"#12070a",
+        accent:"#e11d2e",
+        accent2:"#ffb000",
+        heroGradA:"rgba(225,29,46,.22)",
+        heroGradB:"rgba(255,176,0,.10)"
+      },
+      basePrompt_en:
+`BASE (LOCKED)
+Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
+The scene must feature an ultra-realistic Coca-Cola can naturally integrated (not placed/fake).
+Keep it premium, cinematic, and believable. We will inject user details below.`,
+      basePrompt_ar:
+`الأساس (مقفول)
+اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
+لازم يظهر علبة كوكاكولا واقعية جدًا داخل المشهد بشكل طبيعي (مش متحطوطه كده).
+المشهد يبقى بريميوم وسينمائي ومقنع. وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("red")
+    },
+    tui: {
+      id:"tui",
+      title_en:"TUI · AI Video Lab",
+      title_ar:"TUI · AI Video Lab",
+      beta_en:"Demo · TUI",
+      beta_ar:"ديمو · TUI",
+      logo:"assets/brand-logos/tui.png",
+      theme:{
+        bg:"#061821",
+        accent:"#2aa8ff",
+        accent2:"#7fe0ff",
+        heroGradA:"rgba(42,168,255,.20)",
+        heroGradB:"rgba(127,224,255,.10)"
+      },
+      basePrompt_en:
+`BASE (LOCKED)
+Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and bright, realistic lighting.
+The scene should feel like a premium TUI destination moment (clean, uplifting, high-end).
+We will inject user details below.`,
+      basePrompt_ar:
+`الأساس (مقفول)
+اعمل فيديو سينمائي عمودي ٩:١٦ بطابع سفر/سياحة، مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية مشرقة.
+المشهد يحسسك بلحظة وجهة سفر بريميوم على ستايل TUI (نضيف، مبهج، راقي).
+وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      demos: demoPack("blue")
     }
+  };
 
-    // Server-side trials: 2 per 24h (default), persists even after refresh
-    await enforceTrials(deviceId);
+  function demoPack(color){
+    const posters = [
+      `https://picsum.photos/seed/${color}-a/400/700`,
+      `https://picsum.photos/seed/${color}-b/400/700`,
+      `https://picsum.photos/seed/${color}-c/400/700`,
+      `https://picsum.photos/seed/${color}-d/400/700`,
+      `https://picsum.photos/seed/${color}-e/400/700`,
+      `https://picsum.photos/seed/${color}-f/400/700`,
+      `https://picsum.photos/seed/${color}-g/400/700`,
+      `https://picsum.photos/seed/${color}-h/400/700`,
+      `https://picsum.photos/seed/${color}-i/400/700`,
+      `https://picsum.photos/seed/${color}-j/400/700`
+    ];
+    const vids = [
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
+    ];
+    return posters.map((p, idx)=>({
+      id: "demo-" + idx,
+      kind: "demo",
+      poster: p,
+      video: vids[idx],
+      tag: "demo"
+    }));
+  }
 
-    const prompt = body.prompt || "Cinematic 9:16 desert sunrise, realistic lighting";
-
-    const gen = await fetch(
-      `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${modelId}:predictLongRunning`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          instances: [{ prompt }],
-          parameters: { aspectRatio: "9:16", durationSeconds: 8, sampleCount: 1 },
-        }),
+  async function loadBrandConfig(brandId){
+    try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
+    try{
+      const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
+      if(r.ok){
+        const txt = await r.text();
+        const parsed = JSON.parse(txt);
+        return normalizeBrand(parsed, brandId);
       }
-    );
+    }catch(e){}
+    return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
+  }
 
+  function normalizeBrand(raw, brandId){
+    const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
+    const theme = raw.theme || raw.colors || {};
+    const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
     return {
-      statusCode: 200,
-      headers: baseHeaders(),
-      body: await gen.text(),
-    };
-  } catch (e) {
-    console.error(e);
-    const status = e.statusCode || 500;
-    return {
-      statusCode: status,
-      headers: baseHeaders(),
-      body: JSON.stringify({ error: e.message }),
+      id: raw.id || brandId,
+      title_en: raw.title_en || raw.title || fb.title_en,
+      title_ar: raw.title_ar || fb.title_ar,
+      beta_en: raw.beta_en || fb.beta_en,
+      beta_ar: raw.beta_ar || fb.beta_ar,
+      logo: raw.logo || fb.logo,
+      theme: {
+        bg: theme.bg || fb.theme.bg,
+        accent: theme.accent || fb.theme.accent,
+        accent2: theme.accent2 || fb.theme.accent2,
+        heroGradA: theme.heroGradA || fb.theme.heroGradA,
+        heroGradB: theme.heroGradB || fb.theme.heroGradB
+      },
+      basePrompt_en: raw.basePrompt_en || fb.basePrompt_en,
+      basePrompt_ar: raw.basePrompt_ar || fb.basePrompt_ar,
+      demos
     };
   }
-};
 
+  function applyTheme(theme){
+    const root = document.documentElement.style;
+    root.setProperty("--bg", theme.bg);
+    root.setProperty("--accent", theme.accent);
+    root.setProperty("--accent2", theme.accent2);
+    root.setProperty("--heroGradA", theme.heroGradA);
+    root.setProperty("--heroGradB", theme.heroGradB);
+    root.setProperty("--btnText", "#07120a");
+  }
 
+  function setBrandUI(cfg){
+    $("brandTitle").textContent = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
+    $("betaPill").textContent = (currentLang === "ar") ? cfg.beta_ar : cfg.beta_en;
+
+    const img = $("brandLogo");
+    img.src = cfg.logo || "assets/brand-logos/shaga3app.png";
+    img.onerror = () => { img.src = "assets/brand-logos/shaga3app.png"; };
+
+    document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
+  }
+
+  /* Carousel / preview */
+  let brandCfg = null;
+  let items = [];
+  let selectedIndex = 0;
+
+  function renderBasePrompt(){
+    if(!brandCfg) return;
+    $("basePrompt").textContent = (currentLang === "ar") ? brandCfg.basePrompt_ar : brandCfg.basePrompt_en;
+  }
+
+  function setSelected(index){
+    selectedIndex = Math.max(0, Math.min(items.length-1, index));
+    [...$("thumbRow").children].forEach((el,i)=>el.classList.toggle("on", i===selectedIndex));
+    updateDots();
+    showPoster(items[selectedIndex]);
+  }
+
+  function showPoster(it){
+    $("mainPoster").src = it.poster || "";
+    $("mainPoster").style.display = "block";
+
+    $("mainVideo").pause();
+    $("mainVideo").removeAttribute("src");
+    $("mainVideo").load();
+    $("mainVideo").style.display = "none";
+  }
+
+  function playInline(it){
+    $("mainVideo").src = it.video;
+    $("mainVideo").style.display = "block";
+    $("mainPoster").style.display = "none";
+    $("mainVideo").load();
+    $("mainVideo").play().catch(()=>{});
+  }
+
+  function openVideoViewer(url){
+    if(!url) return;
+    window.open(url, "_blank", "noopener");
+  }
+
+  $("playBtn").addEventListener("click", ()=>{
+    const it = items[selectedIndex];
+    if(!it) return;
+
+    if(it.kind === "new"){
+      openVideoViewer(it.video);
+      return;
+    }
+    playInline(it);
+  });
+
+  function renderThumbs(){
+    const row = $("thumbRow");
+    row.innerHTML = "";
+    $("thumbDots").innerHTML = "";
+    if(!items.length) return;
+
+    items.forEach((it, idx)=>{
+      const d = document.createElement("div");
+      d.className = "thumb" + (idx===selectedIndex ? " on" : "");
+      d.innerHTML = `
+        <div class="thumbPlay">▶</div>
+        <img alt="poster" src="${it.poster || ""}">
+        <div class="thumbMeta">
+          <span class="thumbTag">${
+            (currentLang==="ar")
+              ? (it.kind==="new" ? i18n.ar.newTag : i18n.ar.demoTag)
+              : (it.kind==="new" ? i18n.en.newTag : i18n.en.demoTag)
+          }</span>
+          <span style="opacity:.75">${idx+1}</span>
+        </div>
+      `;
+      d.addEventListener("click", ()=> setSelected(idx));
+      row.appendChild(d);
+    });
+
+    buildDots();
+    updateDots();
+  }
+
+  function buildDots(){
+    const dots = $("thumbDots");
+    dots.innerHTML = "";
+    const pages = Math.min(10, Math.max(1, Math.ceil(items.length / 2)));
+    for(let i=0;i<pages;i++){
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dots.appendChild(dot);
+    }
+  }
+
+  function updateDots(){
+    const dots = [...$("thumbDots").children];
+    if(!dots.length) return;
+    const page = Math.min(dots.length-1, Math.floor(selectedIndex / 2));
+    dots.forEach((d,i)=>d.classList.toggle("on", i===page));
+  }
+
+  /* Mode switching */
+  const imagesBox = $("imagesBox");
+  $("modeText").addEventListener("click", ()=>{
+    INPUT_MODE = "text";
+    $("modeText").classList.add("on");
+    $("modeImages").classList.remove("on");
+    imagesBox.style.display = "none";
+  });
+  $("modeImages").addEventListener("click", ()=>{
+    INPUT_MODE = "images";
+    $("modeImages").classList.add("on");
+    $("modeText").classList.remove("on");
+    imagesBox.style.display = "block";
+  });
+
+  /* Prompt builder + API */
+  function buildPrompt(){
+    const base = $("basePrompt").textContent || "";
+    const subject = ($("subject").value || "").trim();
+    const location = ($("location").value || "").trim();
+    const twist = ($("twist").value || "").trim();
+
+    const parts = [];
+    if(subject) parts.push(`Main subject: ${subject}`);
+    if(location) parts.push(`Location: ${location}`);
+    if(twist) parts.push(`Creative twist: ${twist}`);
+
+    return `${base}\n\n---\n${parts.join("\n")}`.trim();
+  }
+
+  async function postJSON(payload){
+    const url = API_URL + "?t=" + Date.now();
+    const r = await fetch(url,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "X-API-KEY": API_KEY
+      },
+      body: JSON.stringify(payload),
+    });
+    const text = await r.text();
+    let data;
+    try{ data = JSON.parse(text); }catch(e){ data = { raw:text }; }
+    if(!r.ok){
+      const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
+      throw new Error(`${msg} (HTTP ${r.status})`);
+    }
+    return data;
+  }
+
+  // ✅ initialize trials from localStorage mirror
+  let trialsState = loadTrialsState();
+  let trials = getTrialsLeftFromState(trialsState);
+  let generating = false;
+
+  const LAST_URL_KEY2 = "shaga3app_last_video_url"; // keep original key name usage
+  function saveLastUrl(url){
+    try{ localStorage.setItem(LAST_URL_KEY2, url); }catch(e){}
+  }
+  function loadLastUrl(){
+    try{ return localStorage.getItem(LAST_URL_KEY2) || ""; }catch(e){ return ""; }
+  }
+
+  // ✅ UX: bar stays <= 95% until video is REALLY ready
+  function setTimerText(secondsLeft){
+    if(currentLang === "ar"){
+      $("timerText").textContent =
+        secondsLeft > 0
+          ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)`
+          : i18n.ar.waiting;
+    } else {
+      $("timerText").textContent =
+        secondsLeft > 0
+          ? `Generating… (~${secondsLeft}s)`
+          : i18n.en.waiting;
+    }
+  }
+  function setReadyText(){
+    $("timerText").textContent = (currentLang==="ar") ? i18n.ar.ready : i18n.en.ready;
+  }
+
+  function showLimitReached(){
+    $("resultBox").style.display = "block";
+    $("bar").style.width = "0%";
+    $("timerText").textContent = (currentLang==="ar") ? i18n.ar.limitReached : i18n.en.limitReached;
+    $("resultNote").textContent = "";
+  }
+
+  function isTrialLimitErrorMessage(msg){
+    const m = String(msg||"").toUpperCase();
+    return (
+      m.includes("TRIAL_LIMIT_REACHED") ||
+      m.includes("LIMIT_REACHED") ||
+      m.includes("HTTP 429") ||
+      m.includes("(HTTP 429)") ||
+      m.includes("429")
+    );
+  }
+
+  async function generate(){
+    if(generating) return;
+
+    // ✅ if UI says 0 trials, block immediately (prevents fake “2” after refresh)
+    if(trials <= 0){
+      showLimitReached();
+      return;
+    }
+
+    generating = true;
+
+    // show progress UI (under copy/download)
+    $("resultBox").style.display = "block";
+    $("bar").style.width = "0%";
+    $("resultNote").textContent = "";
+
+    // show initial text immediately
+    setTimerText(60);
+
+    const maxSeconds = 60;
+    const start = Date.now();
+    let rafId;
+
+    const tick = ()=>{
+      const elapsed = (Date.now()-start)/1000;
+
+      // ✅ NEVER 100% while waiting . cap at 95%
+      const p = Math.min(95, (elapsed/maxSeconds)*95);
+      $("bar").style.width = p + "%";
+
+      const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
+      setTimerText(remain);
+
+      rafId = requestAnimationFrame(tick);
+    };
+    tick();
+
+    try{
+      const prompt = buildPrompt();
+
+      // ✅ If Image Mode: attach start+end images (added)
+      let i2v = null;
+      if(INPUT_MODE === "images"){
+        assertI2VFiles();
+
+        $("resultNote").textContent = (currentLang === "ar")
+          ? "جارٍ رفع الصور وتجهيز الفيديو…"
+          : "Preparing images and generating video…";
+
+        const startB64 = await fileToBase64(I2V_START_FILE);
+        const endB64 = await fileToBase64(I2V_END_FILE);
+
+        i2v = {
+          start: {
+            name: I2V_START_FILE.name || "start.jpg",
+            mime: I2V_START_FILE.type || "image/jpeg",
+            b64: startB64
+          },
+          end: {
+            name: I2V_END_FILE.name || "end.jpg",
+            mime: I2V_END_FILE.type || "image/jpeg",
+            b64: endB64
+          }
+        };
+      }
+
+      const gen = await postJSON({
+        action:"generate",
+        modelId: MODEL_ID,
+        prompt,
+        deviceId: getDeviceId(),
+        inputMode: INPUT_MODE,
+        i2v
+      });
+
+      // ✅ ONLY NOW we consume a trial locally (server accepted)
+      consumeOneTrial();
+
+      const operationName = gen.operationName || gen.name;
+
+      // If API returns immediately ready
+      if(gen.done && gen.downloadUrl){
+        onGenerated(gen.downloadUrl);
+        return;
+      }
+
+      if(!operationName) throw new Error("No operationName returned from generate");
+
+      const pollEveryMs = 3000;
+      const maxPolls = 25;
+      let doneUrl = "";
+
+      for(let i=0;i<maxPolls;i++){
+        await new Promise(res=>setTimeout(res, pollEveryMs));
+
+        const chk = await postJSON({
+          action:"check",
+          modelId: MODEL_ID,
+          operationName,
+          deviceId: getDeviceId()
+        });
+
+        if(chk.done && chk.downloadUrl){ doneUrl = chk.downloadUrl; break; }
+        if(chk.done && chk.response && chk.response.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
+      }
+
+      if(!doneUrl) throw new Error("Still processing. Try again in a few seconds.");
+
+      onGenerated(doneUrl);
+
+    }catch(err){
+      const msg = (err?.message || "Unknown error");
+
+      // ✅ If server says limit reached . show Arabic/English . lock local to 0
+      if(isTrialLimitErrorMessage(msg)){
+        hardLockTrialsToZero();
+        showLimitReached();
+      }else{
+        $("timerText").textContent = "Error: " + msg;
+        $("bar").style.width = "0%";
+      }
+    }finally{
+      generating = false;
+      if(rafId) cancelAnimationFrame(rafId);
+    }
+  }
+
+  function onGenerated(downloadUrl){
+    // ✅ NOW we can jump to 100%
+    $("bar").style.width = "100%";
+    setReadyText();
+
+    saveLastUrl(downloadUrl);
+
+    const newItem = {
+      id: "new-" + Date.now(),
+      kind: "new",
+      poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || ""),
+      video: downloadUrl,
+      tag: "new"
+    };
+
+    items = items.filter(x => x.kind !== "new");
+    items.unshift(newItem);
+
+    selectedIndex = 0;
+    renderThumbs();
+    setSelected(0);
+
+    $("resultNote").textContent = (currentLang==="ar")
+      ? "✅ اتولد فيديو جديد. اضغط «تشغيل» لمشاهدته بسرعة."
+      : "✅ New video generated. Tap “Play” to open it fast.";
+  }
+
+  /* Buttons */
+  $("generateBtn").addEventListener("click", generate);
+
+  function getCurrentVideoUrl(){
+    const it = items[selectedIndex];
+    if(it?.video) return it.video;
+    return loadLastUrl();
+  }
+
+  $("downloadBtn").addEventListener("click", ()=>{
+    const url = getCurrentVideoUrl();
+    if(!url) return;
+    saveLastUrl(url);
+    openVideoViewer(url);
+  });
+
+  $("copyBtn").addEventListener("click", async ()=>{
+    const url = getCurrentVideoUrl();
+    if(!url) return;
+    saveLastUrl(url);
+    try{
+      await navigator.clipboard.writeText(url);
+      alert((currentLang==="ar") ? i18n.ar.copied : i18n.en.copied);
+    }catch(e){
+      const msg = (currentLang==="ar") ? "انسخ الرابط من هنا:" : "Copy link from here:";
+      prompt(msg, url);
+    }
+  });
+
+  /* Language */
+  function applyLang(lang){
+    currentLang = lang;
+    const t = i18n[lang];
+
+    $("heroTitle").innerHTML = t.heroTitle;
+    const triesNum = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
+
+    $("baseLabel").textContent = t.baseLabel;
+    $("lockedTag").textContent = t.locked;
+    $("trialsLabel").textContent = t.trialsLabel;
+
+    $("selectedLabel").textContent = t.selectedDemo;
+    $("playTxt").textContent = t.play;
+
+    $("modeLabel").textContent = t.modeLabel;
+    $("modeTextTxt").textContent = t.modeText;
+    $("modeImgTxt").textContent = t.modeImg;
+
+    $("lblSubject").textContent = t.lblSubject;
+    $("lblLocation").textContent = t.lblLocation;
+    $("lblTwist").textContent = t.lblTwist;
+    $("lblImages").textContent = t.lblImages;
+    $("hintImages").textContent = t.hintImages;
+
+    // I2V preview labels (added)
+    if($("startPrevLbl")) $("startPrevLbl").textContent = t.startPrev;
+    if($("endPrevLbl")) $("endPrevLbl").textContent = t.endPrev;
+
+    $("subject").placeholder = t.phSubject;
+    $("location").placeholder = t.phLocation;
+    $("twist").placeholder = t.phTwist;
+
+    $("genTxt").textContent = t.gen;
+    $("dlTxt").textContent = t.dl;
+    $("copyTxt").textContent = t.copy;
+    $("saveWarn").textContent = t.saveWarn;
+
+    document.body.dir = (lang === "ar") ? "rtl" : "ltr";
+    document.documentElement.lang = (lang === "ar") ? "ar" : "en";
+    $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
+
+    // keep trials numbers consistent after toggle
+    $("trialsLeft").textContent = (lang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+
+    renderBasePrompt();
+    renderThumbs();
+    setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
+  }
+
+  $("langToggle").addEventListener("click", () => {
+    applyLang(currentLang === "en" ? "ar" : "en");
+  });
+
+  /* Boot */
+  async function boot(){
+    // ✅ load trials from local mirror FIRST (fix refresh showing 2)
+    trialsState = loadTrialsState();
+    trials = getTrialsLeftFromState(trialsState);
+    setTrialsLeft(trials); // updates both hero + locked box
+
+    const brandId = getBrandFromUrl();
+    brandCfg = await loadBrandConfig(brandId);
+
+    applyTheme(brandCfg.theme);
+    applyLang("en");
+    setBrandUI(brandCfg);
+
+    items = (brandCfg.demos && brandCfg.demos.length) ? brandCfg.demos.slice() : FALLBACK_BRANDS.shaga3.demos.slice();
+    selectedIndex = 0;
+
+    renderBasePrompt();
+    renderThumbs();
+    setSelected(0);
+
+    // init I2V inputs after UI exists (added)
+    initI2VInputs();
+  }
+
+  boot();
+</script>
+</body>
+</html>
+```
