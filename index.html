@@ -1,4 +1,3 @@
-```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -440,22 +439,6 @@
         <label id="lblImages">Start + End images</label>
         <input type="file" id="startImg" accept="image/*">
         <input type="file" id="endImg" accept="image/*" style="margin-top:8px;">
-
-        <!-- I2V previews (added) -->
-        <div id="i2vPreview" style="display:flex; gap:12px; margin-top:10px; flex-wrap:wrap;">
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <div style="font-size:12px; opacity:.75;" id="startPrevLbl">Start image</div>
-            <img id="startPreview" alt="start preview"
-                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <div style="font-size:12px; opacity:.75;" id="endPrevLbl">End image</div>
-            <img id="endPreview" alt="end preview"
-                 style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid rgba(255,255,255,.12); display:block; opacity:0;">
-          </div>
-        </div>
-
         <div class="miniHint" id="hintImages">Upload a start frame and an end frame to guide the motion.</div>
       </div>
 
@@ -501,46 +484,7 @@
   const $ = id => document.getElementById(id);
 
   /* ===========================
-     I2V. Store selected images + show previews (added)
-  =========================== */
-  let I2V_START_FILE = null;
-  let I2V_END_FILE = null;
-
-  function setPreview(imgEl, file){
-    if(!imgEl) return;
-    if(!file){
-      imgEl.src = "";
-      imgEl.style.opacity = "0";
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    imgEl.src = url;
-    imgEl.style.opacity = "1";
-  }
-
-  function initI2VInputs(){
-    const startInput = $("startImg");
-    const endInput = $("endImg");
-    const startPreview = $("startPreview");
-    const endPreview = $("endPreview");
-
-    if(startInput){
-      startInput.addEventListener("change", () => {
-        I2V_START_FILE = (startInput.files && startInput.files[0]) ? startInput.files[0] : null;
-        setPreview(startPreview, I2V_START_FILE);
-      });
-    }
-
-    if(endInput){
-      endInput.addEventListener("change", () => {
-        I2V_END_FILE = (endInput.files && endInput.files[0]) ? endInput.files[0] : null;
-        setPreview(endPreview, I2V_END_FILE);
-      });
-    }
-  }
-
-  /* ===========================
-     STEP 2A . Device ID (anti-abuse)
+     STEP 2A — Device ID (anti-abuse)
   =========================== */
   const DEVICE_ID_KEY = "shaga3_device_id";
   function getDeviceId(){
@@ -558,9 +502,9 @@
 
   /* ===========================
      ✅ Trials UI persistence (client-side mirror)
-     . Server is the truth (MongoDB rate limit).
-     . This keeps the NUMBER consistent after refresh.
-     . Resets after 24h locally.
+     - Server is the truth (MongoDB rate limit).
+     - This keeps the NUMBER consistent after refresh.
+     - Resets after 24h locally.
   =========================== */
   const TRIALS_MAX = 2; // match MAX_TRIALS in Lambda (default 2)
   const TRIALS_STATE_KEY = "shaga3_trials_state_v1";
@@ -658,9 +602,7 @@
       copied: "Link copied ✅",
       newTag: "New",
       demoTag: "Demo",
-      limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
-      startPrev: "Start image",
-      endPrev: "End image"
+      limitReached: "❌ You reached the max trials for today. Try again tomorrow."
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
@@ -691,9 +633,7 @@
       copied: "تم نسخ الرابط ✅",
       newTag: "جديد",
       demoTag: "ديمو",
-      limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
-      startPrev: "صورة البداية",
-      endPrev: "صورة النهاية"
+      limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة."
     }
   };
 
@@ -703,49 +643,6 @@
   }
 
   let currentLang = "en";
-
-  /* ===========================
-     ✅ INPUT MODE FLAG (added)
-  =========================== */
-  let INPUT_MODE = "text"; // "text" or "images"
-
-  /* ===========================
-     ✅ Helpers to send images (added)
-  =========================== */
-  function fileToBase64(file){
-    return new Promise((resolve, reject)=>{
-      try{
-        const fr = new FileReader();
-        fr.onload = () => {
-          const dataUrl = String(fr.result || "");
-          const b64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
-          if(!b64) return reject(new Error("Failed to read image"));
-          resolve(b64);
-        };
-        fr.onerror = () => reject(new Error("Failed to read image"));
-        fr.readAsDataURL(file);
-      }catch(e){
-        reject(new Error("Failed to read image"));
-      }
-    });
-  }
-
-  function assertI2VFiles(){
-    if(!I2V_START_FILE || !I2V_END_FILE){
-      const msg = (currentLang === "ar")
-        ? "من فضلك ارفع صورة البداية وصورة النهاية."
-        : "Please upload both Start and End images.";
-      throw new Error(msg);
-    }
-
-    const maxBytes = 3 * 1024 * 1024; // 3MB each
-    if(I2V_START_FILE.size > maxBytes || I2V_END_FILE.size > maxBytes){
-      const msg = (currentLang === "ar")
-        ? "الصور كبيرة جدًا. جرّب صور أصغر (أقل من 3MB)."
-        : "Images are too large. Please use smaller images (under 3MB).";
-      throw new Error(msg);
-    }
-  }
 
   /* Brand config */
   function getBrandFromUrl(){
@@ -782,7 +679,7 @@ The scene follows this base concept, and we will inject the user details below.`
       basePrompt_ar:
 `الأساس (مقفول)
 اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد . بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين كده أو فيك.
+لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد — بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين كده أو فيك.
 المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت.`,
       demos: demoPack("purple")
     },
@@ -1033,13 +930,11 @@ We will inject user details below.`,
   /* Mode switching */
   const imagesBox = $("imagesBox");
   $("modeText").addEventListener("click", ()=>{
-    INPUT_MODE = "text";
     $("modeText").classList.add("on");
     $("modeImages").classList.remove("on");
     imagesBox.style.display = "none";
   });
   $("modeImages").addEventListener("click", ()=>{
-    INPUT_MODE = "images";
     $("modeImages").classList.add("on");
     $("modeText").classList.remove("on");
     imagesBox.style.display = "block";
@@ -1075,6 +970,7 @@ We will inject user details below.`,
     try{ data = JSON.parse(text); }catch(e){ data = { raw:text }; }
     if(!r.ok){
       const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
+      // keep status visible inside message for detection
       throw new Error(`${msg} (HTTP ${r.status})`);
     }
     return data;
@@ -1155,7 +1051,7 @@ We will inject user details below.`,
     const tick = ()=>{
       const elapsed = (Date.now()-start)/1000;
 
-      // ✅ NEVER 100% while waiting . cap at 95%
+      // ✅ NEVER 100% while waiting — cap at 95%
       const p = Math.min(95, (elapsed/maxSeconds)*95);
       $("bar").style.width = p + "%";
 
@@ -1169,39 +1065,11 @@ We will inject user details below.`,
     try{
       const prompt = buildPrompt();
 
-      // ✅ If Image Mode: attach start+end images (added)
-      let i2v = null;
-      if(INPUT_MODE === "images"){
-        assertI2VFiles();
-
-        $("resultNote").textContent = (currentLang === "ar")
-          ? "جارٍ رفع الصور وتجهيز الفيديو…"
-          : "Preparing images and generating video…";
-
-        const startB64 = await fileToBase64(I2V_START_FILE);
-        const endB64 = await fileToBase64(I2V_END_FILE);
-
-        i2v = {
-          start: {
-            name: I2V_START_FILE.name || "start.jpg",
-            mime: I2V_START_FILE.type || "image/jpeg",
-            b64: startB64
-          },
-          end: {
-            name: I2V_END_FILE.name || "end.jpg",
-            mime: I2V_END_FILE.type || "image/jpeg",
-            b64: endB64
-          }
-        };
-      }
-
       const gen = await postJSON({
         action:"generate",
         modelId: MODEL_ID,
         prompt,
-        deviceId: getDeviceId(),
-        inputMode: INPUT_MODE,
-        i2v
+        deviceId: getDeviceId()
       });
 
       // ✅ ONLY NOW we consume a trial locally (server accepted)
@@ -1242,7 +1110,7 @@ We will inject user details below.`,
     }catch(err){
       const msg = (err?.message || "Unknown error");
 
-      // ✅ If server says limit reached . show Arabic/English . lock local to 0
+      // ✅ If server says limit reached → show Arabic/English + lock local to 0
       if(isTrialLimitErrorMessage(msg)){
         hardLockTrialsToZero();
         showLimitReached();
@@ -1338,10 +1206,6 @@ We will inject user details below.`,
     $("lblImages").textContent = t.lblImages;
     $("hintImages").textContent = t.hintImages;
 
-    // I2V preview labels (added)
-    if($("startPrevLbl")) $("startPrevLbl").textContent = t.startPrev;
-    if($("endPrevLbl")) $("endPrevLbl").textContent = t.endPrev;
-
     $("subject").placeholder = t.phSubject;
     $("location").placeholder = t.phLocation;
     $("twist").placeholder = t.phTwist;
@@ -1387,13 +1251,9 @@ We will inject user details below.`,
     renderBasePrompt();
     renderThumbs();
     setSelected(0);
-
-    // init I2V inputs after UI exists (added)
-    initI2VInputs();
   }
 
   boot();
 </script>
 </body>
 </html>
-```
