@@ -10,8 +10,8 @@
   "heroTitle_ar": "كوكاكولا<br>معمل فيديو",
   "heroDesc_en": "Pick a demo poster, add your twist, then generate. Your result appears instantly in the main preview.",
   "heroDesc_ar": "اختار صورة ديمو، ضيف لمستك، وبعدين ولّد — النتيجة هتظهر فورًا في المعاينة الأساسية.",
-  "basePrompt_en": "BASE (LOCKED)\\n\\nCreate a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and realistic lighting.\\nThe Coca-Cola can must look ultra-real and naturally part of the scene.\\nKeep it emotional, human, and authentic — no fake product placement look.\\nWe will inject the user details below.",
-  "basePrompt_ar": "الأساس (مقفول)\\n\\nاعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية.\\nعلبة كوكاكولا لازم تبان واقعية جدًا وجزء طبيعي من المشهد.\\nخليه إحساسي وبشري وحقيقي — من غير إحساس إعلان متحطّ فجأة.\\nوإحنا هنضيف تفاصيل المستخدم تحت.",
+  "basePrompt_en": "BASE (LOCKED)\\n\\nCreate a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.\\nThe Coca-Cola can must look ultra-real and naturally part of the scene — no fake product placement look.\\nAn Egyptian flag must appear naturally in the scene, and a person is clearly holding the flag and cheering or waving it in an energetic but believable way.\\nKeep it emotional, human, and authentic.\\nWe will inject the user details below.",
+  "basePrompt_ar": "الأساس (مقفول)\\n\\nاعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.\\nعلبة كوكاكولا لازم تبان واقعية جدًا وجزء طبيعي من المشهد — من غير إحساس إعلان متحطّ فجأة.\\nلازم يظهر علم مصر بشكل طبيعي جوّه المشهد، وشخص ماسك العلم وبيشجّع أو بيهوّش بيه بحركة حماسية وطبيعية تناسب الجو.\\nخليه إحساسي وبشري وحقيقي.\\nوإحنا هنضيف تفاصيل المستخدم تحت.",
   "demoPosters": [
     "assets/demo/coke/1.jpg",
     "assets/demo/coke/2.jpg",
@@ -21,4 +21,3 @@
     "assets/demo/coke/6.jpg"
   ]
 }
-
