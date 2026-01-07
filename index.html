@@ -1,4 +1,3 @@
-```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -549,6 +548,29 @@
   const LAST_URL_KEY = "shaga3app_last_video_url";
   const LAST_BRAND_KEY = "shaga3app_last_brand";
 
+  // ✅ NEW: persist pending operation so the UI never shows scary wording
+  const PENDING_OP_KEY = "shaga3app_pending_op_v1";
+  const PENDING_OP_TTL_MS = 30 * 60 * 1000;
+
+  function savePendingOp(op){
+    try{ localStorage.setItem(PENDING_OP_KEY, JSON.stringify(op)); }catch(e){}
+  }
+  function loadPendingOp(){
+    try{
+      const raw = localStorage.getItem(PENDING_OP_KEY);
+      if(!raw) return null;
+      const op = JSON.parse(raw);
+      if(!op || !op.operationName || !op.createdAt) return null;
+      if(Date.now() - op.createdAt > PENDING_OP_TTL_MS) return null;
+      return op;
+    }catch(e){
+      return null;
+    }
+  }
+  function clearPendingOp(){
+    try{ localStorage.removeItem(PENDING_OP_KEY); }catch(e){}
+  }
+
   const i18n = {
     en: {
       heroTitle: "Play with our<br>guided video<br>prompt",
@@ -574,18 +596,21 @@
       dl: "Download",
       copy: "Copy link",
       saveWarn: "This page does not save your generated video. Please download it or copy the link before leaving.",
-      waiting: "Waiting for video…",
+      waiting: "Generating…",
+      stillWorking: "Still generating… we are checking for the result.",
+      longer: "This is taking longer than usual. Please try again in a minute.",
       ready: "Ready ✅",
       copied: "Link copied ✅",
       newTag: "New",
       demoTag: "Demo",
       limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
-      needStart: "Please upload a START image."
+      needStart: "Please upload a START image.",
+      tryAgainSoft: "Could not complete this time. Please try again."
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
       heroDescStart: "لديك ",
-      heroDescEnd: " محاولات. الفكرة الأساسية ثابتة؛ أنت فقط أضِف لمستك الإبداعية ✨",
+      heroDescEnd: " محاولات. الفكرة الأساسية ثابتة. أنت فقط أضِف لمستك الإبداعية ✨",
       baseLabel: "المفهوم الأساسي (مقفول)",
       locked: "🔒 مقفول",
       trialsLabel: "المحاولات المتبقية:",
@@ -598,21 +623,24 @@
       lblLocation: "المكان / البيئة",
       lblTwist: "إضافة إبداعية",
       lblImages: "صورتان: بداية + نهاية",
-      hintImages: "ارفع صورة البداية. صورة النهاية اختيارية (محتاجة Bucket في الباك إند).",
-      phSubject: "مين البطل؟ (سن/ستايل/ملابس/إحساس عام)",
-      phLocation: "أين المكان؟ (مدينة/وقت/إضاءة/أجواء)",
-      phTwist: "اختياري: حركة كاميرا/مود/ستايل/تفصيلة مميزة.",
+      hintImages: "ارفع صورة البداية. صورة النهاية اختيارية. محتاجة Bucket في الباك إند.",
+      phSubject: "مين البطل؟ (سن. ستايل. ملابس. إحساس عام)",
+      phLocation: "أين المكان؟ (مدينة. وقت. إضاءة. أجواء)",
+      phTwist: "اختياري. حركة كاميرا. مود. ستايل. تفصيلة مميزة.",
       gen: "توليد فيديو",
       dl: "تحميل",
       copy: "نسخ الرابط",
       saveWarn: "الصفحة لا تحتفظ بالفيديو الناتج. من فضلك حمّل الفيديو أو انسخ الرابط قبل الخروج.",
-      waiting: "بنستنى الفيديو…",
+      waiting: "جارٍ التوليد…",
+      stillWorking: "لسه شغالين… وبنتابع لحد ما النتيجة تجهز.",
+      longer: "التوليد بياخد وقت أطول من المعتاد. جرّب تاني بعد دقيقة.",
       ready: "جاهز ✅",
       copied: "تم نسخ الرابط ✅",
       newTag: "جديد",
       demoTag: "ديمو",
       limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
-      needStart: "من فضلك ارفع صورة البداية."
+      needStart: "من فضلك ارفع صورة البداية.",
+      tryAgainSoft: "المحاولة دي ما كملتش. جرّب تاني."
     }
   };
 
@@ -658,9 +686,9 @@ The scene follows this base concept, and we will inject the user details below.`
       basePrompt_ar:
 `الأساس (مقفول)
 اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين أو فيك.
+لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد بشكل طبيعي ومتناسق. من غير ما يبانوا متحطّين أو فيك.
 الشخص ماسك علم مصر وبيشجّع أو بيهوّش بالعلم بحركة حماسية وطبيعية تناسب الجو.
-المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت..`,
+المشهد ماشي على الفكرة الأساسية دي. وإحنا هنضيف تفاصيل المستخدم تحت.`,
       demos: demoPack("purple")
     },
     cocacola: {
@@ -685,11 +713,10 @@ A person is clearly holding the Egyptian flag and cheering or waving it in a nat
 The scene follows this base concept, and we will inject the user details below.`,
       basePrompt_ar:
 `الأساس (مقفول)
-
 اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد بشكل طبيعي ومتناسق، من غير ما يبانوا متحطّين أو فيك.
+لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد بشكل طبيعي ومتناسق. من غير ما يبانوا متحطّين أو فيك.
 الشخص ماسك علم مصر وبيشجّع أو بيهوّش بالعلم بحركة حماسية وطبيعية تناسب الجو.
-المشهد ماشي على الفكرة الأساسية دي، وإحنا هنضيف تفاصيل المستخدم تحت..`,
+المشهد ماشي على الفكرة الأساسية دي. وإحنا هنضيف تفاصيل المستخدم تحت.`,
       demos: demoPack("red")
     },
     tui: {
@@ -1024,6 +1051,67 @@ We will inject user details below.`,
     );
   }
 
+  function safeUserMessageFromErr(err){
+    const t = i18n[currentLang];
+    const msg = String(err?.message || "").trim();
+
+    if(isTrialLimitErrorMessage(msg)) return null;
+
+    // Never show scary prefixes, never show "Error:".
+    if(!msg) return t.tryAgainSoft;
+
+    // Keep your existing friendly backend message if present.
+    if(msg.toLowerCase().includes("still processing")) return t.stillWorking;
+    if(msg.toLowerCase().includes("taking longer than usual")) return t.longer;
+
+    // Default friendly
+    return t.tryAgainSoft;
+  }
+
+  async function pollForResult(operationName){
+    const t = i18n[currentLang];
+
+    let doneUrl = "";
+    let chk = null;
+
+    // Backoff: 3s to 10s
+    let waitMs = 3000;
+    const maxWaitMs = 10000;
+
+    // Total checks: longer for images
+    const maxChecks = isImagesModeOn() ? 110 : 70; // roughly 8 to 15 minutes depending on backoff
+
+    for(let i=0;i<maxChecks;i++){
+      await new Promise(res=>setTimeout(res, waitMs));
+
+      chk = await postJSON({
+        action:"check",
+        modelId: MODEL_ID,
+        operationName,
+        deviceId: getDeviceId()
+      });
+
+      if(chk?.done && chk?.downloadUrl){ doneUrl = chk.downloadUrl; break; }
+      if(chk?.done && chk?.response?.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
+
+      // Friendly status text. No error wording.
+      if(i === 8){
+        $("timerText").textContent = t.stillWorking;
+        const currentWidth = parseFloat(($("bar").style.width || "0").replace("%","")) || 0;
+        $("bar").style.width = Math.min(95, Math.max(currentWidth, 65)) + "%";
+      }
+      if(i === 25){
+        $("timerText").textContent = t.stillWorking;
+        const currentWidth = parseFloat(($("bar").style.width || "0").replace("%","")) || 0;
+        $("bar").style.width = Math.min(95, Math.max(currentWidth, 80)) + "%";
+      }
+
+      waitMs = Math.min(maxWaitMs, Math.round(waitMs * 1.15));
+    }
+
+    return doneUrl;
+  }
+
   async function generate(){
     if(generating) return;
 
@@ -1038,8 +1126,9 @@ We will inject user details below.`,
     $("bar").style.width = "0%";
     $("resultNote").textContent = "";
 
-    const maxSeconds = 180;               // ✅ was 60
-    setTimerText(maxSeconds);             // ✅ was setTimerText(60)
+    // Timer length by mode. Images usually take longer.
+    const maxSeconds = isImagesModeOn() ? 420 : 240;
+    setTimerText(maxSeconds);
 
     const start = Date.now();
     let rafId;
@@ -1071,7 +1160,7 @@ We will inject user details below.`,
         const endFile = $("endImg")?.files?.[0] || null;
 
         const startB64 = await fileToB64(startFile);
-        if(!startB64) throw new Error("Start image could not be read.");
+        if(!startB64) throw new Error((currentLang==="ar") ? "لم نتمكن من قراءة صورة البداية." : "Start image could not be read.");
 
         payload.inputMode = "images";
         payload.i2v = {
@@ -1083,7 +1172,7 @@ We will inject user details below.`,
 
         if(endFile){
           const endB64 = await fileToB64(endFile);
-          if(!endB64) throw new Error("End image could not be read.");
+          if(!endB64) throw new Error((currentLang==="ar") ? "لم نتمكن من قراءة صورة النهاية." : "End image could not be read.");
           payload.i2v.end = {
             mime: endFile.type || "image/jpeg",
             b64: endB64
@@ -1093,88 +1182,51 @@ We will inject user details below.`,
 
       const gen = await postJSON(payload);
 
+      // Consume local trial only after backend accepted the request.
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
 
       if(gen.done && gen.downloadUrl){
+        clearPendingOp();
         onGenerated(gen.downloadUrl);
         return;
       }
 
-      if(!operationName) throw new Error("No operationName returned from generate");
+      if(!operationName) throw new Error((currentLang==="ar") ? "لم يتم استلام رقم العملية." : "No operation id returned.");
 
-      /* ==========================================
-         ✅ BULLETPROOF POLLING (NO “error” wording)
-      ========================================== */
-      const pollEveryMs = 3000;
+      // Save operation so user can refresh and still continue without panic.
+      savePendingOp({
+        operationName,
+        createdAt: Date.now(),
+        modelId: MODEL_ID,
+        deviceId: getDeviceId()
+      });
 
-      let doneUrl = "";
-      let chk = null;
+      // Poll for result with friendly UX.
+      const doneUrl = await pollForResult(operationName);
 
-      // Phase 1: ~120s
-      for(let i=0;i<40;i++){
-        await new Promise(res=>setTimeout(res, pollEveryMs));
-
-        chk = await postJSON({
-          action:"check",
-          modelId: MODEL_ID,
-          operationName,
-          deviceId: getDeviceId()
-        });
-
-        if(chk?.done && chk?.downloadUrl){ doneUrl = chk.downloadUrl; break; }
-        if(chk?.done && chk?.response?.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
-      }
-
-      // Phase 2: keep checking longer, but friendly text only
       if(!doneUrl){
-        $("timerText").textContent = (currentLang==="ar")
-          ? "لسه شغالين… هنفضل نتابع لحد ما الفيديو يجهز."
-          : "Still generating… we will keep checking until it is ready.";
-
-        // keep bar alive but never 100%
-        const currentWidth = parseFloat(($("bar").style.width || "0").replace("%","")) || 0;
-        $("bar").style.width = Math.min(95, Math.max(currentWidth, 70)) + "%";
-
-        // Extra ~240s
-        for(let i=0;i<80;i++){
-          await new Promise(res=>setTimeout(res, pollEveryMs));
-
-          chk = await postJSON({
-            action:"check",
-            modelId: MODEL_ID,
-            operationName,
-            deviceId: getDeviceId()
-          });
-
-          if(chk?.done && chk?.downloadUrl){ doneUrl = chk.downloadUrl; break; }
-          if(chk?.done && chk?.response?.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
-        }
-      }
-
-      // Final: if still not ready, show a normal message and stop (no error)
-      if(!doneUrl){
-        $("timerText").textContent = (currentLang==="ar")
-          ? "التوليد بياخد وقت أطول من المعتاد. جرّب تاني بعد دقيقة."
-          : "This is taking longer than usual. Please try again in a minute.";
+        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.longer : i18n.en.longer;
         $("bar").style.width = "95%";
         $("resultNote").textContent = "";
         return;
       }
 
+      clearPendingOp();
       onGenerated(doneUrl);
 
     }catch(err){
-      const msg = (err?.message || "Unknown error");
+      const msg = String(err?.message || "");
 
       if(isTrialLimitErrorMessage(msg)){
         hardLockTrialsToZero();
         showLimitReached();
       }else{
-        // Keep real errors visible, but without scary “Error:” prefix
-        $("timerText").textContent = msg;
+        const t = i18n[currentLang];
+        $("timerText").textContent = safeUserMessageFromErr(err) || t.tryAgainSoft;
         $("bar").style.width = "0%";
+        $("resultNote").textContent = "";
       }
     }finally{
       generating = false;
@@ -1303,10 +1355,32 @@ We will inject user details below.`,
     renderBasePrompt();
     renderThumbs();
     setSelected(0);
+
+    // ✅ If there is a pending op from a refresh, auto continue checking (friendly).
+    const pending = loadPendingOp();
+    if(pending?.operationName){
+      $("resultBox").style.display = "block";
+      $("bar").style.width = "70%";
+      $("timerText").textContent = (currentLang==="ar") ? i18n.ar.stillWorking : i18n.en.stillWorking;
+
+      try{
+        const doneUrl = await pollForResult(pending.operationName);
+        if(doneUrl){
+          clearPendingOp();
+          onGenerated(doneUrl);
+        }else{
+          $("timerText").textContent = (currentLang==="ar") ? i18n.ar.longer : i18n.en.longer;
+          $("bar").style.width = "95%";
+        }
+      }catch(e){
+        clearPendingOp();
+        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.tryAgainSoft : i18n.en.tryAgainSoft;
+        $("bar").style.width = "0%";
+      }
+    }
   }
 
   boot();
 </script>
 </body>
 </html>
-```
