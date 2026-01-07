@@ -22,31 +22,31 @@
     {
       "label": "Demo",
       "poster": "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "video": "https://videos.pexels.com/video-files/3015510/3015510-hd_720_1280_25fps.mp4",
+      "video": "assets/demo/tui/videos/tui-demo-01.mp4",
       "badge": "9:16 • 5–8s"
     },
     {
       "label": "Demo",
       "poster": "https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "video": "https://videos.pexels.com/video-files/857195/857195-hd_720_1280_24fps.mp4",
+      "video": "assets/demo/tui/videos/tui-demo-02.mp4",
       "badge": "9:16 • 5–8s"
     },
     {
       "label": "Demo",
       "poster": "https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "video": "https://videos.pexels.com/video-files/2795737/2795737-hd_720_1280_25fps.mp4",
+      "video": "assets/demo/tui/videos/tui-demo-03.mp4",
       "badge": "9:16 • 5–8s"
     },
     {
       "label": "Demo",
       "poster": "https://images.pexels.com/photos/261169/pexels-photo-261169.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "video": "https://videos.pexels.com/video-files/853889/853889-hd_720_1280_24fps.mp4",
+      "video": "assets/demo/tui/videos/tui-demo-04.mp4",
       "badge": "9:16 • 5–8s"
     },
     {
       "label": "Demo",
       "poster": "https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "video": "https://videos.pexels.com/video-files/1918465/1918465-hd_720_1280_24fps.mp4",
+      "video": "assets/demo/tui/videos/tui-demo-05.mp4",
       "badge": "9:16 • 5–8s"
     }
   ]
