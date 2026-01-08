@@ -1441,5 +1441,183 @@
 
   boot();
 </script>
+<!-- ✅ PASTE THIS WHOLE BLOCK ONCE.
+Put it at the very end of your HTML, right before </body>.
+It will. add an iPhone hint. plus a “Save to Photos” share button (works when iOS supports it). -->
+
+<style>
+  /* iOS download helper toast */
+  .iosToast{
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    z-index: 999999;
+    background: rgba(15,23,42,.92);
+    border: 1px solid rgba(148,163,184,.35);
+    color: #e5e7eb;
+    border-radius: 14px;
+    padding: 12px 12px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    display: none;
+  }
+  .iosToast strong{ display:block; margin-bottom:6px; }
+  .iosToast .row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    margin-top: 10px;
+  }
+  .iosToast button{
+    border-radius: 999px;
+    padding: 8px 12px;
+    border: 1px solid rgba(148,163,184,.55);
+    background: rgba(255,255,255,.06);
+    color:#e5e7eb;
+    font-size: .85rem;
+    cursor:pointer;
+  }
+  .iosToast button.primary{
+    border-color: rgba(34,197,94,.55);
+  }
+</style>
+
+<div id="iosDownloadToast" class="iosToast" role="status" aria-live="polite">
+  <strong>iPhone tip</strong>
+  <div id="iosToastText">
+    If you tapped Download, the video is usually saved in <b>Files → Downloads</b>.
+    Then open it. tap Share. and choose <b>Save to Photos</b>.
+  </div>
+  <div class="row">
+    <button id="iosToastClose">OK</button>
+    <button id="iosSaveToPhotosBtn" class="primary">Save to Photos</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ✅ iOS Download Helper. plus “Save to Photos” (Share Sheet)
+   ========================================================= */
+
+/**
+ * You MUST set this function to return your current video URL.
+ * If your code already has a variable like `lastVideoUrl` or `finalUrl`,
+ * just return it here.
+ */
+function getLatestVideoUrl(){
+  // 🔧 CHANGE THIS LINE if your variable name is different:
+  return window.lastVideoUrl || window.latestVideoUrl || window.finalVideoUrl || "";
+}
+
+/**
+ * OPTIONAL: call this when your video becomes ready.
+ * Example after generation finishes: setLatestVideoUrl(presignedUrl)
+ */
+function setLatestVideoUrl(url){
+  window.lastVideoUrl = url;
+}
+
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+function showIOSToast(customText){
+  const toast = document.getElementById("iosDownloadToast");
+  const text  = document.getElementById("iosToastText");
+  if(customText) text.innerHTML = customText;
+  toast.style.display = "block";
+}
+
+function hideIOSToast(){
+  const toast = document.getElementById("iosDownloadToast");
+  toast.style.display = "none";
+}
+
+document.getElementById("iosToastClose")?.addEventListener("click", hideIOSToast);
+
+/**
+ * “Save to Photos” via Share Sheet.
+ * Works when iOS Safari supports navigator.share with files.
+ * If not supported, we fall back to opening the URL + showing instructions.
+ */
+async function saveToPhotosIOS(){
+  const url = getLatestVideoUrl();
+  if(!url){
+    showIOSToast("No video URL yet. Generate a video first. then try again.");
+    return;
+  }
+
+  // If Web Share API is not available or files sharing not supported
+  const canShareFiles = !!(navigator.share && navigator.canShare);
+  if(!canShareFiles){
+    window.open(url, "_blank");
+    showIOSToast("Your iPhone will open the video. Tap Share. then choose <b>Save to Photos</b>.");
+    return;
+  }
+
+  try{
+    // Download as blob, then share as a File
+    const res = await fetch(url, { mode: "cors" });
+    if(!res.ok) throw new Error("Fetch failed: " + res.status);
+
+    const blob = await res.blob();
+    const file = new File([blob], "shaga3app-video.mp4", { type: blob.type || "video/mp4" });
+
+    // navigator.canShare({files}) is required on iOS for file share
+    if(!navigator.canShare({ files: [file] })){
+      window.open(url, "_blank");
+      showIOSToast("Opened the video. Tap Share. then choose <b>Save to Photos</b>.");
+      return;
+    }
+
+    await navigator.share({
+      files: [file],
+      title: "Shaga3app Video",
+      text: "Save to Photos"
+    });
+
+    hideIOSToast();
+  }catch(e){
+    // Fallback path
+    window.open(url, "_blank");
+    showIOSToast("Couldn’t open Share Sheet. The video is opened now. Tap Share. then <b>Save to Photos</b>.");
+  }
+}
+
+document.getElementById("iosSaveToPhotosBtn")?.addEventListener("click", saveToPhotosIOS);
+
+/* ---------------------------------------------------------
+   ✅ Hook into your existing Download button.
+   If your download button has a different id, change it below.
+   --------------------------------------------------------- */
+(function attachDownloadHint(){
+  // 🔧 CHANGE these selectors if your buttons have different ids/classes
+  const downloadBtn =
+    document.getElementById("downloadBtn") ||
+    document.querySelector('[data-action="download"]') ||
+    document.querySelector(".downloadBtn");
+
+  if(!downloadBtn) return;
+
+  downloadBtn.addEventListener("click", () => {
+    if(isIOS()){
+      showIOSToast(); // shows the default message
+    }
+  });
+})();
+
+/* ---------------------------------------------------------
+   ✅ OPTIONAL. If you prefer the hint only AFTER download link appears,
+   call `onVideoReadyForDownload(url)` when you set the final video URL.
+   --------------------------------------------------------- */
+function onVideoReadyForDownload(url){
+  setLatestVideoUrl(url);
+  if(isIOS()){
+    showIOSToast("Video is ready. Tap Download. it will appear in <b>Files → Downloads</b>. Then Share. <b>Save to Photos</b>.");
+  }
+}
+</script>
+  
 </body>
 </html>
