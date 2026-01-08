@@ -910,7 +910,14 @@ We will inject user details below.`,
           <span style="opacity:.75">${idx+1}</span>
         </div>
       `;
-      d.addEventListener("click", ()=> setSelected(idx));
+      d.addEventListener("click", ()=>{
+  setSelected(idx);
+  const it = items[idx];
+  if(!it) return;
+  // Auto-play the selected video immediately
+  if(it.video) playInline(it);
+});
+
       row.appendChild(d);
     });
 
