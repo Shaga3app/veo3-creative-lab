@@ -167,8 +167,6 @@
       overflow:hidden;
       min-height: 320px;
       aspect-ratio: 9 / 16;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
     }
     .mainStage img,
     .mainStage video{
@@ -180,10 +178,17 @@
       display:none;
       background:#000;
     }
+
+    /* ✅ overlay for play/pause (shown only when paused/ended) */
     .playOverlay{
       position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
       pointer-events:none;
+      opacity:1;
+      transition: opacity .12s ease;
+    }
+    .playOverlay.hidden{
+      opacity:0;
     }
     .playBtn{
       pointer-events:auto;
@@ -491,58 +496,6 @@
     }
   }
 
-  const TRIALS_MAX = 2;
-  const TRIALS_STATE_KEY = "shaga3_trials_state_v1";
-  const TRIALS_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-  function loadTrialsState(){
-    try{
-      const raw = localStorage.getItem(TRIALS_STATE_KEY);
-      if(!raw) return { windowStart: Date.now(), used: 0 };
-      const s = JSON.parse(raw);
-      if(!s || typeof s.windowStart !== "number" || typeof s.used !== "number"){
-        return { windowStart: Date.now(), used: 0 };
-      }
-      if(Date.now() - s.windowStart >= TRIALS_WINDOW_MS){
-        return { windowStart: Date.now(), used: 0 };
-      }
-      s.used = Math.max(0, Math.min(TRIALS_MAX, Math.floor(s.used)));
-      return s;
-    }catch(e){
-      return { windowStart: Date.now(), used: 0 };
-    }
-  }
-
-  function saveTrialsState(state){
-    try{ localStorage.setItem(TRIALS_STATE_KEY, JSON.stringify(state)); }catch(e){}
-  }
-
-  function getTrialsLeftFromState(state){
-    return Math.max(0, TRIALS_MAX - (state.used || 0));
-  }
-
-  function setTrialsLeft(n){
-    trials = Math.max(0, Math.min(TRIALS_MAX, Number(n||0)));
-    $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
-    const triesNum = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
-    const t = i18n[currentLang];
-    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
-  }
-
-  function consumeOneTrial(){
-    const s = loadTrialsState();
-    s.used = Math.min(TRIALS_MAX, (s.used||0) + 1);
-    saveTrialsState(s);
-    setTrialsLeft(getTrialsLeftFromState(s));
-  }
-
-  function hardLockTrialsToZero(){
-    const s = loadTrialsState();
-    s.used = TRIALS_MAX;
-    saveTrialsState(s);
-    setTrialsLeft(0);
-  }
-
   const API_URL = "https://hhkaj4azuk6zqykrqdk2dmo6bi0mixvp.lambda-url.eu-central-1.on.aws/";
   const MODEL_ID = "veo-3.1-generate-001";
   const API_KEY = "v3_9f8c2d1a_6b7c8d9e_0a1b2c3d4e5f9n5v";
@@ -582,6 +535,7 @@
       trialsLabel: "Trials left:",
       selectedDemo: "Selected demo",
       play: "Play",
+      pause: "Pause",
       modeLabel: "CHOOSE INPUT MODE",
       modeText: "Text prompt",
       modeImg: "Start + End images",
@@ -617,6 +571,7 @@
       trialsLabel: "المحاولات المتبقية:",
       selectedDemo: "الديمو المختار",
       play: "تشغيل",
+      pause: "إيقاف",
       modeLabel: "اختر طريقة الإدخال",
       modeText: "نص فقط",
       modeImg: "صورتان: بداية + نهاية",
@@ -663,6 +618,7 @@
     return "shaga3";
   }
 
+  // Minimal fallback. You already have more in your real file.
   const FALLBACK_BRANDS = {
     shaga3: {
       id:"shaga3",
@@ -678,73 +634,9 @@
         heroGradA:"rgba(91,92,255,.25)",
         heroGradB:"rgba(34,197,94,.12)"
       },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
-Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated, not placed or fake.
-A person is clearly holding the Egyptian flag and cheering or waving it in a natural, energetic way that fits the moment.
-The scene follows this base concept, and we will inject the user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد بشكل طبيعي ومتناسق. من غير ما يبانوا متحطّين أو فيك.
-الشخص ماسك علم مصر وبيشجّع أو بيهوّش بالعلم بحركة حماسية وطبيعية تناسب الجو.
-المشهد ماشي على الفكرة الأساسية دي. وإحنا هنضيف تفاصيل المستخدم تحت.`,
+      basePrompt_en: "BASE (LOCKED)\n\nCreate a vertical 9:16 cinematic video, 5–8 seconds long...",
+      basePrompt_ar: "الأساس (مقفول)\n\nاعمل فيديو سينمائي عمودي ٩:١٦...",
       demos: demoPack("purple")
-    },
-    cocacola: {
-      id:"cocacola",
-      title_en:"Coca-Cola · AI Video Lab",
-      title_ar:"كوكاكولا · AI Video Lab",
-      beta_en:"Demo · Coca-Cola",
-      beta_ar:"ديمو · كوكاكولا",
-      logo:"assets/brand-logos/cocacola.png",
-      theme:{
-        bg:"#12070a",
-        accent:"#e11d2e",
-        accent2:"#ffb000",
-        heroGradA:"rgba(225,29,46,.22)",
-        heroGradB:"rgba(255,176,0,.10)"
-      },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich, realistic lighting.
-Include an ultra-realistic Coca-Cola can and an Egyptian flag in the scene, naturally integrated, not placed or fake.
-A person is clearly holding the Egyptian flag and cheering or waving it in a natural, energetic way that fits the moment.
-The scene follows this base concept, and we will inject the user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية وغنية.
-لازم يظهر علبة كوكاكولا واقعية جدًا وعلم مصر جوّه المشهد بشكل طبيعي ومتناسق. من غير ما يبانوا متحطّين أو فيك.
-الشخص ماسك علم مصر وبيشجّع أو بيهوّش بالعلم بحركة حماسية وطبيعية تناسب الجو.
-المشهد ماشي على الفكرة الأساسية دي. وإحنا هنضيف تفاصيل المستخدم تحت.`,
-      demos: demoPack("red")
-    },
-    tui: {
-      id:"tui",
-      title_en:"TUI · AI Video Lab",
-      title_ar:"TUI · AI Video Lab",
-      beta_en:"Demo · TUI",
-      beta_ar:"ديمو · TUI",
-      logo:"assets/brand-logos/tui.png",
-      theme:{
-        bg:"#061821",
-        accent:"#2aa8ff",
-        accent2:"#7fe0ff",
-        heroGradA:"rgba(42,168,255,.20)",
-        heroGradB:"rgba(127,224,255,.10)"
-      },
-      basePrompt_en:
-`BASE (LOCKED)
-Create a vertical 9:16 cinematic travel-style video, 5–8 seconds long, with smooth camera moves and bright, realistic lighting.
-The scene should feel like a premium TUI destination moment (clean, uplifting, high-end).
-We will inject user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-اعمل فيديو سينمائي عمودي ٩:١٦ بطابع سفر/سياحة، مدته من ٥ لـ ٨ ثواني، بحركة كاميرا ناعمة وإضاءة واقعية مشرقة.
-المشهد يحسسك بلحظة وجهة سفر بريميوم على ستايل TUI. نضيف. مبهج. راقي.
-وإحنا هنضيف تفاصيل المستخدم تحت.`,
-      demos: demoPack("blue")
     }
   };
 
@@ -754,24 +646,14 @@ We will inject user details below.`,
       `https://picsum.photos/seed/${color}-b/400/700`,
       `https://picsum.photos/seed/${color}-c/400/700`,
       `https://picsum.photos/seed/${color}-d/400/700`,
-      `https://picsum.photos/seed/${color}-e/400/700`,
-      `https://picsum.photos/seed/${color}-f/400/700`,
-      `https://picsum.photos/seed/${color}-g/400/700`,
-      `https://picsum.photos/seed/${color}-h/400/700`,
-      `https://picsum.photos/seed/${color}-i/400/700`,
-      `https://picsum.photos/seed/${color}-j/400/700`
+      `https://picsum.photos/seed/${color}-e/400/700`
     ];
     const vids = [
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
       "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
     ];
     return posters.map((p, idx)=>({
       id: "demo-" + idx,
@@ -856,52 +738,80 @@ We will inject user details below.`,
     showPoster(items[selectedIndex]);
   }
 
-  function showPoster(it){
-    $("mainPoster").src = it.poster || "";
-    $("mainPoster").style.display = "block";
+  // ===== Main player UX helpers (overlay + tap to toggle) =====
+  const mainStage = $("mainStage");
+  const mainVideo = $("mainVideo");
+  const mainPoster = $("mainPoster");
+  const playOverlay = $("playOverlay");
+  const playBtn = $("playBtn");
 
-    const v = $("mainVideo");
-    v.pause();
-    v.removeAttribute("src");
-    v.load();
-    v.style.display = "none";
-
-    syncOverlay();
+  function setOverlayVisible(visible){
+    playOverlay.classList.toggle("hidden", !visible);
+    playOverlay.style.pointerEvents = visible ? "auto" : "none";
   }
 
-  /* =========================
-     Overlay logic (FIXED)
-     Overlay hidden while playing.
-     Overlay appears when paused or ended.
-  ========================= */
   function syncOverlay(){
-    const v = $("mainVideo");
-    if(!v) return;
-
-    const isPlaying = !v.paused && !v.ended && v.currentTime > 0;
-    $("playOverlay").style.display = isPlaying ? "none" : "flex";
+    const hasVideo = mainVideo.style.display !== "none" && !!mainVideo.src;
+    if(!hasVideo){
+      setOverlayVisible(true);
+      return;
+    }
+    if(mainVideo.ended || mainVideo.paused){
+      setOverlayVisible(true);
+    }else{
+      setOverlayVisible(false);
+    }
   }
 
-  function showOverlay(){ $("playOverlay").style.display = "flex"; }
-  function hideOverlay(){ $("playOverlay").style.display = "none"; }
+  mainVideo.addEventListener("play", syncOverlay);
+  mainVideo.addEventListener("pause", syncOverlay);
+  mainVideo.addEventListener("ended", syncOverlay);
+  mainVideo.addEventListener("loadedmetadata", syncOverlay);
 
-  function playInline(it){
-    if(!it || !it.video) return;
+  function showPoster(it){
+    mainPoster.src = it.poster || "";
+    mainPoster.style.display = "block";
 
-    const v = $("mainVideo");
+    mainVideo.pause();
+    mainVideo.removeAttribute("src");
+    mainVideo.load();
+    mainVideo.style.display = "none";
 
-    v.src = it.video;
-    v.style.display = "block";
-    $("mainPoster").style.display = "none";
+    setOverlayVisible(true);
+  }
 
-    v.load();
+  // ✅ NEW: playInline supports skipSeconds + hide poster while playing
+  function playInline(it, opts = {}){
+    const { hidePosterWhilePlaying = false, startMuted = false, skipSeconds = 0 } = opts;
 
-    const p = v.play();
-    if(p && typeof p.then === "function"){
-      p.then(()=>{ syncOverlay(); }).catch(()=>{ showOverlay(); });
+    mainVideo.muted = !!startMuted;
+    mainVideo.src = it.video;
+    mainVideo.style.display = "block";
+
+    if(hidePosterWhilePlaying){
+      mainPoster.style.display = "none";
     }else{
-      setTimeout(syncOverlay, 0);
+      mainPoster.style.display = "none"; // always hide when we actually play
     }
+
+    // ✅ Skip intro seconds (only when requested)
+    if(skipSeconds && skipSeconds > 0){
+      const doSkip = ()=>{
+        try{
+          const d = Number(mainVideo.duration || 0);
+          const target = Math.min(skipSeconds, Math.max(0, d - 0.05) || skipSeconds);
+          if(!Number.isNaN(target) && target > 0){
+            mainVideo.currentTime = target;
+          }
+        }catch(e){}
+      };
+      mainVideo.addEventListener("loadedmetadata", doSkip, { once:true });
+      mainVideo.addEventListener("canplay", doSkip, { once:true });
+    }
+
+    mainVideo.load();
+    mainVideo.play().catch(()=>{});
+    syncOverlay();
   }
 
   function openVideoViewer(url){
@@ -909,18 +819,54 @@ We will inject user details below.`,
     window.open(url, "_blank", "noopener");
   }
 
-  $("playBtn").addEventListener("click", (e)=>{
+  function togglePlayPause(){
+    const it = items[selectedIndex];
+    if(!it) return;
+
+    // If it is a generated "new" video and we prefer opening in new tab, keep your old logic.
+    // Here we play inline for demos. For new, we still inline when tapped on stage.
+    const hasSrc = !!mainVideo.src;
+
+    if(!hasSrc){
+      if(it.video){
+        const hidePoster = (it.kind === "new");
+        const skip = (it.kind === "new" && it.i2v) ? 0.2 : 0;
+        playInline(it, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+      }
+      return;
+    }
+
+    if(mainVideo.paused || mainVideo.ended){
+      mainVideo.play().catch(()=>{});
+    }else{
+      mainVideo.pause();
+    }
+    syncOverlay();
+  }
+
+  // Tap anywhere toggles play/pause
+  mainStage.addEventListener("click", (e)=>{
+    // If clicking the button itself, that handler will run too.
+    // We still allow toggling.
+    togglePlayPause();
+  });
+
+  playBtn.addEventListener("click", (e)=>{
+    e.preventDefault();
     e.stopPropagation();
     const it = items[selectedIndex];
     if(!it) return;
 
+    // For NEW videos, you previously opened new tab when clicking play button.
+    // Keep that behavior. Tap on stage plays inline.
     if(it.kind === "new"){
       openVideoViewer(it.video);
       return;
     }
-    playInline(it);
+    playInline(it, { hidePosterWhilePlaying:false, startMuted:false, skipSeconds: 0 });
   });
 
+  // ===== Thumbs =====
   function renderThumbs(){
     const row = $("thumbRow");
     row.innerHTML = "";
@@ -942,12 +888,18 @@ We will inject user details below.`,
           <span style="opacity:.75">${idx+1}</span>
         </div>
       `;
-
       d.addEventListener("click", ()=>{
         setSelected(idx);
         const it2 = items[idx];
         if(!it2) return;
-        if(it2.video) playInline(it2);
+
+        // ✅ Auto-play selected video
+        const hidePoster = (it2.kind === "new");
+        const skip = (it2.kind === "new" && it2.i2v) ? 0.2 : 0;
+
+        if(it2.video){
+          playInline(it2, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+        }
       });
 
       row.appendChild(d);
@@ -1043,9 +995,64 @@ We will inject user details below.`,
     return data;
   }
 
+  const TRIALS_MAX = 2;
+  const TRIALS_STATE_KEY = "shaga3_trials_state_v1";
+  const TRIALS_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+  function loadTrialsState(){
+    try{
+      const raw = localStorage.getItem(TRIALS_STATE_KEY);
+      if(!raw) return { windowStart: Date.now(), used: 0 };
+      const s = JSON.parse(raw);
+      if(!s || typeof s.windowStart !== "number" || typeof s.used !== "number"){
+        return { windowStart: Date.now(), used: 0 };
+      }
+      if(Date.now() - s.windowStart >= TRIALS_WINDOW_MS){
+        return { windowStart: Date.now(), used: 0 };
+      }
+      s.used = Math.max(0, Math.min(TRIALS_MAX, Math.floor(s.used)));
+      return s;
+    }catch(e){
+      return { windowStart: Date.now(), used: 0 };
+    }
+  }
+
+  function saveTrialsState(state){
+    try{ localStorage.setItem(TRIALS_STATE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  function getTrialsLeftFromState(state){
+    return Math.max(0, TRIALS_MAX - (state.used || 0));
+  }
+
   let trialsState = loadTrialsState();
   let trials = getTrialsLeftFromState(trialsState);
   let generating = false;
+
+  // ✅ NEW: remember if the last accepted generation was Image-to-Video
+  let lastGenWasImages = false;
+
+  function setTrialsLeft(n){
+    trials = Math.max(0, Math.min(TRIALS_MAX, Number(n||0)));
+    $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+    const triesNum = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+    const t = i18n[currentLang];
+    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
+  }
+
+  function consumeOneTrial(){
+    const s = loadTrialsState();
+    s.used = Math.min(TRIALS_MAX, (s.used||0) + 1);
+    saveTrialsState(s);
+    setTrialsLeft(getTrialsLeftFromState(s));
+  }
+
+  function hardLockTrialsToZero(){
+    const s = loadTrialsState();
+    s.used = TRIALS_MAX;
+    saveTrialsState(s);
+    setTrialsLeft(0);
+  }
 
   const LAST_URL_KEY2 = "shaga3app_last_video_url";
   function saveLastUrl(url){
@@ -1096,8 +1103,10 @@ We will inject user details below.`,
 
     if(isTrialLimitErrorMessage(msg)) return null;
     if(!msg) return t.tryAgainSoft;
+
     if(msg.toLowerCase().includes("still processing")) return t.stillWorking;
     if(msg.toLowerCase().includes("taking longer than usual")) return t.longer;
+
     return t.tryAgainSoft;
   }
 
@@ -1109,6 +1118,7 @@ We will inject user details below.`,
 
     let waitMs = 3000;
     const maxWaitMs = 10000;
+
     const maxChecks = isImagesModeOn() ? 110 : 70;
 
     for(let i=0;i<maxChecks;i++){
@@ -1141,9 +1151,16 @@ We will inject user details below.`,
     return doneUrl;
   }
 
+  function getTrialStatusFromLocal(){
+    trialsState = loadTrialsState();
+    trials = getTrialsLeftFromState(trialsState);
+    setTrialsLeft(trials);
+  }
+
   async function generate(){
     if(generating) return;
 
+    getTrialStatusFromLocal();
     if(trials <= 0){
       showLimitReached();
       return;
@@ -1174,6 +1191,9 @@ We will inject user details below.`,
     tick();
 
     try{
+      // ✅ record mode (for skip only if request was I2V)
+      lastGenWasImages = isImagesModeOn();
+
       const prompt = buildPrompt();
 
       const payload = {
@@ -1210,6 +1230,7 @@ We will inject user details below.`,
 
       const gen = await postJSON(payload);
 
+      // ✅ consume local trial only after backend accepted
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
@@ -1268,6 +1289,7 @@ We will inject user details below.`,
     const newItem = {
       id: "new-" + Date.now(),
       kind: "new",
+      i2v: !!lastGenWasImages, // ✅ tag the generated video as i2v if it came from images
       poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || ""),
       video: downloadUrl,
       tag: "new"
@@ -1280,9 +1302,18 @@ We will inject user details below.`,
     renderThumbs();
     setSelected(0);
 
+    // ✅ autoplay inline. skip 0.2s only if i2v
+    playInline(items[0], {
+      hidePosterWhilePlaying: true,
+      startMuted:false,
+      skipSeconds: items[0]?.i2v ? 0.2 : 0
+    });
+
     $("resultNote").textContent = (currentLang==="ar")
-      ? "✅ اتولد فيديو جديد. اضغط «تشغيل» لمشاهدته بسرعة."
-      : "✅ New video generated. Tap “Play” to open it fast.";
+      ? "✅ اتولد فيديو جديد. اضغط على الشاشة للتشغيل أو الإيقاف."
+      : "✅ New video generated. Tap the preview to play/pause.";
+
+    syncOverlay();
   }
 
   $("generateBtn").addEventListener("click", generate);
@@ -1382,42 +1413,6 @@ We will inject user details below.`,
     renderBasePrompt();
     renderThumbs();
     setSelected(0);
-
-    /* =========================
-       Inline UX (FIXED)
-       Tap anywhere toggles play/pause.
-       Overlay stays hidden while playing.
-    ========================= */
-    const stage = $("mainStage");
-    const v = $("mainVideo");
-
-    ["play","playing","pause","ended","timeupdate","seeking","seeked","loadeddata","canplay"].forEach(evt=>{
-      v.addEventListener(evt, syncOverlay);
-    });
-
-    stage.addEventListener("click", (e)=>{
-      if(e.target && e.target.closest && e.target.closest("#playBtn")) return;
-
-      const it = items[selectedIndex];
-      if(!it) return;
-
-      if(!v.src){
-        if(it.kind === "new"){
-          openVideoViewer(it.video);
-          return;
-        }
-        playInline(it);
-        return;
-      }
-
-      if(v.paused){
-        v.play().catch(()=>{});
-      }else{
-        v.pause();
-      }
-
-      setTimeout(syncOverlay, 0);
-    });
 
     syncOverlay();
 
