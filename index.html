@@ -409,7 +409,7 @@
           <img id="mainPoster" alt="Selected poster" />
           <video id="mainVideo" controls playsinline preload="none"></video>
 
-          <div class="playOverlay">
+          <div class="playOverlay" id="playOverlay">
             <button class="playBtn" id="playBtn" type="button">▶ <span id="playTxt">Play</span></button>
           </div>
         </div>
@@ -848,6 +848,18 @@ We will inject user details below.`,
     $("basePrompt").textContent = (currentLang === "ar") ? brandCfg.basePrompt_ar : brandCfg.basePrompt_en;
   }
 
+  /* =========================
+     ✅ Overlay helpers
+  ========================= */
+  function showOverlay(){
+    const o = $("playOverlay");
+    if(o) o.style.display = "flex";
+  }
+  function hideOverlay(){
+    const o = $("playOverlay");
+    if(o) o.style.display = "none";
+  }
+
   function setSelected(index){
     selectedIndex = Math.max(0, Math.min(items.length-1, index));
     [...$("thumbRow").children].forEach((el,i)=>el.classList.toggle("on", i===selectedIndex));
@@ -863,14 +875,23 @@ We will inject user details below.`,
     $("mainVideo").removeAttribute("src");
     $("mainVideo").load();
     $("mainVideo").style.display = "none";
+
+    showOverlay();
   }
 
   function playInline(it){
+    if(!it || !it.video) return;
+
     $("mainVideo").src = it.video;
     $("mainVideo").style.display = "block";
     $("mainPoster").style.display = "none";
     $("mainVideo").load();
-    $("mainVideo").play().catch(()=>{});
+
+    const v = $("mainVideo");
+    const onPlay = () => { hideOverlay(); v.removeEventListener("play", onPlay); };
+    v.addEventListener("play", onPlay);
+
+    v.play().catch(()=>{ showOverlay(); });
   }
 
   function openVideoViewer(url){
@@ -878,14 +899,12 @@ We will inject user details below.`,
     window.open(url, "_blank", "noopener");
   }
 
+  /* =========================
+     ✅ Play button now plays inline for demo AND new
+  ========================= */
   $("playBtn").addEventListener("click", ()=>{
     const it = items[selectedIndex];
     if(!it) return;
-
-    if(it.kind === "new"){
-      openVideoViewer(it.video);
-      return;
-    }
     playInline(it);
   });
 
@@ -911,12 +930,11 @@ We will inject user details below.`,
         </div>
       `;
       d.addEventListener("click", ()=>{
-  setSelected(idx);
-  const it = items[idx];
-  if(!it) return;
-  // Auto-play the selected video immediately
-  if(it.video) playInline(it);
-});
+        setSelected(idx);
+        const it2 = items[idx];
+        if(!it2) return;
+        if(it2.video) playInline(it2);
+      });
 
       row.appendChild(d);
     });
@@ -1064,14 +1082,11 @@ We will inject user details below.`,
 
     if(isTrialLimitErrorMessage(msg)) return null;
 
-    // Never show scary prefixes, never show "Error:".
     if(!msg) return t.tryAgainSoft;
 
-    // Keep your existing friendly backend message if present.
     if(msg.toLowerCase().includes("still processing")) return t.stillWorking;
     if(msg.toLowerCase().includes("taking longer than usual")) return t.longer;
 
-    // Default friendly
     return t.tryAgainSoft;
   }
 
@@ -1081,12 +1096,10 @@ We will inject user details below.`,
     let doneUrl = "";
     let chk = null;
 
-    // Backoff: 3s to 10s
     let waitMs = 3000;
     const maxWaitMs = 10000;
 
-    // Total checks: longer for images
-    const maxChecks = isImagesModeOn() ? 110 : 70; // roughly 8 to 15 minutes depending on backoff
+    const maxChecks = isImagesModeOn() ? 110 : 70;
 
     for(let i=0;i<maxChecks;i++){
       await new Promise(res=>setTimeout(res, waitMs));
@@ -1101,7 +1114,6 @@ We will inject user details below.`,
       if(chk?.done && chk?.downloadUrl){ doneUrl = chk.downloadUrl; break; }
       if(chk?.done && chk?.response?.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
 
-      // Friendly status text. No error wording.
       if(i === 8){
         $("timerText").textContent = t.stillWorking;
         const currentWidth = parseFloat(($("bar").style.width || "0").replace("%","")) || 0;
@@ -1133,7 +1145,6 @@ We will inject user details below.`,
     $("bar").style.width = "0%";
     $("resultNote").textContent = "";
 
-    // Timer length by mode. Images usually take longer.
     const maxSeconds = isImagesModeOn() ? 420 : 240;
     setTimerText(maxSeconds);
 
@@ -1189,7 +1200,6 @@ We will inject user details below.`,
 
       const gen = await postJSON(payload);
 
-      // Consume local trial only after backend accepted the request.
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
@@ -1202,7 +1212,6 @@ We will inject user details below.`,
 
       if(!operationName) throw new Error((currentLang==="ar") ? "لم يتم استلام رقم العملية." : "No operation id returned.");
 
-      // Save operation so user can refresh and still continue without panic.
       savePendingOp({
         operationName,
         createdAt: Date.now(),
@@ -1210,7 +1219,6 @@ We will inject user details below.`,
         deviceId: getDeviceId()
       });
 
-      // Poll for result with friendly UX.
       const doneUrl = await pollForResult(operationName);
 
       if(!doneUrl){
@@ -1264,7 +1272,7 @@ We will inject user details below.`,
 
     $("resultNote").textContent = (currentLang==="ar")
       ? "✅ اتولد فيديو جديد. اضغط «تشغيل» لمشاهدته بسرعة."
-      : "✅ New video generated. Tap “Play” to open it fast.";
+      : "✅ New video generated. Tap “Play” to watch it here.";
   }
 
   $("generateBtn").addEventListener("click", generate);
@@ -1362,6 +1370,35 @@ We will inject user details below.`,
     renderBasePrompt();
     renderThumbs();
     setSelected(0);
+
+    /* =========================
+       ✅ Best UX: tap anywhere toggles play/pause
+       . Overlay hides while playing, shows when paused or ended
+    ========================= */
+    const stage = document.querySelector(".mainStage");
+    const v = $("mainVideo");
+
+    v.addEventListener("play", hideOverlay);
+    v.addEventListener("pause", showOverlay);
+    v.addEventListener("ended", showOverlay);
+
+    stage.addEventListener("click", (e)=>{
+      if(e.target && e.target.closest && e.target.closest("#playBtn")) return;
+
+      const it = items[selectedIndex];
+      if(!it) return;
+
+      if(!v.src){
+        playInline(it);
+        return;
+      }
+
+      if(v.paused){
+        v.play().catch(()=>{});
+      }else{
+        v.pause();
+      }
+    });
 
     // ✅ If there is a pending op from a refresh, auto continue checking (friendly).
     const pending = loadPendingOp();
