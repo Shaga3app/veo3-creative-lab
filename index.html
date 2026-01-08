@@ -167,6 +167,8 @@
       overflow:hidden;
       min-height: 320px;
       aspect-ratio: 9 / 16;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
     }
     .mainStage img,
     .mainStage video{
@@ -405,7 +407,7 @@
           <div class="badge" id="formatBadge">9:16 • 5–8s</div>
         </div>
 
-        <div class="mainStage">
+        <div class="mainStage" id="mainStage">
           <img id="mainPoster" alt="Selected poster" />
           <video id="mainVideo" controls playsinline preload="none"></video>
 
@@ -548,7 +550,6 @@
   const LAST_URL_KEY = "shaga3app_last_video_url";
   const LAST_BRAND_KEY = "shaga3app_last_brand";
 
-  // ✅ NEW: persist pending operation so the UI never shows scary wording
   const PENDING_OP_KEY = "shaga3app_pending_op_v1";
   const PENDING_OP_TTL_MS = 30 * 60 * 1000;
 
@@ -848,18 +849,6 @@ We will inject user details below.`,
     $("basePrompt").textContent = (currentLang === "ar") ? brandCfg.basePrompt_ar : brandCfg.basePrompt_en;
   }
 
-  /* =========================
-     ✅ Overlay helpers
-  ========================= */
-  function showOverlay(){
-    const o = $("playOverlay");
-    if(o) o.style.display = "flex";
-  }
-  function hideOverlay(){
-    const o = $("playOverlay");
-    if(o) o.style.display = "none";
-  }
-
   function setSelected(index){
     selectedIndex = Math.max(0, Math.min(items.length-1, index));
     [...$("thumbRow").children].forEach((el,i)=>el.classList.toggle("on", i===selectedIndex));
@@ -871,27 +860,48 @@ We will inject user details below.`,
     $("mainPoster").src = it.poster || "";
     $("mainPoster").style.display = "block";
 
-    $("mainVideo").pause();
-    $("mainVideo").removeAttribute("src");
-    $("mainVideo").load();
-    $("mainVideo").style.display = "none";
+    const v = $("mainVideo");
+    v.pause();
+    v.removeAttribute("src");
+    v.load();
+    v.style.display = "none";
 
-    showOverlay();
+    syncOverlay();
   }
+
+  /* =========================
+     Overlay logic (FIXED)
+     Overlay hidden while playing.
+     Overlay appears when paused or ended.
+  ========================= */
+  function syncOverlay(){
+    const v = $("mainVideo");
+    if(!v) return;
+
+    const isPlaying = !v.paused && !v.ended && v.currentTime > 0;
+    $("playOverlay").style.display = isPlaying ? "none" : "flex";
+  }
+
+  function showOverlay(){ $("playOverlay").style.display = "flex"; }
+  function hideOverlay(){ $("playOverlay").style.display = "none"; }
 
   function playInline(it){
     if(!it || !it.video) return;
 
-    $("mainVideo").src = it.video;
-    $("mainVideo").style.display = "block";
-    $("mainPoster").style.display = "none";
-    $("mainVideo").load();
-
     const v = $("mainVideo");
-    const onPlay = () => { hideOverlay(); v.removeEventListener("play", onPlay); };
-    v.addEventListener("play", onPlay);
 
-    v.play().catch(()=>{ showOverlay(); });
+    v.src = it.video;
+    v.style.display = "block";
+    $("mainPoster").style.display = "none";
+
+    v.load();
+
+    const p = v.play();
+    if(p && typeof p.then === "function"){
+      p.then(()=>{ syncOverlay(); }).catch(()=>{ showOverlay(); });
+    }else{
+      setTimeout(syncOverlay, 0);
+    }
   }
 
   function openVideoViewer(url){
@@ -899,12 +909,15 @@ We will inject user details below.`,
     window.open(url, "_blank", "noopener");
   }
 
-  /* =========================
-     ✅ Play button now plays inline for demo AND new
-  ========================= */
-  $("playBtn").addEventListener("click", ()=>{
+  $("playBtn").addEventListener("click", (e)=>{
+    e.stopPropagation();
     const it = items[selectedIndex];
     if(!it) return;
+
+    if(it.kind === "new"){
+      openVideoViewer(it.video);
+      return;
+    }
     playInline(it);
   });
 
@@ -929,6 +942,7 @@ We will inject user details below.`,
           <span style="opacity:.75">${idx+1}</span>
         </div>
       `;
+
       d.addEventListener("click", ()=>{
         setSelected(idx);
         const it2 = items[idx];
@@ -1081,12 +1095,9 @@ We will inject user details below.`,
     const msg = String(err?.message || "").trim();
 
     if(isTrialLimitErrorMessage(msg)) return null;
-
     if(!msg) return t.tryAgainSoft;
-
     if(msg.toLowerCase().includes("still processing")) return t.stillWorking;
     if(msg.toLowerCase().includes("taking longer than usual")) return t.longer;
-
     return t.tryAgainSoft;
   }
 
@@ -1098,7 +1109,6 @@ We will inject user details below.`,
 
     let waitMs = 3000;
     const maxWaitMs = 10000;
-
     const maxChecks = isImagesModeOn() ? 110 : 70;
 
     for(let i=0;i<maxChecks;i++){
@@ -1272,7 +1282,7 @@ We will inject user details below.`,
 
     $("resultNote").textContent = (currentLang==="ar")
       ? "✅ اتولد فيديو جديد. اضغط «تشغيل» لمشاهدته بسرعة."
-      : "✅ New video generated. Tap “Play” to watch it here.";
+      : "✅ New video generated. Tap “Play” to open it fast.";
   }
 
   $("generateBtn").addEventListener("click", generate);
@@ -1346,6 +1356,8 @@ We will inject user details below.`,
     renderBasePrompt();
     renderThumbs();
     setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
+
+    syncOverlay();
   }
 
   $("langToggle").addEventListener("click", () => {
@@ -1372,15 +1384,16 @@ We will inject user details below.`,
     setSelected(0);
 
     /* =========================
-       ✅ Best UX: tap anywhere toggles play/pause
-       . Overlay hides while playing, shows when paused or ended
+       Inline UX (FIXED)
+       Tap anywhere toggles play/pause.
+       Overlay stays hidden while playing.
     ========================= */
-    const stage = document.querySelector(".mainStage");
+    const stage = $("mainStage");
     const v = $("mainVideo");
 
-    v.addEventListener("play", hideOverlay);
-    v.addEventListener("pause", showOverlay);
-    v.addEventListener("ended", showOverlay);
+    ["play","playing","pause","ended","timeupdate","seeking","seeked","loadeddata","canplay"].forEach(evt=>{
+      v.addEventListener(evt, syncOverlay);
+    });
 
     stage.addEventListener("click", (e)=>{
       if(e.target && e.target.closest && e.target.closest("#playBtn")) return;
@@ -1389,6 +1402,10 @@ We will inject user details below.`,
       if(!it) return;
 
       if(!v.src){
+        if(it.kind === "new"){
+          openVideoViewer(it.video);
+          return;
+        }
         playInline(it);
         return;
       }
@@ -1398,9 +1415,12 @@ We will inject user details below.`,
       }else{
         v.pause();
       }
+
+      setTimeout(syncOverlay, 0);
     });
 
-    // ✅ If there is a pending op from a refresh, auto continue checking (friendly).
+    syncOverlay();
+
     const pending = loadPendingOp();
     if(pending?.operationName){
       $("resultBox").style.display = "block";
