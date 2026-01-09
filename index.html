@@ -202,6 +202,21 @@
       backdrop-filter: blur(8px);
     }
 
+    /* ✅ NEW: visible error under the preview (under the video) */
+    .errorBox{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.08);
+      color: rgba(229,231,235,.92);
+      font-size:12px;
+      line-height:1.35;
+      word-break: break-word;
+    }
+    .errorBox strong{display:block;margin-bottom:6px}
+
     /* carousel thumbs */
     .thumbRowWrap{
       margin-top:10px;
@@ -419,6 +434,12 @@
           <div class="playOverlay" id="playOverlay">
             <button class="playBtn" id="playBtn" type="button">▶ <span id="playTxt">Play</span></button>
           </div>
+        </div>
+
+        <!-- ✅ NEW: actual backend error shown under the video -->
+        <div class="errorBox" id="errorBox">
+          <strong id="errorTitle">Error details</strong>
+          <div id="errorText"></div>
         </div>
 
         <div class="thumbRowWrap">
@@ -738,6 +759,37 @@
     showPoster(items[selectedIndex]);
   }
 
+  // ✅ NEW: error display helpers
+  function showErrorDetail(msg){
+    const box = $("errorBox");
+    const title = $("errorTitle");
+    const text = $("errorText");
+    if(!box || !text) return;
+
+    if(currentLang === "ar"){
+      title.textContent = "تفاصيل الخطأ";
+    }else{
+      title.textContent = "Error details";
+    }
+
+    const m = String(msg || "").trim();
+    if(!m){
+      box.style.display = "none";
+      text.textContent = "";
+      return;
+    }
+
+    text.textContent = m;
+    box.style.display = "block";
+  }
+  function clearErrorDetail(){
+    const box = $("errorBox");
+    const text = $("errorText");
+    if(!box || !text) return;
+    text.textContent = "";
+    box.style.display = "none";
+  }
+
   // ===== Main player UX helpers (overlay + tap to toggle) =====
   const mainStage = $("mainStage");
   const mainVideo = $("mainVideo");
@@ -791,10 +843,9 @@
     if(hidePosterWhilePlaying){
       mainPoster.style.display = "none";
     }else{
-      mainPoster.style.display = "none"; // always hide when we actually play
+      mainPoster.style.display = "none";
     }
 
-    // ✅ Skip intro seconds (only when requested)
     if(skipSeconds && skipSeconds > 0){
       const doSkip = ()=>{
         try{
@@ -823,8 +874,6 @@
     const it = items[selectedIndex];
     if(!it) return;
 
-    // If it is a generated "new" video and we prefer opening in new tab, keep your old logic.
-    // Here we play inline for demos. For new, we still inline when tapped on stage.
     const hasSrc = !!mainVideo.src;
 
     if(!hasSrc){
@@ -844,10 +893,7 @@
     syncOverlay();
   }
 
-  // Tap anywhere toggles play/pause
   mainStage.addEventListener("click", (e)=>{
-    // If clicking the button itself, that handler will run too.
-    // We still allow toggling.
     togglePlayPause();
   });
 
@@ -857,8 +903,6 @@
     const it = items[selectedIndex];
     if(!it) return;
 
-    // For NEW videos, you previously opened new tab when clicking play button.
-    // Keep that behavior. Tap on stage plays inline.
     if(it.kind === "new"){
       openVideoViewer(it.video);
       return;
@@ -893,7 +937,6 @@
         const it2 = items[idx];
         if(!it2) return;
 
-        // ✅ Auto-play selected video
         const hidePoster = (it2.kind === "new");
         const skip = (it2.kind === "new" && it2.i2v) ? 0.2 : 0;
 
@@ -975,6 +1018,7 @@
     return `${base}\n\n---\n${parts.join("\n")}`.trim();
   }
 
+  // ✅ UPDATED: always parse body. always expose real backend message.
   async function postJSON(payload){
     const url = API_URL + "?t=" + Date.now();
     const r = await fetch(url,{
@@ -985,13 +1029,28 @@
       },
       body: JSON.stringify(payload),
     });
+
     const text = await r.text();
     let data;
     try{ data = JSON.parse(text); }catch(e){ data = { raw:text }; }
-    if(!r.ok){
-      const msg = data?.error || data?.message || data?.raw || ("HTTP " + r.status);
-      throw new Error(`${msg} (HTTP ${r.status})`);
+
+    const backendMsg =
+      data?.errorDetail ||
+      data?.error ||
+      data?.message ||
+      data?.raw ||
+      text ||
+      ("HTTP " + r.status);
+
+    // If backend returned an error object even with 200, treat it as error.
+    if(!r.ok || (data && (data.error || data.ok === false))){
+      const err = new Error(String(backendMsg).trim());
+      err.statusCode = r.status;
+      err.backend = data;
+      err.httpStatus = r.status;
+      throw err;
     }
+
     return data;
   }
 
@@ -1160,6 +1219,9 @@
   async function generate(){
     if(generating) return;
 
+    // ✅ clear old error at the start of a new attempt
+    clearErrorDetail();
+
     getTrialStatusFromLocal();
     if(trials <= 0){
       showLimitReached();
@@ -1191,7 +1253,6 @@
     tick();
 
     try{
-      // ✅ record mode (for skip only if request was I2V)
       lastGenWasImages = isImagesModeOn();
 
       const prompt = buildPrompt();
@@ -1230,7 +1291,6 @@
 
       const gen = await postJSON(payload);
 
-      // ✅ consume local trial only after backend accepted
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
@@ -1272,7 +1332,13 @@
         const t = i18n[currentLang];
         $("timerText").textContent = safeUserMessageFromErr(err) || t.tryAgainSoft;
         $("bar").style.width = "0%";
-        $("resultNote").textContent = "";
+
+        // ✅ THIS is the important part. show the exact backend error.
+        const detail = String(err?.message || "").trim();
+        showErrorDetail(detail);
+
+        // Keep note too
+        $("resultNote").textContent = detail ? detail : "";
       }
     }finally{
       generating = false;
@@ -1281,6 +1347,9 @@
   }
 
   function onGenerated(downloadUrl){
+    // ✅ success. clear error box.
+    clearErrorDetail();
+
     $("bar").style.width = "100%";
     setReadyText();
 
@@ -1289,7 +1358,7 @@
     const newItem = {
       id: "new-" + Date.now(),
       kind: "new",
-      i2v: !!lastGenWasImages, // ✅ tag the generated video as i2v if it came from images
+      i2v: !!lastGenWasImages,
       poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || ""),
       video: downloadUrl,
       tag: "new"
@@ -1302,7 +1371,6 @@
     renderThumbs();
     setSelected(0);
 
-    // ✅ autoplay inline. skip 0.2s only if i2v
     playInline(items[0], {
       hidePosterWhilePlaying: true,
       startMuted:false,
@@ -1388,6 +1456,12 @@
     renderThumbs();
     setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
 
+    // Keep error title language consistent
+    const currentErr = $("errorText")?.textContent || "";
+    if(currentErr.trim()){
+      showErrorDetail(currentErr);
+    }
+
     syncOverlay();
   }
 
@@ -1435,16 +1509,18 @@
         clearPendingOp();
         $("timerText").textContent = (currentLang==="ar") ? i18n.ar.tryAgainSoft : i18n.en.tryAgainSoft;
         $("bar").style.width = "0%";
+
+        const detail = String(e?.message || "").trim();
+        showErrorDetail(detail);
+        $("resultNote").textContent = detail ? detail : "";
       }
     }
   }
 
   boot();
 </script>
-<!-- ✅ PASTE THIS WHOLE BLOCK ONCE.
-Put it at the very end of your HTML, right before </body>.
-It will. add an iPhone hint. plus a “Save to Photos” share button (works when iOS supports it). -->
 
+<!-- ✅ Keep your iOS helper block as you had it (unchanged) -->
 <style>
   /* iOS download helper toast */
   .iosToast{
@@ -1500,20 +1576,10 @@ It will. add an iPhone hint. plus a “Save to Photos” share button (works whe
    ✅ iOS Download Helper. plus “Save to Photos” (Share Sheet)
    ========================================================= */
 
-/**
- * You MUST set this function to return your current video URL.
- * If your code already has a variable like `lastVideoUrl` or `finalUrl`,
- * just return it here.
- */
 function getLatestVideoUrl(){
-  // 🔧 CHANGE THIS LINE if your variable name is different:
   return window.lastVideoUrl || window.latestVideoUrl || window.finalVideoUrl || "";
 }
 
-/**
- * OPTIONAL: call this when your video becomes ready.
- * Example after generation finishes: setLatestVideoUrl(presignedUrl)
- */
 function setLatestVideoUrl(url){
   window.lastVideoUrl = url;
 }
@@ -1536,11 +1602,6 @@ function hideIOSToast(){
 
 document.getElementById("iosToastClose")?.addEventListener("click", hideIOSToast);
 
-/**
- * “Save to Photos” via Share Sheet.
- * Works when iOS Safari supports navigator.share with files.
- * If not supported, we fall back to opening the URL + showing instructions.
- */
 async function saveToPhotosIOS(){
   const url = getLatestVideoUrl();
   if(!url){
@@ -1548,7 +1609,6 @@ async function saveToPhotosIOS(){
     return;
   }
 
-  // If Web Share API is not available or files sharing not supported
   const canShareFiles = !!(navigator.share && navigator.canShare);
   if(!canShareFiles){
     window.open(url, "_blank");
@@ -1557,14 +1617,12 @@ async function saveToPhotosIOS(){
   }
 
   try{
-    // Download as blob, then share as a File
     const res = await fetch(url, { mode: "cors" });
     if(!res.ok) throw new Error("Fetch failed: " + res.status);
 
     const blob = await res.blob();
     const file = new File([blob], "shaga3app-video.mp4", { type: blob.type || "video/mp4" });
 
-    // navigator.canShare({files}) is required on iOS for file share
     if(!navigator.canShare({ files: [file] })){
       window.open(url, "_blank");
       showIOSToast("Opened the video. Tap Share. then choose <b>Save to Photos</b>.");
@@ -1579,7 +1637,6 @@ async function saveToPhotosIOS(){
 
     hideIOSToast();
   }catch(e){
-    // Fallback path
     window.open(url, "_blank");
     showIOSToast("Couldn’t open Share Sheet. The video is opened now. Tap Share. then <b>Save to Photos</b>.");
   }
@@ -1587,12 +1644,7 @@ async function saveToPhotosIOS(){
 
 document.getElementById("iosSaveToPhotosBtn")?.addEventListener("click", saveToPhotosIOS);
 
-/* ---------------------------------------------------------
-   ✅ Hook into your existing Download button.
-   If your download button has a different id, change it below.
-   --------------------------------------------------------- */
 (function attachDownloadHint(){
-  // 🔧 CHANGE these selectors if your buttons have different ids/classes
   const downloadBtn =
     document.getElementById("downloadBtn") ||
     document.querySelector('[data-action="download"]') ||
@@ -1602,15 +1654,11 @@ document.getElementById("iosSaveToPhotosBtn")?.addEventListener("click", saveToP
 
   downloadBtn.addEventListener("click", () => {
     if(isIOS()){
-      showIOSToast(); // shows the default message
+      showIOSToast();
     }
   });
 })();
 
-/* ---------------------------------------------------------
-   ✅ OPTIONAL. If you prefer the hint only AFTER download link appears,
-   call `onVideoReadyForDownload(url)` when you set the final video URL.
-   --------------------------------------------------------- */
 function onVideoReadyForDownload(url){
   setLatestVideoUrl(url);
   if(isIOS()){
@@ -1618,6 +1666,6 @@ function onVideoReadyForDownload(url){
   }
 }
 </script>
-  
+
 </body>
 </html>
