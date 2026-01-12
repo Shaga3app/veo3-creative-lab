@@ -581,7 +581,8 @@
       demoTag: "Demo",
       limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
       needStart: "Please upload a START image.",
-      tryAgainSoft: "Could not complete this time. Please try again."
+      tryAgainSoft: "Could not complete this time. Please try again.",
+      videoLoadFailed: "Video load failed."
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
@@ -617,7 +618,8 @@
       demoTag: "ديمو",
       limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
       needStart: "من فضلك ارفع صورة البداية.",
-      tryAgainSoft: "المحاولة دي ما كملتش. جرّب تاني."
+      tryAgainSoft: "المحاولة دي ما كملتش. جرّب تاني.",
+      videoLoadFailed: "تحميل الفيديو فشل."
     }
   };
 
@@ -759,7 +761,7 @@
   }
 
   /* =========================
-     ✅ FIX for [object Object]
+     FIX for [object Object]
      Convert any backend error object into real text.
      ========================= */
   function toCleanText(v){
@@ -840,11 +842,18 @@
   mainVideo.addEventListener("ended", syncOverlay);
   mainVideo.addEventListener("loadedmetadata", syncOverlay);
 
+  // If the video itself fails to load on iPhone. surface it clearly.
+  mainVideo.addEventListener("error", ()=>{
+    const t = i18n[currentLang];
+    const code = mainVideo?.error?.code ? ` (code ${mainVideo.error.code})` : "";
+    showErrorDetail(`${t.videoLoadFailed}${code}\nIf this keeps happening on iPhone, the MP4 URL might not allow streaming or range seek.`);
+  });
+
   function showPoster(it){
     mainPoster.src = it.poster || "";
     mainPoster.style.display = "block";
 
-    mainVideo.pause();
+    try{ mainVideo.pause(); }catch(e){}
     mainVideo.removeAttribute("src");
     mainVideo.load();
     mainVideo.style.display = "none";
@@ -852,37 +861,94 @@
     setOverlayVisible(true);
   }
 
+  // ✅ STRONG iPhone seek fix.
+  // Seek first. then play. retry seek once.
   function playInline(it, opts = {}){
-    const { hidePosterWhilePlaying = false, startMuted = false, skipSeconds = 0 } = opts;
+    const { startMuted = false, skipSeconds = 0 } = opts;
 
     mainVideo.muted = !!startMuted;
+    mainVideo.preload = "auto";
     mainVideo.src = it.video;
     mainVideo.style.display = "block";
+    mainPoster.style.display = "none";
 
-    mainPoster.style.display = hidePosterWhilePlaying ? "none" : "none";
+    const trySeek = (sec)=>{
+      try{
+        const d = Number(mainVideo.duration || 0);
+        const target = Math.max(0, Math.min(sec, (d && d > 0.5) ? (d - 0.25) : sec));
+        if(Number.isFinite(target) && target > 0){
+          mainVideo.currentTime = target;
+          return true;
+        }
+      }catch(e){}
+      return false;
+    };
 
-    if(skipSeconds && skipSeconds > 0){
-      const doSkip = ()=>{
-        try{
-          const d = Number(mainVideo.duration || 0);
-          const target = Math.min(skipSeconds, Math.max(0, d - 0.05) || skipSeconds);
-          if(!Number.isNaN(target) && target > 0){
-            mainVideo.currentTime = target;
-          }
-        }catch(e){}
-      };
-      mainVideo.addEventListener("loadedmetadata", doSkip, { once:true });
-      mainVideo.addEventListener("canplay", doSkip, { once:true });
+    const startPlayback = async ()=>{
+      if(skipSeconds && skipSeconds > 0){
+        trySeek(skipSeconds);
+        setTimeout(()=>{ trySeek(skipSeconds); }, 180);
+      }
+      try{ await mainVideo.play(); }catch(e){}
+      syncOverlay();
+    };
+
+    if(mainVideo.readyState >= 1){
+      startPlayback();
+    }else{
+      mainVideo.addEventListener("loadedmetadata", startPlayback, { once:true });
+      mainVideo.addEventListener("canplay", ()=>{
+        if(skipSeconds && skipSeconds > 0) trySeek(skipSeconds);
+      }, { once:true });
     }
 
     mainVideo.load();
-    mainVideo.play().catch(()=>{});
     syncOverlay();
   }
 
+  function isIOS(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+
+  // Open viewer. iOS will typically open its own player. That is fine for download.
   function openVideoViewer(url){
     if(!url) return;
     window.open(url, "_blank", "noopener");
+  }
+
+  // ✅ Better download UX.
+  // Desktop / Android: download without leaving page.
+  // iOS: open new tab. show toast instructions.
+  async function startDownload(url){
+    if(!url) return;
+
+    if(isIOS()){
+      openVideoViewer(url);
+      if(typeof showIOSToast === "function"){
+        showIOSToast("iPhone tip<br>After it opens, tap <b>Share</b>. then <b>Save Video</b> or <b>Save to Photos</b>.");
+      }
+      return;
+    }
+
+    try{
+      const res = await fetch(url, { mode:"cors" });
+      if(!res.ok) throw new Error("Download failed: " + res.status);
+
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      const objUrl = URL.createObjectURL(blob);
+
+      a.href = objUrl;
+      a.download = "shaga3app-video.mp4";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(()=>URL.revokeObjectURL(objUrl), 8000);
+    }catch(e){
+      // Fallback to opening new tab
+      openVideoViewer(url);
+    }
   }
 
   function togglePlayPause(){
@@ -893,9 +959,8 @@
 
     if(!hasSrc){
       if(it.video){
-        const hidePoster = (it.kind === "new");
-        const skip = (it.kind === "new" && it.i2v) ? 0.2 : 0;
-        playInline(it, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+        const skip = (it.kind === "new" && it.i2v) ? 2 : 0; // ✅ skip 2 seconds for image-to-video
+        playInline(it, { startMuted:false, skipSeconds: skip });
       }
       return;
     }
@@ -912,17 +977,11 @@
     togglePlayPause();
   });
 
+  // ✅ Play button should not open a new page for generated videos.
   playBtn.addEventListener("click", (e)=>{
     e.preventDefault();
     e.stopPropagation();
-    const it = items[selectedIndex];
-    if(!it) return;
-
-    if(it.kind === "new"){
-      openVideoViewer(it.video);
-      return;
-    }
-    playInline(it, { hidePosterWhilePlaying:false, startMuted:false, skipSeconds: 0 });
+    togglePlayPause();
   });
 
   // Thumbs
@@ -952,11 +1011,10 @@
         const it2 = items[idx];
         if(!it2) return;
 
-        const hidePoster = (it2.kind === "new");
-        const skip = (it2.kind === "new" && it2.i2v) ? 0.2 : 0;
+        const skip = (it2.kind === "new" && it2.i2v) ? 2 : 0; // ✅ skip 2 seconds for image-to-video
 
         if(it2.video){
-          playInline(it2, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+          playInline(it2, { startMuted:false, skipSeconds: skip });
         }
       });
 
@@ -1360,7 +1418,7 @@
 
     saveLastUrl(downloadUrl);
 
-    // ✅ make iOS helper always know the latest URL
+    // make iOS helper always know the latest URL
     try{
       if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(downloadUrl);
       if(typeof onVideoReadyForDownload === "function") onVideoReadyForDownload(downloadUrl);
@@ -1382,15 +1440,15 @@
     renderThumbs();
     setSelected(0);
 
+    // ✅ skip first 2 seconds for image-to-video
     playInline(items[0], {
-      hidePosterWhilePlaying: true,
       startMuted:false,
-      skipSeconds: items[0]?.i2v ? 0.2 : 0
+      skipSeconds: items[0]?.i2v ? 2 : 0
     });
 
     $("resultNote").textContent = (currentLang==="ar")
       ? "✅ اتولد فيديو جديد. اضغط على الشاشة للتشغيل أو الإيقاف."
-      : "✅ New video generated. Tap the preview to play/pause.";
+      : "✅ New video generated. Tap the preview to play or pause.";
 
     syncOverlay();
   }
@@ -1403,14 +1461,14 @@
     return loadLastUrl();
   }
 
-  $("downloadBtn").addEventListener("click", ()=>{
+  $("downloadBtn").addEventListener("click", async ()=>{
     const url = getCurrentVideoUrl();
     if(!url) return;
     saveLastUrl(url);
     try{
       if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(url);
     }catch(e){}
-    openVideoViewer(url);
+    await startDownload(url);
   });
 
   $("copyBtn").addEventListener("click", async ()=>{
@@ -1473,7 +1531,6 @@
     renderThumbs();
     setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
 
-    // Keep error title language consistent
     const currentErr = $("errorText")?.textContent || "";
     if(currentErr.trim()){
       showErrorDetail(currentErr);
@@ -1578,12 +1635,11 @@
 <div id="iosDownloadToast" class="iosToast" role="status" aria-live="polite">
   <strong>iPhone tip</strong>
   <div id="iosToastText">
-    If you tapped Download, the video is usually saved in <b>Files → Downloads</b>.
-    Then open it. tap Share. and choose <b>Save to Photos</b>.
+    After it opens, tap <b>Share</b>. then <b>Save Video</b> or <b>Save to Photos</b>.
   </div>
   <div class="row">
     <button id="iosToastClose">OK</button>
-    <button id="iosSaveToPhotosBtn" class="primary">Save to Photos</button>
+    <button id="iosOpenVideoBtn" class="primary">Open video</button>
   </div>
 </div>
 
@@ -1609,47 +1665,16 @@ function hideIOSToast(){
 }
 document.getElementById("iosToastClose")?.addEventListener("click", hideIOSToast);
 
-async function saveToPhotosIOS(){
+// ✅ Replaces the unreliable "Save to Photos" attempt.
+// Opens the video. then user uses iOS Share.
+document.getElementById("iosOpenVideoBtn")?.addEventListener("click", ()=>{
   const url = getLatestVideoUrl();
   if(!url){
     showIOSToast("No video URL yet. Generate a video first. then try again.");
     return;
   }
-
-  const canShareFiles = !!(navigator.share && navigator.canShare);
-  if(!canShareFiles){
-    window.open(url, "_blank");
-    showIOSToast("Your iPhone will open the video. Tap Share. then choose <b>Save to Photos</b>.");
-    return;
-  }
-
-  try{
-    const res = await fetch(url, { mode: "cors" });
-    if(!res.ok) throw new Error("Fetch failed: " + res.status);
-
-    const blob = await res.blob();
-    const file = new File([blob], "shaga3app-video.mp4", { type: blob.type || "video/mp4" });
-
-    if(!navigator.canShare({ files: [file] })){
-      window.open(url, "_blank");
-      showIOSToast("Opened the video. Tap Share. then choose <b>Save to Photos</b>.");
-      return;
-    }
-
-    await navigator.share({
-      files: [file],
-      title: "Shaga3app Video",
-      text: "Save to Photos"
-    });
-
-    hideIOSToast();
-  }catch(e){
-    window.open(url, "_blank");
-    showIOSToast("Couldn’t open Share Sheet. The video is opened now. Tap Share. then <b>Save to Photos</b>.");
-  }
-}
-
-document.getElementById("iosSaveToPhotosBtn")?.addEventListener("click", saveToPhotosIOS);
+  window.open(url, "_blank", "noopener");
+});
 
 (function attachDownloadHint(){
   const downloadBtn =
@@ -1669,7 +1694,7 @@ document.getElementById("iosSaveToPhotosBtn")?.addEventListener("click", saveToP
 function onVideoReadyForDownload(url){
   setLatestVideoUrl(url);
   if(isIOS()){
-    showIOSToast("Video is ready. Tap Download. it will appear in <b>Files → Downloads</b>. Then Share. <b>Save to Photos</b>.");
+    showIOSToast("Video is ready. Tap <b>Download</b>. It may open in a new tab. Then tap <b>Share</b>. and choose <b>Save Video</b> or <b>Save to Photos</b>.");
   }
 }
 </script>
