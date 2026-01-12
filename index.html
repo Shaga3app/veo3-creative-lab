@@ -7,6 +7,7 @@
 
   <style>
     :root{
+      /* defaults */
       --bg:#0b0f18;
       --panel:rgba(255,255,255,.06);
       --panel2:rgba(0,0,0,.18);
@@ -47,6 +48,7 @@
       backdrop-filter: blur(10px);
     }
 
+    /* top bar */
     .topBar{
       display:flex;align-items:center;justify-content:space-between;
       gap:12px;
@@ -90,10 +92,12 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* hero */
     .hero{margin:18px 0 10px}
     .hero h1{font-size:52px;line-height:1.05;margin:6px 0 8px;font-weight:950;letter-spacing:-.02em}
     .hero p{color:var(--muted);font-size:16px;max-width:560px;line-height:1.4;margin:0}
 
+    /* sections */
     .sectionLabel{
       margin:18px 0 8px;
       font-size:12px;
@@ -102,6 +106,7 @@
       color:color-mix(in srgb, var(--muted) 85%, transparent);
     }
 
+    /* locked prompt */
     .lockedBox{
       background: var(--panel2);
       border:1px solid var(--line);
@@ -131,6 +136,7 @@
       overflow:auto;
     }
 
+    /* preview + carousel */
     .previewCard{
       margin-top:12px;
       background: var(--panel2);
@@ -173,6 +179,7 @@
       background:#000;
     }
 
+    /* overlay for play. pause */
     .playOverlay{
       position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
@@ -180,7 +187,9 @@
       opacity:1;
       transition: opacity .12s ease;
     }
-    .playOverlay.hidden{opacity:0}
+    .playOverlay.hidden{
+      opacity:0;
+    }
     .playBtn{
       pointer-events:auto;
       display:inline-flex;align-items:center;gap:8px;
@@ -193,6 +202,7 @@
       backdrop-filter: blur(8px);
     }
 
+    /* error under the preview */
     .errorBox{
       display:none;
       margin-top:10px;
@@ -208,6 +218,7 @@
     }
     .errorBox strong{display:block;margin-bottom:6px}
 
+    /* carousel thumbs */
     .thumbRowWrap{
       margin-top:10px;
       border-radius:14px;
@@ -270,6 +281,7 @@
     .dot{width:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.18)}
     .dot.on{background: color-mix(in srgb, var(--accent2) 80%, transparent);}
 
+    /* mode bar */
     .modeBar{
       margin-top:14px;
       display:flex;gap:10px;
@@ -294,6 +306,7 @@
       color:var(--text);
     }
 
+    /* inputs */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
 
@@ -316,6 +329,7 @@
     .field input::placeholder{color:rgba(148,163,184,.65)}
     .miniHint{margin-top:10px;font-size:12px;color: var(--muted);line-height:1.35;opacity:.95}
 
+    /* progress */
     .result{
       display:none;
       margin-top:12px;
@@ -335,6 +349,7 @@
       background:linear-gradient(90deg, var(--accent), var(--accent2));
     }
 
+    /* buttons */
     .btn{
       padding:12px 14px;
       border-radius:14px;
@@ -355,6 +370,7 @@
       border:1px solid rgba(0,0,0,.10);
     }
 
+    /* actions under inputs */
     .actionsUnderInputs{
       margin-top:12px;
       display:grid;
@@ -370,6 +386,7 @@
       .actionsUnderInputs .primaryWrap{max-width:520px}
     }
 
+    /* RTL tweaks */
     body[dir="rtl"] .hero h1{letter-spacing:0}
     body[dir="rtl"] .brandTitle{max-width:50vw}
   </style>
@@ -510,17 +527,6 @@
   const PENDING_OP_KEY = "shaga3app_pending_op_v1";
   const PENDING_OP_TTL_MS = 30 * 60 * 1000;
 
-  const PENDING_META_KEY = "shaga3app_pending_meta_v1";
-  function savePendingMeta(meta){
-    try{ localStorage.setItem(PENDING_META_KEY, JSON.stringify(meta)); }catch(e){}
-  }
-  function loadPendingMeta(){
-    try{ return JSON.parse(localStorage.getItem(PENDING_META_KEY) || "null"); }catch(e){ return null; }
-  }
-  function clearPendingMeta(){
-    try{ localStorage.removeItem(PENDING_META_KEY); }catch(e){}
-  }
-
   function savePendingOp(op){
     try{ localStorage.setItem(PENDING_OP_KEY, JSON.stringify(op)); }catch(e){}
   }
@@ -538,6 +544,41 @@
   }
   function clearPendingOp(){
     try{ localStorage.removeItem(PENDING_OP_KEY); }catch(e){}
+  }
+
+  /* =========================
+     Resumable progress for pending ops
+     ========================= */
+  let pendingRafId = null;
+
+  function stopPendingProgress(){
+    if(pendingRafId){
+      cancelAnimationFrame(pendingRafId);
+      pendingRafId = null;
+    }
+  }
+
+  function startPendingProgress(createdAtMs, maxSeconds){
+    stopPendingProgress();
+
+    const startMs = Number(createdAtMs || Date.now());
+    const maxSec = Math.max(1, Number(maxSeconds || 240));
+
+    $("resultBox").style.display = "block";
+
+    const tick = ()=>{
+      const elapsedSec = (Date.now() - startMs) / 1000;
+      const pct = Math.min(95, Math.max(0, (elapsedSec / maxSec) * 95));
+
+      $("bar").style.width = pct.toFixed(2) + "%";
+
+      const remain = Math.max(0, Math.ceil(maxSec - elapsedSec));
+      setTimerText(remain);
+
+      pendingRafId = requestAnimationFrame(tick);
+    };
+
+    tick();
   }
 
   const i18n = {
@@ -648,29 +689,53 @@
         heroGradA:"rgba(91,92,255,.25)",
         heroGradB:"rgba(34,197,94,.12)"
       },
-      basePrompt_en:
-`BASE (LOCKED)
-
-Create a vertical 9:16 cinematic video, 5–8 seconds long, with smooth camera moves and rich realistic lighting.
-The scene follows this core concept, and we will inject the user details below.`,
-      basePrompt_ar:
-`الأساس (مقفول)
-
-اعمل فيديو سينمائي عمودي ٩:١٦ مدته من ٥ إلى ٨ ثواني، مع حركة كاميرا ناعمة وإضاءة واقعية غنية.
-المشهد بيتبع الفكرة الأساسية، وسنضيف تفاصيل المستخدم بالأسفل.`,
-      demos: [
-        { id:"demo-0", kind:"demo", poster:"https://picsum.photos/seed/purple-a/400/700", video:"https://samplelib.com/lib/preview/mp4/sample-5s.mp4", tag:"demo" },
-        { id:"demo-1", kind:"demo", poster:"https://picsum.photos/seed/purple-b/400/700", video:"https://samplelib.com/lib/preview/mp4/sample-10s.mp4", tag:"demo" },
-        { id:"demo-2", kind:"demo", poster:"https://picsum.photos/seed/purple-c/400/700", video:"https://samplelib.com/lib/preview/mp4/sample-5s.mp4", tag:"demo" },
-        { id:"demo-3", kind:"demo", poster:"https://picsum.photos/seed/purple-d/400/700", video:"https://samplelib.com/lib/preview/mp4/sample-10s.mp4", tag:"demo" },
-        { id:"demo-4", kind:"demo", poster:"https://picsum.photos/seed/purple-e/400/700", video:"https://samplelib.com/lib/preview/mp4/sample-5s.mp4", tag:"demo" }
-      ]
+      basePrompt_en: "BASE (LOCKED)\n\nCreate a vertical 9:16 cinematic video, 5–8 seconds long...",
+      basePrompt_ar: "الأساس (مقفول)\n\nاعمل فيديو سينمائي عمودي ٩:١٦...",
+      demos: demoPack("purple")
     }
   };
+
+  function demoPack(color){
+    const posters = [
+      `https://picsum.photos/seed/${color}-a/400/700`,
+      `https://picsum.photos/seed/${color}-b/400/700`,
+      `https://picsum.photos/seed/${color}-c/400/700`,
+      `https://picsum.photos/seed/${color}-d/400/700`,
+      `https://picsum.photos/seed/${color}-e/400/700`
+    ];
+    const vids = [
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
+    ];
+    return posters.map((p, idx)=>({
+      id: "demo-" + idx,
+      kind: "demo",
+      poster: p,
+      video: vids[idx],
+      tag: "demo"
+    }));
+  }
+
+  async function loadBrandConfig(brandId){
+    try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
+    try{
+      const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
+      if(r.ok){
+        const txt = await r.text();
+        const parsed = JSON.parse(txt);
+        return normalizeBrand(parsed, brandId);
+      }
+    }catch(e){}
+    return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
+  }
 
   function normalizeBrand(raw, brandId){
     const fb = FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
     const theme = raw.theme || raw.colors || {};
+    const demos = Array.isArray(raw.demos) ? raw.demos : fb.demos;
     return {
       id: raw.id || brandId,
       title_en: raw.title_en || raw.title || fb.title_en,
@@ -687,20 +752,8 @@ The scene follows this core concept, and we will inject the user details below.`
       },
       basePrompt_en: raw.basePrompt_en || fb.basePrompt_en,
       basePrompt_ar: raw.basePrompt_ar || fb.basePrompt_ar,
-      demos: Array.isArray(raw.demos) ? raw.demos : fb.demos
+      demos
     };
-  }
-
-  async function loadBrandConfig(brandId){
-    try{ localStorage.setItem(LAST_BRAND_KEY, brandId); }catch(e){}
-    try{
-      const r = await fetch(`brands/${brandId}.json?t=${Date.now()}`, {cache:"no-store"});
-      if(r.ok){
-        const parsed = await r.json();
-        return normalizeBrand(parsed, brandId);
-      }
-    }catch(e){}
-    return FALLBACK_BRANDS[brandId] || FALLBACK_BRANDS.shaga3;
   }
 
   function applyTheme(theme){
@@ -716,11 +769,12 @@ The scene follows this core concept, and we will inject the user details below.`
   function setBrandUI(cfg){
     $("brandTitle").textContent = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
     $("betaPill").textContent = (currentLang === "ar") ? cfg.beta_ar : cfg.beta_en;
-    document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
 
     const img = $("brandLogo");
     img.src = cfg.logo || "assets/brand-logos/shaga3app.png";
     img.onerror = () => { img.src = "assets/brand-logos/shaga3app.png"; };
+
+    document.title = (currentLang === "ar") ? cfg.title_ar : cfg.title_en;
   }
 
   let brandCfg = null;
@@ -732,84 +786,6 @@ The scene follows this core concept, and we will inject the user details below.`
     $("basePrompt").textContent = (currentLang === "ar") ? brandCfg.basePrompt_ar : brandCfg.basePrompt_en;
   }
 
-  function buildDots(){
-    const dots = $("thumbDots");
-    dots.innerHTML = "";
-    const pages = Math.min(10, Math.max(1, Math.ceil(items.length / 2)));
-    for(let i=0;i<pages;i++){
-      const dot = document.createElement("div");
-      dot.className = "dot";
-      dots.appendChild(dot);
-    }
-  }
-  function updateDots(){
-    const dots = [...$("thumbDots").children];
-    if(!dots.length) return;
-    const page = Math.min(dots.length-1, Math.floor(selectedIndex / 2));
-    dots.forEach((d,i)=>d.classList.toggle("on", i===page));
-  }
-
-  const mainVideo = $("mainVideo");
-  const mainPoster = $("mainPoster");
-  const playOverlay = $("playOverlay");
-  const playBtn = $("playBtn");
-
-  function setOverlayVisible(visible){
-    playOverlay.classList.toggle("hidden", !visible);
-    playOverlay.style.pointerEvents = visible ? "auto" : "none";
-  }
-  function syncOverlay(){
-    const hasVideo = mainVideo.style.display !== "none" && !!mainVideo.src;
-    if(!hasVideo){ setOverlayVisible(true); return; }
-    if(mainVideo.ended || mainVideo.paused) setOverlayVisible(true);
-    else setOverlayVisible(false);
-  }
-  mainVideo.addEventListener("play", syncOverlay);
-  mainVideo.addEventListener("pause", syncOverlay);
-  mainVideo.addEventListener("ended", syncOverlay);
-
-  function showPoster(it){
-    mainPoster.src = it.poster || "";
-    mainPoster.style.display = "block";
-
-    mainVideo.pause();
-    mainVideo.removeAttribute("src");
-    mainVideo.load();
-    mainVideo.style.display = "none";
-
-    setOverlayVisible(true);
-  }
-
-  function playInline(it, opts = {}){
-    const { hidePosterWhilePlaying = true, startMuted = false, skipSeconds = 0 } = opts;
-
-    mainVideo.muted = !!startMuted;
-    mainVideo.src = it.video;
-    mainVideo.style.display = "block";
-    mainPoster.style.display = hidePosterWhilePlaying ? "none" : "block";
-
-    if(skipSeconds && skipSeconds > 0){
-      const doSkip = ()=>{
-        try{
-          const d = Number(mainVideo.duration || 0);
-          const target = Math.min(skipSeconds, Math.max(0, d - 0.05) || skipSeconds);
-          if(!Number.isNaN(target) && target > 0) mainVideo.currentTime = target;
-        }catch(e){}
-      };
-      mainVideo.addEventListener("loadedmetadata", doSkip, { once:true });
-      mainVideo.addEventListener("canplay", doSkip, { once:true });
-    }
-
-    mainVideo.load();
-    mainVideo.play().catch(()=>{});
-    syncOverlay();
-  }
-
-  function openVideoViewer(url){
-    if(!url) return;
-    window.open(url, "_blank", "noopener");
-  }
-
   function setSelected(index){
     selectedIndex = Math.max(0, Math.min(items.length-1, index));
     [...$("thumbRow").children].forEach((el,i)=>el.classList.toggle("on", i===selectedIndex));
@@ -817,40 +793,13 @@ The scene follows this core concept, and we will inject the user details below.`
     showPoster(items[selectedIndex]);
   }
 
-  function renderThumbs(){
-    const row = $("thumbRow");
-    row.innerHTML = "";
-    $("thumbDots").innerHTML = "";
-
-    items.forEach((it, idx)=>{
-      const d = document.createElement("div");
-      d.className = "thumb" + (idx===selectedIndex ? " on" : "");
-      d.innerHTML = `
-        <div class="thumbPlay">▶</div>
-        <img alt="poster" src="${it.poster || ""}">
-        <div class="thumbMeta">
-          <span class="thumbTag">${(currentLang==="ar") ? (it.kind==="new" ? i18n.ar.newTag : i18n.ar.demoTag) : (it.kind==="new" ? i18n.en.newTag : i18n.en.demoTag)}</span>
-          <span style="opacity:.75">${idx+1}</span>
-        </div>
-      `;
-      d.addEventListener("click", ()=>{
-        setSelected(idx);
-        const it2 = items[idx];
-        if(it2?.video){
-          const skip = (it2.kind === "new" && it2.i2v) ? 0.2 : 0;
-          playInline(it2, { hidePosterWhilePlaying:true, startMuted:false, skipSeconds: skip });
-        }
-      });
-      row.appendChild(d);
-    });
-
-    buildDots();
-    updateDots();
-  }
-
+  /* =========================
+     FIX for [object Object]
+     ========================= */
   function toCleanText(v){
     if(v == null) return "";
     if(typeof v === "string") return v;
+    if(v instanceof Error) return v.message || String(v);
     try{ return JSON.stringify(v, null, 2); }catch(e){ return String(v); }
   }
 
@@ -868,31 +817,273 @@ The scene follows this core concept, and we will inject the user details below.`
     return toCleanText(msg).trim();
   }
 
+  /* =========================
+     Persist and restore last generated video
+     ========================= */
+  const LAST_VIDEO_META_KEY = "shaga3_last_video_meta_v2";
+
+  function saveLastVideoMeta(meta){
+    try{
+      localStorage.setItem(LAST_VIDEO_META_KEY, JSON.stringify(meta || {}));
+    }catch(e){}
+  }
+  function loadLastVideoMeta(){
+    try{
+      const raw = localStorage.getItem(LAST_VIDEO_META_KEY);
+      if(!raw) return null;
+      const m = JSON.parse(raw);
+      if(!m || !m.url) return null;
+      return m;
+    }catch(e){
+      return null;
+    }
+  }
+
+  function restoreLastGeneratedIntoUI(){
+    try{
+      const meta = loadLastVideoMeta();
+      if(!meta || !meta.url) return false;
+
+      const url = meta.url;
+      const already = items?.some(x => x?.video === url);
+      if(already) return true;
+
+      const newItem = {
+        id: meta.id || ("new-" + Date.now()),
+        kind: "new",
+        i2v: !!meta.i2v,
+        poster: meta.poster || (brandCfg?.demos?.[0]?.poster || ""),
+        video: url,
+        tag: "new"
+      };
+
+      items = (items || []).filter(x => x.kind !== "new");
+      items.unshift(newItem);
+
+      selectedIndex = 0;
+      renderThumbs();
+      setSelected(0);
+
+      showPoster(items[0]);
+
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  // error display helpers
   function showErrorDetail(msg){
     const box = $("errorBox");
     const title = $("errorTitle");
     const text = $("errorText");
+    if(!box || !text) return;
+
     title.textContent = (currentLang === "ar") ? "تفاصيل الخطأ" : "Error details";
+
     const m = toCleanText(msg).trim();
-    if(!m){ box.style.display = "none"; text.textContent = ""; return; }
+    if(!m){
+      box.style.display = "none";
+      text.textContent = "";
+      return;
+    }
+
     text.textContent = m;
     box.style.display = "block";
   }
   function clearErrorDetail(){
-    $("errorBox").style.display = "none";
-    $("errorText").textContent = "";
+    const box = $("errorBox");
+    const text = $("errorText");
+    if(!box || !text) return;
+    text.textContent = "";
+    box.style.display = "none";
   }
 
+  // Main player UX helpers
+  const mainStage = $("mainStage");
+  const mainVideo = $("mainVideo");
+  const mainPoster = $("mainPoster");
+  const playOverlay = $("playOverlay");
+  const playBtn = $("playBtn");
+
+  function setOverlayVisible(visible){
+    playOverlay.classList.toggle("hidden", !visible);
+    playOverlay.style.pointerEvents = visible ? "auto" : "none";
+  }
+
+  function syncOverlay(){
+    const hasVideo = mainVideo.style.display !== "none" && !!mainVideo.src;
+    if(!hasVideo){
+      setOverlayVisible(true);
+      return;
+    }
+    if(mainVideo.ended || mainVideo.paused){
+      setOverlayVisible(true);
+    }else{
+      setOverlayVisible(false);
+    }
+  }
+
+  mainVideo.addEventListener("play", syncOverlay);
+  mainVideo.addEventListener("pause", syncOverlay);
+  mainVideo.addEventListener("ended", syncOverlay);
+  mainVideo.addEventListener("loadedmetadata", syncOverlay);
+
+  function showPoster(it){
+    mainPoster.src = it?.poster || "";
+    mainPoster.style.display = "block";
+
+    try{
+      mainVideo.pause();
+      mainVideo.removeAttribute("src");
+      mainVideo.load();
+    }catch(e){}
+    mainVideo.style.display = "none";
+
+    setOverlayVisible(true);
+  }
+
+  function playInline(it, opts = {}){
+    const { hidePosterWhilePlaying = false, startMuted = false, skipSeconds = 0 } = opts;
+
+    mainVideo.muted = !!startMuted;
+    mainVideo.src = it.video;
+    mainVideo.style.display = "block";
+
+    mainPoster.style.display = hidePosterWhilePlaying ? "none" : "none";
+
+    if(skipSeconds && skipSeconds > 0){
+      const doSkip = ()=>{
+        try{
+          const d = Number(mainVideo.duration || 0);
+          const target = Math.min(skipSeconds, Math.max(0, d - 0.05) || skipSeconds);
+          if(!Number.isNaN(target) && target > 0){
+            mainVideo.currentTime = target;
+          }
+        }catch(e){}
+      };
+      mainVideo.addEventListener("loadedmetadata", doSkip, { once:true });
+      mainVideo.addEventListener("canplay", doSkip, { once:true });
+    }
+
+    mainVideo.load();
+    mainVideo.play().catch(()=>{});
+    syncOverlay();
+  }
+
+  function togglePlayPause(){
+    const it = items[selectedIndex];
+    if(!it) return;
+
+    const hasSrc = !!mainVideo.src;
+
+    if(!hasSrc){
+      if(it.video){
+        const hidePoster = (it.kind === "new");
+        const skip = (it.kind === "new" && it.i2v) ? 2.0 : 0;
+        playInline(it, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+      }
+      return;
+    }
+
+    if(mainVideo.paused || mainVideo.ended){
+      mainVideo.play().catch(()=>{});
+    }else{
+      mainVideo.pause();
+    }
+    syncOverlay();
+  }
+
+  mainStage.addEventListener("click", ()=>{
+    togglePlayPause();
+  });
+
+  playBtn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const it = items[selectedIndex];
+    if(!it) return;
+
+    if(it.kind === "new"){
+      const skip = it.i2v ? 2.0 : 0;
+      playInline(it, { hidePosterWhilePlaying:true, startMuted:false, skipSeconds: skip });
+      return;
+    }
+    playInline(it, { hidePosterWhilePlaying:false, startMuted:false, skipSeconds: 0 });
+  });
+
+  // Thumbs
+  function renderThumbs(){
+    const row = $("thumbRow");
+    row.innerHTML = "";
+    $("thumbDots").innerHTML = "";
+    if(!items.length) return;
+
+    items.forEach((it, idx)=>{
+      const d = document.createElement("div");
+      d.className = "thumb" + (idx===selectedIndex ? " on" : "");
+      d.innerHTML = `
+        <div class="thumbPlay">▶</div>
+        <img alt="poster" src="${it.poster || ""}">
+        <div class="thumbMeta">
+          <span class="thumbTag">${
+            (currentLang==="ar")
+              ? (it.kind==="new" ? i18n.ar.newTag : i18n.ar.demoTag)
+              : (it.kind==="new" ? i18n.en.newTag : i18n.en.demoTag)
+          }</span>
+          <span style="opacity:.75">${idx+1}</span>
+        </div>
+      `;
+      d.addEventListener("click", ()=>{
+        setSelected(idx);
+        const it2 = items[idx];
+        if(!it2) return;
+
+        const hidePoster = (it2.kind === "new");
+        const skip = (it2.kind === "new" && it2.i2v) ? 2.0 : 0;
+
+        if(it2.video){
+          playInline(it2, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+        }
+      });
+
+      row.appendChild(d);
+    });
+
+    buildDots();
+    updateDots();
+  }
+
+  function buildDots(){
+    const dots = $("thumbDots");
+    dots.innerHTML = "";
+    const pages = Math.min(10, Math.max(1, Math.ceil(items.length / 2)));
+    for(let i=0;i<pages;i++){
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dots.appendChild(dot);
+    }
+  }
+
+  function updateDots(){
+    const dots = [...$("thumbDots").children];
+    if(!dots.length) return;
+    const page = Math.min(dots.length-1, Math.floor(selectedIndex / 2));
+    dots.forEach((d,i)=>d.classList.toggle("on", i===page));
+  }
+
+  const imagesBox = $("imagesBox");
   $("modeText").addEventListener("click", ()=>{
     $("modeText").classList.add("on");
     $("modeImages").classList.remove("on");
-    $("imagesBox").style.display = "none";
+    imagesBox.style.display = "none";
   });
   $("modeImages").addEventListener("click", ()=>{
     $("modeImages").classList.add("on");
     $("modeText").classList.remove("on");
-    $("imagesBox").style.display = "block";
+    imagesBox.style.display = "block";
   });
+
   function isImagesModeOn(){
     return $("modeImages").classList.contains("on");
   }
@@ -909,7 +1100,9 @@ The scene follows this core concept, and we will inject the user details below.`
 
   function requireStartImageOrThrow(){
     const startFile = $("startImg")?.files?.[0];
-    if(!startFile) throw new Error((currentLang==="ar") ? i18n.ar.needStart : i18n.en.needStart);
+    if(!startFile){
+      throw new Error((currentLang==="ar") ? i18n.ar.needStart : i18n.en.needStart);
+    }
     return startFile;
   }
 
@@ -942,8 +1135,10 @@ The scene follows this core concept, and we will inject the user details below.`
     let data;
     try{ data = JSON.parse(text); }catch(e){ data = { raw:text }; }
 
+    const backendMsg = extractBackendMessage(data, text, r.status);
+
     if(!r.ok || (data && (data.error || data.ok === false))){
-      const err = new Error(extractBackendMessage(data, text, r.status) || ("HTTP " + r.status));
+      const err = new Error(backendMsg || ("HTTP " + r.status));
       err.statusCode = r.status;
       err.backend = data;
       err.httpStatus = r.status;
@@ -962,17 +1157,23 @@ The scene follows this core concept, and we will inject the user details below.`
       const raw = localStorage.getItem(TRIALS_STATE_KEY);
       if(!raw) return { windowStart: Date.now(), used: 0 };
       const s = JSON.parse(raw);
-      if(!s || typeof s.windowStart !== "number" || typeof s.used !== "number") return { windowStart: Date.now(), used: 0 };
-      if(Date.now() - s.windowStart >= TRIALS_WINDOW_MS) return { windowStart: Date.now(), used: 0 };
+      if(!s || typeof s.windowStart !== "number" || typeof s.used !== "number"){
+        return { windowStart: Date.now(), used: 0 };
+      }
+      if(Date.now() - s.windowStart >= TRIALS_WINDOW_MS){
+        return { windowStart: Date.now(), used: 0 };
+      }
       s.used = Math.max(0, Math.min(TRIALS_MAX, Math.floor(s.used)));
       return s;
     }catch(e){
       return { windowStart: Date.now(), used: 0 };
     }
   }
+
   function saveTrialsState(state){
     try{ localStorage.setItem(TRIALS_STATE_KEY, JSON.stringify(state)); }catch(e){}
   }
+
   function getTrialsLeftFromState(state){
     return Math.max(0, TRIALS_MAX - (state.used || 0));
   }
@@ -981,6 +1182,8 @@ The scene follows this core concept, and we will inject the user details below.`
   let trials = getTrialsLeftFromState(trialsState);
   let generating = false;
 
+  let lastGenWasImages = false;
+
   function setTrialsLeft(n){
     trials = Math.max(0, Math.min(TRIALS_MAX, Number(n||0)));
     $("trialsLeft").textContent = (currentLang==="ar") ? toArabicDigits(String(trials)) : String(trials);
@@ -988,44 +1191,46 @@ The scene follows this core concept, and we will inject the user details below.`
     const t = i18n[currentLang];
     $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
   }
+
   function consumeOneTrial(){
     const s = loadTrialsState();
     s.used = Math.min(TRIALS_MAX, (s.used||0) + 1);
     saveTrialsState(s);
     setTrialsLeft(getTrialsLeftFromState(s));
   }
+
   function hardLockTrialsToZero(){
     const s = loadTrialsState();
     s.used = TRIALS_MAX;
     saveTrialsState(s);
     setTrialsLeft(0);
   }
-  function getTrialStatusFromLocal(){
-    trialsState = loadTrialsState();
-    trials = getTrialsLeftFromState(trialsState);
-    setTrialsLeft(trials);
-  }
 
+  const LAST_URL_KEY2 = "shaga3app_last_video_url";
   function saveLastUrl(url){
-    try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){}
+    try{ localStorage.setItem(LAST_URL_KEY2, url); }catch(e){}
   }
   function loadLastUrl(){
-    try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; }
+    try{ return localStorage.getItem(LAST_URL_KEY2) || ""; }catch(e){ return ""; }
   }
 
   function setTimerText(secondsLeft){
     if(currentLang === "ar"){
-      $("timerText").textContent = secondsLeft > 0 ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)` : i18n.ar.waiting;
+      $("timerText").textContent =
+        secondsLeft > 0
+          ? `جارٍ التوليد… (${toArabicDigits(secondsLeft)} ث)`
+          : i18n.ar.waiting;
     } else {
-      $("timerText").textContent = secondsLeft > 0 ? `Generating… (~${secondsLeft}s)` : i18n.en.waiting;
+      $("timerText").textContent =
+        secondsLeft > 0
+          ? `Generating… (~${secondsLeft}s)`
+          : i18n.en.waiting;
     }
   }
-  function setReadyText(){ $("timerText").textContent = (currentLang==="ar") ? i18n.ar.ready : i18n.en.ready; }
-
-  function isTrialLimitErrorMessage(msg){
-    const m = String(msg||"").toUpperCase();
-    return m.includes("TRIAL_LIMIT_REACHED") || m.includes("LIMIT_REACHED") || m.includes("HTTP 429") || m.includes("429");
+  function setReadyText(){
+    $("timerText").textContent = (currentLang==="ar") ? i18n.ar.ready : i18n.en.ready;
   }
+
   function showLimitReached(){
     $("resultBox").style.display = "block";
     $("bar").style.width = "0%";
@@ -1033,98 +1238,90 @@ The scene follows this core concept, and we will inject the user details below.`
     $("resultNote").textContent = "";
   }
 
-  const PENDING_META_KEY = "shaga3app_pending_meta_v1";
-  function savePendingMeta(meta){
-    try{ localStorage.setItem(PENDING_META_KEY, JSON.stringify(meta)); }catch(e){}
-  }
-  function loadPendingMeta(){
-    try{ return JSON.parse(localStorage.getItem(PENDING_META_KEY) || "null"); }catch(e){ return null; }
-  }
-  function clearPendingMeta(){
-    try{ localStorage.removeItem(PENDING_META_KEY); }catch(e){}
-  }
-
-  function startOrResumeProgress(maxSeconds, createdAtMs){
-    $("resultBox").style.display = "block";
-
-    const startMs = Number(createdAtMs || Date.now());
-    const maxMs = Math.max(1, Number(maxSeconds || 240) * 1000);
-
-    if(window.__resumeRaf) cancelAnimationFrame(window.__resumeRaf);
-
-    const tick = ()=>{
-      const elapsedMs = Date.now() - startMs;
-      const p = Math.min(95, Math.max(0, (elapsedMs / maxMs) * 95));
-      $("bar").style.width = p + "%";
-
-      const remain = Math.max(0, Math.ceil((maxMs - elapsedMs) / 1000));
-      setTimerText(remain);
-
-      window.__resumeRaf = requestAnimationFrame(tick);
-    };
-
-    tick();
+  function isTrialLimitErrorMessage(msg){
+    const m = String(msg||"").toUpperCase();
+    return (
+      m.includes("TRIAL_LIMIT_REACHED") ||
+      m.includes("LIMIT_REACHED") ||
+      m.includes("HTTP 429") ||
+      m.includes("(HTTP 429)") ||
+      m.includes("429")
+    );
   }
 
-  function onGenerated(url){
-    if(window.__resumeRaf) cancelAnimationFrame(window.__resumeRaf);
-    $("bar").style.width = "100%";
-    setReadyText();
-    $("resultNote").textContent = "";
+  function safeUserMessageFromErr(err){
+    const t = i18n[currentLang];
 
-    const item = {
-      id: "new-" + Date.now(),
-      kind: "new",
-      poster: items[selectedIndex]?.poster || mainPoster.src || "https://picsum.photos/seed/new/400/700",
-      video: url,
-      tag: "new",
-      i2v: isImagesModeOn() ? 1 : 0
-    };
+    const detailFromBackend = extractBackendMessage(err?.backend, err?.message, err?.httpStatus);
+    if(isTrialLimitErrorMessage(detailFromBackend)) return null;
 
-    items.unshift(item);
-    selectedIndex = 0;
-    renderThumbs();
-    setSelected(0);
+    const msg = String(detailFromBackend || "").trim();
+    if(!msg) return t.tryAgainSoft;
 
-    playInline(item, { hidePosterWhilePlaying:true, startMuted:false, skipSeconds: item.i2v ? 0.2 : 0 });
+    if(msg.toLowerCase().includes("still processing")) return t.stillWorking;
+    if(msg.toLowerCase().includes("taking longer than usual")) return t.longer;
 
-    saveLastUrl(url);
+    return t.tryAgainSoft;
   }
 
   async function pollForResult(operationName){
-    const meta = loadPendingMeta();
-    const isImages = !!meta?.isImages;
-    const maxChecks = isImages ? 110 : 70;
+    const t = i18n[currentLang];
+
+    let doneUrl = "";
+    let chk = null;
 
     let waitMs = 3000;
     const maxWaitMs = 10000;
 
+    const maxChecks = isImagesModeOn() ? 110 : 70;
+
     for(let i=0;i<maxChecks;i++){
       await new Promise(res=>setTimeout(res, waitMs));
 
-      const chk = await postJSON({
+      chk = await postJSON({
         action:"check",
         modelId: MODEL_ID,
         operationName,
         deviceId: getDeviceId()
       });
 
-      const doneUrl = chk?.downloadUrl || chk?.response?.downloadUrl;
-      if(chk?.done && doneUrl) return doneUrl;
+      if(chk?.done && chk?.downloadUrl){ doneUrl = chk.downloadUrl; break; }
+      if(chk?.done && chk?.response?.downloadUrl){ doneUrl = chk.response.downloadUrl; break; }
+
+      if(i === 8){
+        $("timerText").textContent = t.stillWorking;
+        const currentWidth = parseFloat(($("bar").style.width || "0").replace("%","")) || 0;
+        $("bar").style.width = Math.min(95, Math.max(currentWidth, 65)) + "%";
+      }
+      if(i === 25){
+        $("timerText").textContent = t.stillWorking;
+        const currentWidth = parseFloat(($("bar").style.width || "0").replace("%","")) || 0;
+        $("bar").style.width = Math.min(95, Math.max(currentWidth, 80)) + "%";
+      }
 
       waitMs = Math.min(maxWaitMs, Math.round(waitMs * 1.15));
     }
 
-    return "";
+    return doneUrl;
+  }
+
+  function getTrialStatusFromLocal(){
+    trialsState = loadTrialsState();
+    trials = getTrialsLeftFromState(trialsState);
+    setTrialsLeft(trials);
   }
 
   async function generate(){
     if(generating) return;
 
     clearErrorDetail();
-    getTrialStatusFromLocal();
+    stopPendingProgress();
 
-    if(trials <= 0){ showLimitReached(); return; }
+    getTrialStatusFromLocal();
+    if(trials <= 0){
+      showLimitReached();
+      return;
+    }
 
     generating = true;
 
@@ -1133,11 +1330,26 @@ The scene follows this core concept, and we will inject the user details below.`
     $("resultNote").textContent = "";
 
     const maxSeconds = isImagesModeOn() ? 420 : 240;
-    const startedAt = Date.now();
+    setTimerText(maxSeconds);
 
-    startOrResumeProgress(maxSeconds, startedAt);
+    const start = Date.now();
+    let rafId;
+
+    const tick = ()=>{
+      const elapsed = (Date.now()-start)/1000;
+      const p = Math.min(95, (elapsed/maxSeconds)*95);
+      $("bar").style.width = p + "%";
+
+      const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
+      setTimerText(remain);
+
+      rafId = requestAnimationFrame(tick);
+    };
+    tick();
 
     try{
+      lastGenWasImages = isImagesModeOn();
+
       const prompt = buildPrompt();
 
       const payload = {
@@ -1147,48 +1359,65 @@ The scene follows this core concept, and we will inject the user details below.`
         deviceId: getDeviceId()
       };
 
-      let isImages = 0;
       if(isImagesModeOn()){
-        isImages = 1;
         const startFile = requireStartImageOrThrow();
         const endFile = $("endImg")?.files?.[0] || null;
 
         const startB64 = await fileToB64(startFile);
+        if(!startB64) throw new Error((currentLang==="ar") ? "لم نتمكن من قراءة صورة البداية." : "Start image could not be read.");
+
         payload.inputMode = "images";
-        payload.i2v = { start: { mime: startFile.type || "image/jpeg", b64: startB64 } };
+        payload.i2v = {
+          start: {
+            mime: startFile.type || "image/jpeg",
+            b64: startB64
+          }
+        };
 
         if(endFile){
           const endB64 = await fileToB64(endFile);
-          payload.i2v.end = { mime: endFile.type || "image/jpeg", b64: endB64 };
+          if(!endB64) throw new Error((currentLang==="ar") ? "لم نتمكن من قراءة صورة النهاية." : "End image could not be read.");
+          payload.i2v.end = {
+            mime: endFile.type || "image/jpeg",
+            b64: endB64
+          };
         }
       }
 
       const gen = await postJSON(payload);
+
       consumeOneTrial();
 
       const operationName = gen.operationName || gen.name;
 
       if(gen.done && gen.downloadUrl){
         clearPendingOp();
-        clearPendingMeta();
         onGenerated(gen.downloadUrl);
         return;
       }
 
       if(!operationName) throw new Error((currentLang==="ar") ? "لم يتم استلام رقم العملية." : "No operation id returned.");
 
-      savePendingOp({ operationName, createdAt: startedAt, modelId: MODEL_ID, deviceId: getDeviceId() });
-      savePendingMeta({ operationName, createdAt: startedAt, isImages });
+      const pendingMaxSeconds = isImagesModeOn() ? 420 : 240;
+      savePendingOp({
+        operationName,
+        createdAt: Date.now(),
+        modelId: MODEL_ID,
+        deviceId: getDeviceId(),
+        isImages: isImagesModeOn(),
+        maxSeconds: pendingMaxSeconds
+      });
 
       const doneUrl = await pollForResult(operationName);
+
       if(!doneUrl){
         $("timerText").textContent = (currentLang==="ar") ? i18n.ar.longer : i18n.en.longer;
         $("bar").style.width = "95%";
+        $("resultNote").textContent = "";
         return;
       }
 
       clearPendingOp();
-      clearPendingMeta();
       onGenerated(doneUrl);
 
     }catch(err){
@@ -1198,48 +1427,128 @@ The scene follows this core concept, and we will inject the user details below.`
         hardLockTrialsToZero();
         showLimitReached();
       }else{
-        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.tryAgainSoft : i18n.en.tryAgainSoft;
+        const t = i18n[currentLang];
+        $("timerText").textContent = safeUserMessageFromErr(err) || t.tryAgainSoft;
         $("bar").style.width = "0%";
+
         showErrorDetail(detail);
+        $("resultNote").textContent = detail ? detail : "";
       }
     }finally{
       generating = false;
+      if(rafId) cancelAnimationFrame(rafId);
     }
   }
 
-  // buttons
+  function onGenerated(downloadUrl){
+    clearErrorDetail();
+
+    $("bar").style.width = "100%";
+    setReadyText();
+
+    saveLastUrl(downloadUrl);
+
+    saveLastVideoMeta({
+      id: "new-" + Date.now(),
+      url: downloadUrl,
+      i2v: !!lastGenWasImages,
+      poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || "")
+    });
+
+    try{
+      if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(downloadUrl);
+      if(typeof onVideoReadyForDownload === "function") onVideoReadyForDownload(downloadUrl);
+    }catch(e){}
+
+    const newItem = {
+      id: "new-" + Date.now(),
+      kind: "new",
+      i2v: !!lastGenWasImages,
+      poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || ""),
+      video: downloadUrl,
+      tag: "new"
+    };
+
+    items = items.filter(x => x.kind !== "new");
+    items.unshift(newItem);
+
+    selectedIndex = 0;
+    renderThumbs();
+    setSelected(0);
+
+    playInline(items[0], {
+      hidePosterWhilePlaying: true,
+      startMuted:false,
+      skipSeconds: items[0]?.i2v ? 2.0 : 0
+    });
+
+    $("resultNote").textContent = (currentLang==="ar")
+      ? "✅ اتولد فيديو جديد. اضغط على الشاشة للتشغيل أو الإيقاف."
+      : "✅ New video generated. Tap the preview to play/pause.";
+
+    syncOverlay();
+  }
+
   $("generateBtn").addEventListener("click", generate);
 
-  $("copyBtn").addEventListener("click", async ()=>{
-    const url = loadLastUrl();
+  function getCurrentVideoUrl(){
+    const it = items[selectedIndex];
+    if(it?.video) return it.video;
+    return loadLastUrl();
+  }
+
+  $("downloadBtn").addEventListener("click", ()=>{
+    const url = getCurrentVideoUrl();
     if(!url) return;
+
+    saveLastUrl(url);
+
+    const meta = loadLastVideoMeta() || {};
+    saveLastVideoMeta({ ...meta, url });
+
+    try{
+      if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(url);
+    }catch(e){}
+
+    startDownload(url);
+  });
+
+  $("copyBtn").addEventListener("click", async ()=>{
+    const url = getCurrentVideoUrl();
+    if(!url) return;
+
+    saveLastUrl(url);
+    const meta = loadLastVideoMeta() || {};
+    saveLastVideoMeta({ ...meta, url });
+
+    try{
+      if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(url);
+    }catch(e){}
+
     try{
       await navigator.clipboard.writeText(url);
-      $("resultNote").textContent = (currentLang==="ar") ? i18n.ar.copied : i18n.en.copied;
+      alert((currentLang==="ar") ? i18n.ar.copied : i18n.en.copied);
     }catch(e){
-      $("resultNote").textContent = url;
+      const msg = (currentLang==="ar") ? "انسخ الرابط من هنا:" : "Copy link from here:";
+      prompt(msg, url);
     }
   });
 
-  $("downloadBtn").addEventListener("click", ()=>{
-    const url = loadLastUrl();
-    if(!url) return;
-    window.open(url, "_blank", "noopener");
-  });
-
-  // lang
-  function applyLang(){
-    const t = i18n[currentLang];
-    document.body.dir = (currentLang==="ar") ? "rtl" : "ltr";
-
-    $("langToggle").textContent = (currentLang==="ar") ? "EN" : "AR";
+  function applyLang(lang){
+    currentLang = lang;
+    const t = i18n[lang];
 
     $("heroTitle").innerHTML = t.heroTitle;
+    const triesNum = (lang === "ar") ? toArabicDigits(String(trials)) : String(trials);
+    $("heroDesc").innerHTML = `${t.heroDescStart}<b id="triesInline">${triesNum}</b>${t.heroDescEnd}`;
+
     $("baseLabel").textContent = t.baseLabel;
     $("lockedTag").textContent = t.locked;
     $("trialsLabel").textContent = t.trialsLabel;
+
     $("selectedLabel").textContent = t.selectedDemo;
     $("playTxt").textContent = t.play;
+
     $("modeLabel").textContent = t.modeLabel;
     $("modeTextTxt").textContent = t.modeText;
     $("modeImgTxt").textContent = t.modeImg;
@@ -1257,75 +1566,268 @@ The scene follows this core concept, and we will inject the user details below.`
     $("genTxt").textContent = t.gen;
     $("dlTxt").textContent = t.dl;
     $("copyTxt").textContent = t.copy;
-
     $("saveWarn").textContent = t.saveWarn;
 
-    setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
-    renderBasePrompt();
+    document.body.dir = (lang === "ar") ? "rtl" : "ltr";
+    document.documentElement.lang = (lang === "ar") ? "ar" : "en";
+    $("langToggle").textContent = (lang === "ar") ? "EN" : "AR";
 
-    getTrialStatusFromLocal();
+    $("trialsLeft").textContent = (lang==="ar") ? toArabicDigits(String(trials)) : String(trials);
+
+    renderBasePrompt();
     renderThumbs();
-    setSelected(selectedIndex);
+    setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
+
+    const currentErr = $("errorText")?.textContent || "";
+    if(currentErr.trim()){
+      showErrorDetail(currentErr);
+    }
+
+    syncOverlay();
   }
 
-  $("langToggle").addEventListener("click", ()=>{
-    currentLang = (currentLang === "en") ? "ar" : "en";
-    applyLang();
+  $("langToggle").addEventListener("click", () => {
+    applyLang(currentLang === "en" ? "ar" : "en");
   });
 
-  // init
-  async function init(){
+  function isIOS(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+
+  async function startDownload(url){
+    if(!url) return;
+
+    if(isIOS()){
+      try{
+        location.assign(url);
+      }catch(e){
+        window.location.href = url;
+      }
+      return;
+    }
+
+    try{
+      const res = await fetch(url, { mode:"cors" });
+      if(!res.ok) throw new Error("Download failed: " + res.status);
+
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      const objUrl = URL.createObjectURL(blob);
+
+      a.href = objUrl;
+      a.download = "shaga3app-video.mp4";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(()=>URL.revokeObjectURL(objUrl), 8000);
+    }catch(e){
+      window.open(url, "_blank", "noopener");
+    }
+  }
+
+  async function boot(){
+    trialsState = loadTrialsState();
+    trials = getTrialsLeftFromState(trialsState);
+    setTrialsLeft(trials);
+
     const brandId = getBrandFromUrl();
     brandCfg = await loadBrandConfig(brandId);
+
     applyTheme(brandCfg.theme);
+    applyLang("en");
     setBrandUI(brandCfg);
 
-    items = [...(brandCfg.demos || [])];
+    items = (brandCfg.demos && brandCfg.demos.length) ? brandCfg.demos.slice() : FALLBACK_BRANDS.shaga3.demos.slice();
     selectedIndex = 0;
+
     renderBasePrompt();
     renderThumbs();
     setSelected(0);
 
-    getTrialStatusFromLocal();
+    restoreLastGeneratedIntoUI();
 
-    // resume pending with % progress
+    syncOverlay();
+
     const pending = loadPendingOp();
-    const meta = loadPendingMeta();
+    if(pending?.operationName){
+      const pendingMax = Number(pending.maxSeconds || (pending.isImages ? 420 : 240));
+      startPendingProgress(pending.createdAt, pendingMax);
 
-    if(pending?.operationName && pending?.createdAt){
-      $("resultBox").style.display = "block";
-      const maxSeconds = (meta?.isImages ? 420 : 240);
-      startOrResumeProgress(maxSeconds, pending.createdAt);
-
-      generating = true;
       try{
         const doneUrl = await pollForResult(pending.operationName);
+
+        stopPendingProgress();
+
         if(doneUrl){
           clearPendingOp();
-          clearPendingMeta();
           onGenerated(doneUrl);
         }else{
-          $("timerText").textContent = (currentLang==="ar") ? i18n.ar.stillWorking : i18n.en.stillWorking;
+          $("timerText").textContent = (currentLang==="ar") ? i18n.ar.longer : i18n.en.longer;
+          $("bar").style.width = "95%";
         }
       }catch(e){
-        // keep pending so refresh can continue
-        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.stillWorking : i18n.en.stillWorking;
-      }finally{
-        generating = false;
-      }
-    }else{
-      const lastUrl = loadLastUrl();
-      if(lastUrl){
-        $("resultBox").style.display = "block";
-        $("bar").style.width = "100%";
-        setReadyText();
+        stopPendingProgress();
+        clearPendingOp();
+
+        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.tryAgainSoft : i18n.en.tryAgainSoft;
+        $("bar").style.width = "0%";
+
+        const detail = extractBackendMessage(e?.backend, e?.message, e?.httpStatus);
+        showErrorDetail(detail);
+        $("resultNote").textContent = detail ? detail : "";
       }
     }
-
-    applyLang();
   }
 
-  init();
+  boot();
+
+  window.addEventListener("pageshow", () => {
+    restoreLastGeneratedIntoUI();
+
+    const pending = loadPendingOp();
+    if(pending?.operationName){
+      const pendingMax = Number(pending.maxSeconds || (pending.isImages ? 420 : 240));
+      startPendingProgress(pending.createdAt, pendingMax);
+    }
+  });
 </script>
+
+<style>
+  .iosToast{
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    z-index: 999999;
+    background: rgba(15,23,42,.92);
+    border: 1px solid rgba(148,163,184,.35);
+    color: #e5e7eb;
+    border-radius: 14px;
+    padding: 12px 12px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    display: none;
+  }
+  .iosToast strong{ display:block; margin-bottom:6px; }
+  .iosToast .row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    margin-top: 10px;
+  }
+  .iosToast button{
+    border-radius: 999px;
+    padding: 8px 12px;
+    border: 1px solid rgba(148,163,184,.55);
+    background: rgba(255,255,255,.06);
+    color:#e5e7eb;
+    font-size: .85rem;
+    cursor:pointer;
+  }
+  .iosToast button.primary{
+    border-color: rgba(34,197,94,.55);
+  }
+</style>
+
+<div id="iosDownloadToast" class="iosToast" role="status" aria-live="polite">
+  <strong>iPhone tip</strong>
+  <div id="iosToastText">
+    If you tapped Download, the video is usually saved in <b>Files → Downloads</b>.
+    Then open it. tap Share. and choose <b>Save to Photos</b>.
+  </div>
+  <div class="row">
+    <button id="iosToastClose">OK</button>
+    <button id="iosSaveToPhotosBtn" class="primary">Save to Photos</button>
+  </div>
+</div>
+
+<script>
+function getLatestVideoUrl(){
+  return window.lastVideoUrl || window.latestVideoUrl || window.finalVideoUrl || "";
+}
+function setLatestVideoUrl(url){
+  window.lastVideoUrl = url;
+}
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+function showIOSToast(customText){
+  const toast = document.getElementById("iosDownloadToast");
+  const text  = document.getElementById("iosToastText");
+  if(customText) text.innerHTML = customText;
+  toast.style.display = "block";
+}
+function hideIOSToast(){
+  const toast = document.getElementById("iosDownloadToast");
+  toast.style.display = "none";
+}
+document.getElementById("iosToastClose")?.addEventListener("click", hideIOSToast);
+
+async function saveToPhotosIOS(){
+  const url = getLatestVideoUrl();
+  if(!url){
+    showIOSToast("No video URL yet. Generate a video first. then try again.");
+    return;
+  }
+
+  const canShareFiles = !!(navigator.share && navigator.canShare);
+  if(!canShareFiles){
+    window.open(url, "_blank");
+    showIOSToast("Your iPhone will open the video. Tap Share. then choose <b>Save to Photos</b>.");
+    return;
+  }
+
+  try{
+    const res = await fetch(url, { mode: "cors" });
+    if(!res.ok) throw new Error("Fetch failed: " + res.status);
+
+    const blob = await res.blob();
+    const file = new File([blob], "shaga3app-video.mp4", { type: blob.type || "video/mp4" });
+
+    if(!navigator.canShare({ files: [file] })){
+      window.open(url, "_blank");
+      showIOSToast("Opened the video. Tap Share. then choose <b>Save to Photos</b>.");
+      return;
+    }
+
+    await navigator.share({
+      files: [file],
+      title: "Shaga3app Video",
+      text: "Save to Photos"
+    });
+
+    hideIOSToast();
+  }catch(e){
+    window.open(url, "_blank");
+    showIOSToast("Couldn’t open Share Sheet. The video is opened now. Tap Share. then <b>Save to Photos</b>.");
+  }
+}
+
+document.getElementById("iosSaveToPhotosBtn")?.addEventListener("click", saveToPhotosIOS);
+
+(function attachDownloadHint(){
+  const downloadBtn =
+    document.getElementById("downloadBtn") ||
+    document.querySelector('[data-action="download"]') ||
+    document.querySelector(".downloadBtn");
+
+  if(!downloadBtn) return;
+
+  downloadBtn.addEventListener("click", () => {
+    if(isIOS()){
+      showIOSToast("Tip. after viewing the video, tap Back to return here. your video will still be in the New slot.");
+    }
+  });
+})();
+
+function onVideoReadyForDownload(url){
+  setLatestVideoUrl(url);
+  if(isIOS()){
+    showIOSToast("Video is ready. Tap Download. it will appear in <b>Files → Downloads</b>. Then Share. <b>Save to Photos</b>.");
+  }
+}
+</script>
+
 </body>
 </html>
