@@ -7,7 +7,6 @@
 
   <style>
     :root{
-      /* defaults */
       --bg:#0b0f18;
       --panel:rgba(255,255,255,.06);
       --panel2:rgba(0,0,0,.18);
@@ -48,7 +47,6 @@
       backdrop-filter: blur(10px);
     }
 
-    /* top bar */
     .topBar{
       display:flex;align-items:center;justify-content:space-between;
       gap:12px;
@@ -92,12 +90,10 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* hero */
     .hero{margin:18px 0 10px}
     .hero h1{font-size:52px;line-height:1.05;margin:6px 0 8px;font-weight:950;letter-spacing:-.02em}
     .hero p{color:var(--muted);font-size:16px;max-width:560px;line-height:1.4;margin:0}
 
-    /* sections */
     .sectionLabel{
       margin:18px 0 8px;
       font-size:12px;
@@ -106,7 +102,6 @@
       color:color-mix(in srgb, var(--muted) 85%, transparent);
     }
 
-    /* locked prompt */
     .lockedBox{
       background: var(--panel2);
       border:1px solid var(--line);
@@ -136,7 +131,6 @@
       overflow:auto;
     }
 
-    /* preview + carousel */
     .previewCard{
       margin-top:12px;
       background: var(--panel2);
@@ -179,7 +173,6 @@
       background:#000;
     }
 
-    /* overlay for play. pause */
     .playOverlay{
       position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
@@ -187,9 +180,7 @@
       opacity:1;
       transition: opacity .12s ease;
     }
-    .playOverlay.hidden{
-      opacity:0;
-    }
+    .playOverlay.hidden{opacity:0}
     .playBtn{
       pointer-events:auto;
       display:inline-flex;align-items:center;gap:8px;
@@ -202,7 +193,6 @@
       backdrop-filter: blur(8px);
     }
 
-    /* error under the preview */
     .errorBox{
       display:none;
       margin-top:10px;
@@ -218,7 +208,6 @@
     }
     .errorBox strong{display:block;margin-bottom:6px}
 
-    /* carousel thumbs */
     .thumbRowWrap{
       margin-top:10px;
       border-radius:14px;
@@ -274,14 +263,10 @@
       color:#fff;
       font-weight:900;
     }
-    .thumbDots{
-      display:flex;justify-content:center;gap:6px;
-      padding-top:8px;
-    }
+    .thumbDots{display:flex;justify-content:center;gap:6px;padding-top:8px}
     .dot{width:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.18)}
     .dot.on{background: color-mix(in srgb, var(--accent2) 80%, transparent);}
 
-    /* mode bar */
     .modeBar{
       margin-top:14px;
       display:flex;gap:10px;
@@ -306,7 +291,6 @@
       color:var(--text);
     }
 
-    /* inputs */
     .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
 
@@ -329,7 +313,6 @@
     .field input::placeholder{color:rgba(148,163,184,.65)}
     .miniHint{margin-top:10px;font-size:12px;color: var(--muted);line-height:1.35;opacity:.95}
 
-    /* progress */
     .result{
       display:none;
       margin-top:12px;
@@ -349,7 +332,6 @@
       background:linear-gradient(90deg, var(--accent), var(--accent2));
     }
 
-    /* buttons */
     .btn{
       padding:12px 14px;
       border-radius:14px;
@@ -370,7 +352,6 @@
       border:1px solid rgba(0,0,0,.10);
     }
 
-    /* actions under inputs */
     .actionsUnderInputs{
       margin-top:12px;
       display:grid;
@@ -386,7 +367,6 @@
       .actionsUnderInputs .primaryWrap{max-width:520px}
     }
 
-    /* RTL tweaks */
     body[dir="rtl"] .hero h1{letter-spacing:0}
     body[dir="rtl"] .brandTitle{max-width:50vw}
   </style>
@@ -524,7 +504,7 @@
   const LAST_URL_KEY = "shaga3app_last_video_url";
   const LAST_BRAND_KEY = "shaga3app_last_brand";
 
-  const PENDING_OP_KEY = "shaga3app_pending_op_v1";
+  const PENDING_OP_KEY = "shaga3app_pending_op_v2";
   const PENDING_OP_TTL_MS = 30 * 60 * 1000;
 
   function savePendingOp(op){
@@ -546,6 +526,13 @@
     try{ localStorage.removeItem(PENDING_OP_KEY); }catch(e){}
   }
 
+  function saveLastUrl(url){
+    try{ localStorage.setItem(LAST_URL_KEY, url); }catch(e){}
+  }
+  function loadLastUrl(){
+    try{ return localStorage.getItem(LAST_URL_KEY) || ""; }catch(e){ return ""; }
+  }
+
   const i18n = {
     en: {
       heroTitle: "Play with our<br>guided video<br>prompt",
@@ -556,7 +543,6 @@
       trialsLabel: "Trials left:",
       selectedDemo: "Selected demo",
       play: "Play",
-      pause: "Pause",
       modeLabel: "CHOOSE INPUT MODE",
       modeText: "Text prompt",
       modeImg: "Start + End images",
@@ -592,7 +578,6 @@
       trialsLabel: "المحاولات المتبقية:",
       selectedDemo: "الديمو المختار",
       play: "تشغيل",
-      pause: "إيقاف",
       modeLabel: "اختر طريقة الإدخال",
       modeText: "نص فقط",
       modeImg: "صورتان: بداية + نهاية",
@@ -758,9 +743,6 @@
     showPoster(items[selectedIndex]);
   }
 
-  /* =========================
-     FIX for [object Object]
-     ========================= */
   function toCleanText(v){
     if(v == null) return "";
     if(typeof v === "string") return v;
@@ -782,63 +764,6 @@
     return toCleanText(msg).trim();
   }
 
-  /* =========================
-     NEW. persist and restore last generated video (fix iPhone back. new tab issue)
-     ========================= */
-  const LAST_VIDEO_META_KEY = "shaga3_last_video_meta_v2";
-
-  function saveLastVideoMeta(meta){
-    try{
-      localStorage.setItem(LAST_VIDEO_META_KEY, JSON.stringify(meta || {}));
-    }catch(e){}
-  }
-  function loadLastVideoMeta(){
-    try{
-      const raw = localStorage.getItem(LAST_VIDEO_META_KEY);
-      if(!raw) return null;
-      const m = JSON.parse(raw);
-      if(!m || !m.url) return null;
-      return m;
-    }catch(e){
-      return null;
-    }
-  }
-
-  function restoreLastGeneratedIntoUI(){
-    try{
-      const meta = loadLastVideoMeta();
-      if(!meta || !meta.url) return false;
-
-      const url = meta.url;
-      const already = items?.some(x => x?.video === url);
-      if(already) return true;
-
-      const newItem = {
-        id: meta.id || ("new-" + Date.now()),
-        kind: "new",
-        i2v: !!meta.i2v,
-        poster: meta.poster || (brandCfg?.demos?.[0]?.poster || ""),
-        video: url,
-        tag: "new"
-      };
-
-      items = (items || []).filter(x => x.kind !== "new");
-      items.unshift(newItem);
-
-      selectedIndex = 0;
-      renderThumbs();
-      setSelected(0);
-
-      // Do not autoplay on restore. keep it ready.
-      showPoster(items[0]);
-
-      return true;
-    }catch(e){
-      return false;
-    }
-  }
-
-  // error display helpers
   function showErrorDetail(msg){
     const box = $("errorBox");
     const title = $("errorTitle");
@@ -865,7 +790,6 @@
     box.style.display = "none";
   }
 
-  // Main player UX helpers
   const mainStage = $("mainStage");
   const mainVideo = $("mainVideo");
   const mainPoster = $("mainPoster");
@@ -879,15 +803,9 @@
 
   function syncOverlay(){
     const hasVideo = mainVideo.style.display !== "none" && !!mainVideo.src;
-    if(!hasVideo){
-      setOverlayVisible(true);
-      return;
-    }
-    if(mainVideo.ended || mainVideo.paused){
-      setOverlayVisible(true);
-    }else{
-      setOverlayVisible(false);
-    }
+    if(!hasVideo){ setOverlayVisible(true); return; }
+    if(mainVideo.ended || mainVideo.paused) setOverlayVisible(true);
+    else setOverlayVisible(false);
   }
 
   mainVideo.addEventListener("play", syncOverlay);
@@ -896,36 +814,32 @@
   mainVideo.addEventListener("loadedmetadata", syncOverlay);
 
   function showPoster(it){
-    mainPoster.src = it?.poster || "";
+    mainPoster.src = it.poster || "";
     mainPoster.style.display = "block";
 
-    try{
-      mainVideo.pause();
-      mainVideo.removeAttribute("src");
-      mainVideo.load();
-    }catch(e){}
+    mainVideo.pause();
+    mainVideo.removeAttribute("src");
+    mainVideo.load();
     mainVideo.style.display = "none";
 
     setOverlayVisible(true);
   }
 
   function playInline(it, opts = {}){
-    const { hidePosterWhilePlaying = false, startMuted = false, skipSeconds = 0 } = opts;
+    const { startMuted = false, skipSeconds = 0 } = opts;
 
     mainVideo.muted = !!startMuted;
     mainVideo.src = it.video;
     mainVideo.style.display = "block";
 
-    mainPoster.style.display = hidePosterWhilePlaying ? "none" : "none";
+    mainPoster.style.display = "none";
 
     if(skipSeconds && skipSeconds > 0){
       const doSkip = ()=>{
         try{
           const d = Number(mainVideo.duration || 0);
           const target = Math.min(skipSeconds, Math.max(0, d - 0.05) || skipSeconds);
-          if(!Number.isNaN(target) && target > 0){
-            mainVideo.currentTime = target;
-          }
+          if(!Number.isNaN(target) && target > 0) mainVideo.currentTime = target;
         }catch(e){}
       };
       mainVideo.addEventListener("loadedmetadata", doSkip, { once:true });
@@ -950,24 +864,18 @@
 
     if(!hasSrc){
       if(it.video){
-        const hidePoster = (it.kind === "new");
-        const skip = (it.kind === "new" && it.i2v) ? 2.0 : 0; // ✅ skip first 2 seconds for i2v
-        playInline(it, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+        const skip = (it.kind === "new" && it.i2v) ? 0.2 : 0;
+        playInline(it, { startMuted:false, skipSeconds: skip });
       }
       return;
     }
 
-    if(mainVideo.paused || mainVideo.ended){
-      mainVideo.play().catch(()=>{});
-    }else{
-      mainVideo.pause();
-    }
+    if(mainVideo.paused || mainVideo.ended) mainVideo.play().catch(()=>{});
+    else mainVideo.pause();
     syncOverlay();
   }
 
-  mainStage.addEventListener("click", ()=>{
-    togglePlayPause();
-  });
+  mainStage.addEventListener("click", ()=>{ togglePlayPause(); });
 
   playBtn.addEventListener("click", (e)=>{
     e.preventDefault();
@@ -976,15 +884,12 @@
     if(!it) return;
 
     if(it.kind === "new"){
-      // On iPhone. opening new tab causes state loss. better to just play inline.
-      const skip = it.i2v ? 2.0 : 0;
-      playInline(it, { hidePosterWhilePlaying:true, startMuted:false, skipSeconds: skip });
+      openVideoViewer(it.video);
       return;
     }
-    playInline(it, { hidePosterWhilePlaying:false, startMuted:false, skipSeconds: 0 });
+    playInline(it, { startMuted:false, skipSeconds: 0 });
   });
 
-  // Thumbs
   function renderThumbs(){
     const row = $("thumbRow");
     row.innerHTML = "";
@@ -1011,11 +916,10 @@
         const it2 = items[idx];
         if(!it2) return;
 
-        const hidePoster = (it2.kind === "new");
-        const skip = (it2.kind === "new" && it2.i2v) ? 2.0 : 0; // ✅ skip first 2 seconds for i2v
+        const skip = (it2.kind === "new" && it2.i2v) ? 0.2 : 0;
 
         if(it2.video){
-          playInline(it2, { hidePosterWhilePlaying: hidePoster, startMuted:false, skipSeconds: skip });
+          playInline(it2, { startMuted:false, skipSeconds: skip });
         }
       });
 
@@ -1092,7 +996,6 @@
     return `${base}\n\n---\n${parts.join("\n")}`.trim();
   }
 
-  // Always parse body. Always throw with clean text.
   async function postJSON(payload){
     const url = API_URL + "?t=" + Date.now();
     const r = await fetch(url,{
@@ -1110,7 +1013,6 @@
 
     const backendMsg = extractBackendMessage(data, text, r.status);
 
-    // If backend returned an error object even with 200. treat as error.
     if(!r.ok || (data && (data.error || data.ok === false))){
       const err = new Error(backendMsg || ("HTTP " + r.status));
       err.statusCode = r.status;
@@ -1156,7 +1058,6 @@
   let trials = getTrialsLeftFromState(trialsState);
   let generating = false;
 
-  // remember if last accepted generation was I2V
   let lastGenWasImages = false;
 
   function setTrialsLeft(n){
@@ -1179,14 +1080,6 @@
     s.used = TRIALS_MAX;
     saveTrialsState(s);
     setTrialsLeft(0);
-  }
-
-  const LAST_URL_KEY2 = "shaga3app_last_video_url";
-  function saveLastUrl(url){
-    try{ localStorage.setItem(LAST_URL_KEY2, url); }catch(e){}
-  }
-  function loadLastUrl(){
-    try{ return localStorage.getItem(LAST_URL_KEY2) || ""; }catch(e){ return ""; }
   }
 
   function setTimerText(secondsLeft){
@@ -1226,7 +1119,6 @@
 
   function safeUserMessageFromErr(err){
     const t = i18n[currentLang];
-
     const detailFromBackend = extractBackendMessage(err?.backend, err?.message, err?.httpStatus);
     if(isTrialLimitErrorMessage(detailFromBackend)) return null;
 
@@ -1243,8 +1135,6 @@
     const t = i18n[currentLang];
 
     let doneUrl = "";
-    let chk = null;
-
     let waitMs = 3000;
     const maxWaitMs = 10000;
 
@@ -1253,7 +1143,7 @@
     for(let i=0;i<maxChecks;i++){
       await new Promise(res=>setTimeout(res, waitMs));
 
-      chk = await postJSON({
+      const chk = await postJSON({
         action:"check",
         modelId: MODEL_ID,
         operationName,
@@ -1278,6 +1168,18 @@
     }
 
     return doneUrl;
+  }
+
+  async function fetchActiveOpFromServer(){
+    try{
+      const data = await postJSON({
+        action:"active",
+        modelId: MODEL_ID,
+        deviceId: getDeviceId()
+      });
+      if(data?.active && data?.operationName) return String(data.operationName);
+    }catch(e){}
+    return "";
   }
 
   function getTrialStatusFromLocal(){
@@ -1360,9 +1262,33 @@
 
       const gen = await postJSON(payload);
 
-      consumeOneTrial();
-
       const operationName = gen.operationName || gen.name;
+
+      if(gen.alreadyGenerating && operationName){
+        // ✅ Do NOT consume trial here. Just resume polling.
+        savePendingOp({
+          operationName,
+          createdAt: Date.now(),
+          modelId: MODEL_ID,
+          deviceId: getDeviceId()
+        });
+
+        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.stillWorking : i18n.en.stillWorking;
+        $("bar").style.width = "70%";
+
+        const doneUrl = await pollForResult(operationName);
+        if(doneUrl){
+          clearPendingOp();
+          onGenerated(doneUrl);
+        } else {
+          $("timerText").textContent = (currentLang==="ar") ? i18n.ar.longer : i18n.en.longer;
+          $("bar").style.width = "95%";
+        }
+        return;
+      }
+
+      // ✅ Count 1 trial only when we accepted a fresh generation request
+      consumeOneTrial();
 
       if(gen.done && gen.downloadUrl){
         clearPendingOp();
@@ -1419,15 +1345,6 @@
 
     saveLastUrl(downloadUrl);
 
-    // store meta so Safari back or reload restores New item
-    saveLastVideoMeta({
-      id: "new-" + Date.now(),
-      url: downloadUrl,
-      i2v: !!lastGenWasImages,
-      poster: items[selectedIndex]?.poster || (brandCfg?.demos?.[0]?.poster || "")
-    });
-
-    // make iOS helper always know latest URL
     try{
       if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(downloadUrl);
       if(typeof onVideoReadyForDownload === "function") onVideoReadyForDownload(downloadUrl);
@@ -1449,11 +1366,7 @@
     renderThumbs();
     setSelected(0);
 
-    playInline(items[0], {
-      hidePosterWhilePlaying: true,
-      startMuted:false,
-      skipSeconds: items[0]?.i2v ? 2.0 : 0 // ✅ skip first 2 seconds for i2v
-    });
+    playInline(items[0], { startMuted:false, skipSeconds: items[0]?.i2v ? 0.2 : 0 });
 
     $("resultNote").textContent = (currentLang==="ar")
       ? "✅ اتولد فيديو جديد. اضغط على الشاشة للتشغيل أو الإيقاف."
@@ -1473,33 +1386,16 @@
   $("downloadBtn").addEventListener("click", ()=>{
     const url = getCurrentVideoUrl();
     if(!url) return;
-
     saveLastUrl(url);
-
-    // keep meta fresh before leaving to MP4 view
-    const meta = loadLastVideoMeta() || {};
-    saveLastVideoMeta({ ...meta, url });
-
-    try{
-      if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(url);
-    }catch(e){}
-
-    // ✅ Use unified download behavior. iOS uses same tab so Back returns to the same page.
-    startDownload(url);
+    try{ if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(url); }catch(e){}
+    openVideoViewer(url);
   });
 
   $("copyBtn").addEventListener("click", async ()=>{
     const url = getCurrentVideoUrl();
     if(!url) return;
-
     saveLastUrl(url);
-    const meta = loadLastVideoMeta() || {};
-    saveLastVideoMeta({ ...meta, url });
-
-    try{
-      if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(url);
-    }catch(e){}
-
+    try{ if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(url); }catch(e){}
     try{
       await navigator.clipboard.writeText(url);
       alert((currentLang==="ar") ? i18n.ar.copied : i18n.en.copied);
@@ -1554,9 +1450,7 @@
     setBrandUI(brandCfg || FALLBACK_BRANDS.shaga3);
 
     const currentErr = $("errorText")?.textContent || "";
-    if(currentErr.trim()){
-      showErrorDetail(currentErr);
-    }
+    if(currentErr.trim()) showErrorDetail(currentErr);
 
     syncOverlay();
   }
@@ -1564,48 +1458,6 @@
   $("langToggle").addEventListener("click", () => {
     applyLang(currentLang === "en" ? "ar" : "en");
   });
-
-  /* =========================
-     NEW. download behavior
-     iOS Safari should open MP4 in same tab. so Back returns to this exact page.
-     ========================= */
-  function isIOS(){
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  }
-
-  async function startDownload(url){
-    if(!url) return;
-
-    if(isIOS()){
-      // same tab navigation. Back returns to the same webview instance.
-      try{
-        location.assign(url);
-      }catch(e){
-        window.location.href = url;
-      }
-      return;
-    }
-
-    // non-iOS. try real download with blob. fallback open new tab.
-    try{
-      const res = await fetch(url, { mode:"cors" });
-      if(!res.ok) throw new Error("Download failed: " + res.status);
-
-      const blob = await res.blob();
-      const a = document.createElement("a");
-      const objUrl = URL.createObjectURL(blob);
-
-      a.href = objUrl;
-      a.download = "shaga3app-video.mp4";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      setTimeout(()=>URL.revokeObjectURL(objUrl), 8000);
-    }catch(e){
-      window.open(url, "_blank", "noopener");
-    }
-  }
 
   async function boot(){
     trialsState = loadTrialsState();
@@ -1623,22 +1475,53 @@
     selectedIndex = 0;
 
     renderBasePrompt();
+
+    // ✅ Restore last generated video (for iPhone Safari download-tab behavior)
+    const lastUrl = loadLastUrl();
+    if(lastUrl){
+      const restored = {
+        id: "new-restored",
+        kind: "new",
+        i2v: false,
+        poster: brandCfg?.demos?.[0]?.poster || "",
+        video: lastUrl,
+        tag: "new"
+      };
+      items = items.filter(x => x.kind !== "new");
+      items.unshift(restored);
+      selectedIndex = 0;
+
+      try{ if(typeof setLatestVideoUrl === "function") setLatestVideoUrl(lastUrl); }catch(e){}
+    }
+
     renderThumbs();
     setSelected(0);
-
-    // ✅ restore last generated video (fix Safari reload or back)
-    restoreLastGeneratedIntoUI();
-
     syncOverlay();
 
-    const pending = loadPendingOp();
-    if(pending?.operationName){
+    // ✅ Resume generation after refresh. First try local pending. Then ask server "active".
+    let pending = loadPendingOp();
+    let operationName = pending?.operationName || "";
+
+    if(!operationName){
+      operationName = await fetchActiveOpFromServer();
+      if(operationName){
+        savePendingOp({
+          operationName,
+          createdAt: Date.now(),
+          modelId: MODEL_ID,
+          deviceId: getDeviceId()
+        });
+        pending = loadPendingOp();
+      }
+    }
+
+    if(operationName){
       $("resultBox").style.display = "block";
       $("bar").style.width = "70%";
       $("timerText").textContent = (currentLang==="ar") ? i18n.ar.stillWorking : i18n.en.stillWorking;
 
       try{
-        const doneUrl = await pollForResult(pending.operationName);
+        const doneUrl = await pollForResult(operationName);
         if(doneUrl){
           clearPendingOp();
           onGenerated(doneUrl);
@@ -1659,15 +1542,9 @@
   }
 
   boot();
-
-  // Safari iOS sometimes uses bfcache. pageshow fires when user goes Back from MP4 view.
-  window.addEventListener("pageshow", () => {
-    restoreLastGeneratedIntoUI();
-  });
 </script>
 
 <style>
-  /* iOS download helper toast */
   .iosToast{
     position: fixed;
     left: 14px;
@@ -1790,7 +1667,7 @@ document.getElementById("iosSaveToPhotosBtn")?.addEventListener("click", saveToP
 
   downloadBtn.addEventListener("click", () => {
     if(isIOS()){
-      showIOSToast("Tip. after viewing the video, tap Back to return here. your video will still be in the New slot.");
+      showIOSToast();
     }
   });
 })();
