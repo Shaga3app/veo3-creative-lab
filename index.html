@@ -547,7 +547,30 @@
   }
 
   /* =========================
-     Resumable progress for pending ops
+     NEW: Refresh resilient "starting" state
+     ========================= */
+  const GEN_STATE_KEY = "shaga3_gen_state_v1";
+  const GEN_STATE_TTL_MS = 30 * 60 * 1000;
+
+  function saveGenState(state){
+    try{ localStorage.setItem(GEN_STATE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  function loadGenState(){
+    try{
+      const raw = localStorage.getItem(GEN_STATE_KEY);
+      if(!raw) return null;
+      const s = JSON.parse(raw);
+      if(!s || !s.createdAt) return null;
+      if(Date.now() - s.createdAt > GEN_STATE_TTL_MS) return null;
+      return s;
+    }catch(e){ return null; }
+  }
+  function clearGenState(){
+    try{ localStorage.removeItem(GEN_STATE_KEY); }catch(e){}
+  }
+
+  /* =========================
+     Progress ticker (used for both pending ops and pre-op starting)
      ========================= */
   let pendingRafId = null;
 
@@ -616,7 +639,9 @@
       demoTag: "Demo",
       limitReached: "❌ You reached the max trials for today. Try again tomorrow.",
       needStart: "Please upload a START image.",
-      tryAgainSoft: "Could not complete this time. Please try again."
+      tryAgainSoft: "Could not complete this time. Please try again.",
+      refreshedStarting: "Page refreshed. Still starting… do not click twice. If it stays like this, click Generate once.",
+      alreadyGenerating: "Already generating…"
     },
     ar: {
       heroTitle: "جرّب معانا<br>برومبت فيديو<br>مُوجَّه",
@@ -652,7 +677,9 @@
       demoTag: "ديمو",
       limitReached: "❌ وصلت للحد الأقصى من المحاولات النهاردة. جرّب بكرة.",
       needStart: "من فضلك ارفع صورة البداية.",
-      tryAgainSoft: "المحاولة دي ما كملتش. جرّب تاني."
+      tryAgainSoft: "المحاولة دي ما كملتش. جرّب تاني.",
+      refreshedStarting: "الصفحة اتعملها تحديث ولسه بنبدأ… ما تدوسش مرتين. لو الموضوع طول اضغط توليد مرة واحدة.",
+      alreadyGenerating: "لسه بيولّد…"
     }
   };
 
@@ -793,9 +820,6 @@
     showPoster(items[selectedIndex]);
   }
 
-  /* =========================
-     FIX for [object Object]
-     ========================= */
   function toCleanText(v){
     if(v == null) return "";
     if(typeof v === "string") return v;
@@ -817,9 +841,6 @@
     return toCleanText(msg).trim();
   }
 
-  /* =========================
-     Persist and restore last generated video
-     ========================= */
   const LAST_VIDEO_META_KEY = "shaga3_last_video_meta_v2";
 
   function saveLastVideoMeta(meta){
@@ -865,14 +886,12 @@
       setSelected(0);
 
       showPoster(items[0]);
-
       return true;
     }catch(e){
       return false;
     }
   }
 
-  // error display helpers
   function showErrorDetail(msg){
     const box = $("errorBox");
     const title = $("errorTitle");
@@ -899,7 +918,6 @@
     box.style.display = "none";
   }
 
-  // Main player UX helpers
   const mainStage = $("mainStage");
   const mainVideo = $("mainVideo");
   const mainPoster = $("mainPoster");
@@ -1012,7 +1030,6 @@
     playInline(it, { hidePosterWhilePlaying:false, startMuted:false, skipSeconds: 0 });
   });
 
-  // Thumbs
   function renderThumbs(){
     const row = $("thumbRow");
     row.innerHTML = "";
@@ -1312,10 +1329,15 @@
   }
 
   async function generate(){
-    if(generating) return;
+    if(generating){
+      $("resultBox").style.display = "block";
+      if(!$("timerText").textContent.trim()){
+        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.alreadyGenerating : i18n.en.alreadyGenerating;
+      }
+      return;
+    }
 
     clearErrorDetail();
-    stopPendingProgress();
 
     getTrialStatusFromLocal();
     if(trials <= 0){
@@ -1330,22 +1352,19 @@
     $("resultNote").textContent = "";
 
     const maxSeconds = isImagesModeOn() ? 420 : 240;
-    setTimerText(maxSeconds);
+    const createdAt = Date.now();
 
-    const start = Date.now();
-    let rafId;
+    /* NEW: Save a state immediately so refresh keeps the bar */
+    saveGenState({
+      createdAt,
+      maxSeconds,
+      isImages: isImagesModeOn(),
+      status: "starting",
+      operationName: ""
+    });
 
-    const tick = ()=>{
-      const elapsed = (Date.now()-start)/1000;
-      const p = Math.min(95, (elapsed/maxSeconds)*95);
-      $("bar").style.width = p + "%";
-
-      const remain = Math.max(0, Math.ceil(maxSeconds - elapsed));
-      setTimerText(remain);
-
-      rafId = requestAnimationFrame(tick);
-    };
-    tick();
+    /* Use the shared RAF ticker */
+    startPendingProgress(createdAt, maxSeconds);
 
     try{
       lastGenWasImages = isImagesModeOn();
@@ -1392,6 +1411,7 @@
 
       if(gen.done && gen.downloadUrl){
         clearPendingOp();
+        clearGenState();
         onGenerated(gen.downloadUrl);
         return;
       }
@@ -1399,13 +1419,24 @@
       if(!operationName) throw new Error((currentLang==="ar") ? "لم يتم استلام رقم العملية." : "No operation id returned.");
 
       const pendingMaxSeconds = isImagesModeOn() ? 420 : 240;
+
+      /* Save real pending op for refresh resume */
       savePendingOp({
         operationName,
-        createdAt: Date.now(),
+        createdAt,                 /* IMPORTANT: keep original createdAt */
         modelId: MODEL_ID,
         deviceId: getDeviceId(),
         isImages: isImagesModeOn(),
         maxSeconds: pendingMaxSeconds
+      });
+
+      /* Update gen state with operationName */
+      saveGenState({
+        createdAt,
+        maxSeconds: pendingMaxSeconds,
+        isImages: isImagesModeOn(),
+        status: "pending",
+        operationName
       });
 
       const doneUrl = await pollForResult(operationName);
@@ -1418,6 +1449,7 @@
       }
 
       clearPendingOp();
+      clearGenState();
       onGenerated(doneUrl);
 
     }catch(err){
@@ -1436,13 +1468,20 @@
       }
     }finally{
       generating = false;
-      if(rafId) cancelAnimationFrame(rafId);
+      stopPendingProgress();
+
+      /* Clear gen state if we are no longer actively working */
+      const pending = loadPendingOp();
+      if(!pending?.operationName){
+        clearGenState();
+      }
     }
   }
 
   function onGenerated(downloadUrl){
     clearErrorDetail();
 
+    stopPendingProgress();
     $("bar").style.width = "100%";
     setReadyText();
 
@@ -1646,10 +1685,17 @@
     setSelected(0);
 
     restoreLastGeneratedIntoUI();
-
     syncOverlay();
 
+    /* =========================
+       Resume logic after refresh
+       Priority:
+       1) Pending op (has operationName)
+       2) Gen state (may be starting without operationName)
+       ========================= */
     const pending = loadPendingOp();
+    const genState = loadGenState();
+
     if(pending?.operationName){
       const pendingMax = Number(pending.maxSeconds || (pending.isImages ? 420 : 240));
       startPendingProgress(pending.createdAt, pendingMax);
@@ -1661,6 +1707,7 @@
 
         if(doneUrl){
           clearPendingOp();
+          clearGenState();
           onGenerated(doneUrl);
         }else{
           $("timerText").textContent = (currentLang==="ar") ? i18n.ar.longer : i18n.en.longer;
@@ -1669,6 +1716,7 @@
       }catch(e){
         stopPendingProgress();
         clearPendingOp();
+        clearGenState();
 
         $("timerText").textContent = (currentLang==="ar") ? i18n.ar.tryAgainSoft : i18n.en.tryAgainSoft;
         $("bar").style.width = "0%";
@@ -1676,6 +1724,35 @@
         const detail = extractBackendMessage(e?.backend, e?.message, e?.httpStatus);
         showErrorDetail(detail);
         $("resultNote").textContent = detail ? detail : "";
+      }
+      return;
+    }
+
+    if(genState?.createdAt){
+      $("resultBox").style.display = "block";
+      const m = Number(genState.maxSeconds || (genState.isImages ? 420 : 240));
+      startPendingProgress(genState.createdAt, m);
+
+      if(genState.operationName){
+        try{
+          const doneUrl = await pollForResult(genState.operationName);
+
+          stopPendingProgress();
+
+          if(doneUrl){
+            clearPendingOp();
+            clearGenState();
+            onGenerated(doneUrl);
+          }else{
+            $("timerText").textContent = (currentLang==="ar") ? i18n.ar.longer : i18n.en.longer;
+            $("bar").style.width = "95%";
+          }
+        }catch(e){
+          stopPendingProgress();
+          clearGenState();
+        }
+      }else{
+        $("timerText").textContent = (currentLang==="ar") ? i18n.ar.refreshedStarting : i18n.en.refreshedStarting;
       }
     }
   }
@@ -1689,6 +1766,13 @@
     if(pending?.operationName){
       const pendingMax = Number(pending.maxSeconds || (pending.isImages ? 420 : 240));
       startPendingProgress(pending.createdAt, pendingMax);
+      return;
+    }
+
+    const genState = loadGenState();
+    if(genState?.createdAt){
+      const m = Number(genState.maxSeconds || (genState.isImages ? 420 : 240));
+      startPendingProgress(genState.createdAt, m);
     }
   });
 </script>
