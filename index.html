@@ -3,7 +3,48 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+
+  <!-- =========================================================
+       LINK PREVIEW (Open Graph. WhatsApp. FB. LinkedIn. iMessage)
+       Important: This is STATIC on GitHub Pages.
+       For Coca vs TUI previews, use separate URLs like /tui/ and /coke/
+       and set different og:image in each page.
+       ========================================================= -->
   <title>Shaga3app · AI Creative Playground</title>
+  <meta name="description" content="Create AI videos and join the live competition." />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Shaga3app · AI Creative Playground" />
+  <meta property="og:description" content="Create AI videos and join the live competition." />
+  <!-- Set this to the FINAL public URL of THIS page (absolute). -->
+  <!-- Example: https://yourdomain.com/tui/  or  https://username.github.io/repo/tui/ -->
+  <meta property="og:url" content="" />
+  <!-- Put a real 1200x630 image that includes the brand logo in the design -->
+  <!-- Example: https://yourdomain.com/assets/preview-tui.jpg -->
+  <meta property="og:image" content="assets/preview-default.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Shaga3app · AI Creative Playground" />
+  <meta name="twitter:description" content="Create AI videos and join the live competition." />
+  <meta name="twitter:image" content="assets/preview-default.jpg" />
+
+  <!-- =========================================================
+       PWA (Install like an app)
+       Use RELATIVE paths so it works on GitHub Pages subpaths.
+       ========================================================= -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#0b0f18" />
+
+  <!-- iOS Add to Home Screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Shaga3app" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="./icons/icon-192.png" />
 
   <style>
     :root{
@@ -90,6 +131,17 @@
       background: rgba(255,255,255,.06);
       font-weight:900; cursor:pointer;
       -webkit-tap-highlight-color: transparent;
+    }
+
+    /* NEW: Install button */
+    .installBtn{
+      font-size:12px; padding:7px 10px; border-radius:999px;
+      border:1px solid color-mix(in srgb, var(--accent2) 55%, transparent);
+      background: color-mix(in srgb, var(--accent2) 18%, transparent);
+      color: var(--text);
+      font-weight:950; cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      display:none;
     }
 
     /* hero */
@@ -389,6 +441,43 @@
     /* RTL tweaks */
     body[dir="rtl"] .hero h1{letter-spacing:0}
     body[dir="rtl"] .brandTitle{max-width:50vw}
+
+    /* NEW: Install toast (reuse style idea) */
+    .pwaToast{
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      z-index: 999998;
+      background: rgba(15,23,42,.92);
+      border: 1px solid rgba(148,163,184,.35);
+      color: #e5e7eb;
+      border-radius: 14px;
+      padding: 12px 12px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+      display: none;
+    }
+    .pwaToast strong{ display:block; margin-bottom:6px; }
+    .pwaToast .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top: 10px;
+    }
+    .pwaToast button{
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid rgba(148,163,184,.55);
+      background: rgba(255,255,255,.06);
+      color:#e5e7eb;
+      font-size: .85rem;
+      cursor:pointer;
+    }
+    .pwaToast button.primary{
+      border-color: rgba(34,197,94,.55);
+      background: rgba(34,197,94,.12);
+    }
   </style>
 </head>
 
@@ -403,6 +492,9 @@
         </div>
 
         <div class="topRight">
+          <!-- NEW: Install button -->
+          <button class="installBtn" id="installBtn" type="button">⬇ Install</button>
+
           <button class="langBtn" id="langToggle" type="button">AR</button>
           <div class="pill" id="betaPill">Beta · Shaga3app powered</div>
         </div>
@@ -500,6 +592,143 @@
     </div>
   </div>
 
+  <!-- NEW: PWA install helper toast -->
+  <div id="pwaToast" class="pwaToast" role="status" aria-live="polite">
+    <strong id="pwaToastTitle">Install</strong>
+    <div id="pwaToastText"></div>
+    <div class="row">
+      <button id="pwaToastClose">OK</button>
+      <button id="pwaToastAction" class="primary">Install</button>
+    </div>
+  </div>
+
+<script>
+  /* =========================================================
+     NEW: Service Worker registration for PWA installability
+     GitHub Pages note: must be served over HTTPS (it is).
+     ========================================================= */
+  (function registerSW(){
+    if(!("serviceWorker" in navigator)) return;
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    });
+  })();
+
+  /* =========================================================
+     NEW: Install UX (Android prompt. iOS instructions)
+     ========================================================= */
+  const installBtn = document.getElementById("installBtn");
+  const pwaToast = document.getElementById("pwaToast");
+  const pwaToastTitle = document.getElementById("pwaToastTitle");
+  const pwaToastText = document.getElementById("pwaToastText");
+  const pwaToastClose = document.getElementById("pwaToastClose");
+  const pwaToastAction = document.getElementById("pwaToastAction");
+
+  function isIOSPWA(){
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+  function isInStandalone(){
+    return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
+  }
+  function showPwaToast(title, html, actionLabel, onAction){
+    if(!pwaToast) return;
+    pwaToastTitle.textContent = title || "Install";
+    pwaToastText.innerHTML = html || "";
+    pwaToast.style.display = "block";
+
+    pwaToastAction.textContent = actionLabel || "Install";
+    pwaToastAction.onclick = () => {
+      try{ onAction && onAction(); }catch(e){}
+    };
+  }
+  function hidePwaToast(){
+    if(!pwaToast) return;
+    pwaToast.style.display = "none";
+  }
+  pwaToastClose?.addEventListener("click", hidePwaToast);
+
+  let deferredInstallPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+
+    if(installBtn && !isInStandalone()){
+      installBtn.style.display = "inline-flex";
+    }
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    if(installBtn) installBtn.style.display = "none";
+    hidePwaToast();
+  });
+
+  function handleInstallClick(){
+    if(isInStandalone()){
+      showPwaToast("Installed", "This app is already installed on this device.", "OK", hidePwaToast);
+      return;
+    }
+
+    if(isIOSPWA()){
+      showPwaToast(
+        "Install on iPhone",
+        "Open this page in <b>Safari</b>. Tap <b>Share</b>. Then choose <b>Add to Home Screen</b>.",
+        "OK",
+        hidePwaToast
+      );
+      return;
+    }
+
+    if(!deferredInstallPrompt){
+      showPwaToast(
+        "Install",
+        "If you don’t see the install prompt, open the browser menu and choose <b>Install app</b> or <b>Add to Home screen</b>.",
+        "OK",
+        hidePwaToast
+      );
+      return;
+    }
+
+    showPwaToast(
+      "Install Shaga3app",
+      "Install this experience so it opens like an app, fullscreen.",
+      "Install",
+      async () => {
+        try{
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if(choice && choice.outcome !== "accepted"){
+            showPwaToast("Install", "No worries. You can install any time from the browser menu.", "OK", hidePwaToast);
+          }else{
+            hidePwaToast();
+          }
+        }catch(e){
+          showPwaToast("Install", "Could not show the install prompt. Try from the browser menu.", "OK", hidePwaToast);
+        }finally{
+          deferredInstallPrompt = null;
+        }
+      }
+    );
+  }
+
+  installBtn?.addEventListener("click", handleInstallClick);
+
+  // On iOS, show Install button anyway (because there is no beforeinstallprompt).
+  (function initInstallBtnVisibility(){
+    if(!installBtn) return;
+    if(isInStandalone()){
+      installBtn.style.display = "none";
+      return;
+    }
+    if(isIOSPWA()){
+      installBtn.style.display = "inline-flex";
+      return;
+    }
+    // On Android, it will appear when beforeinstallprompt fires.
+  })();
+</script>
+
 <script>
   const $ = id => document.getElementById(id);
 
@@ -547,7 +776,7 @@
   }
 
   /* =========================
-     NEW: Refresh resilient "starting" state
+     Refresh resilient "starting" state
      ========================= */
   const GEN_STATE_KEY = "shaga3_gen_state_v1";
   const GEN_STATE_TTL_MS = 30 * 60 * 1000;
@@ -1354,7 +1583,6 @@
     const maxSeconds = isImagesModeOn() ? 420 : 240;
     const createdAt = Date.now();
 
-    /* NEW: Save a state immediately so refresh keeps the bar */
     saveGenState({
       createdAt,
       maxSeconds,
@@ -1363,7 +1591,6 @@
       operationName: ""
     });
 
-    /* Use the shared RAF ticker */
     startPendingProgress(createdAt, maxSeconds);
 
     try{
@@ -1420,17 +1647,15 @@
 
       const pendingMaxSeconds = isImagesModeOn() ? 420 : 240;
 
-      /* Save real pending op for refresh resume */
       savePendingOp({
         operationName,
-        createdAt,                 /* IMPORTANT: keep original createdAt */
+        createdAt,
         modelId: MODEL_ID,
         deviceId: getDeviceId(),
         isImages: isImagesModeOn(),
         maxSeconds: pendingMaxSeconds
       });
 
-      /* Update gen state with operationName */
       saveGenState({
         createdAt,
         maxSeconds: pendingMaxSeconds,
@@ -1470,7 +1695,6 @@
       generating = false;
       stopPendingProgress();
 
-      /* Clear gen state if we are no longer actively working */
       const pending = loadPendingOp();
       if(!pending?.operationName){
         clearGenState();
@@ -1687,12 +1911,6 @@
     restoreLastGeneratedIntoUI();
     syncOverlay();
 
-    /* =========================
-       Resume logic after refresh
-       Priority:
-       1) Pending op (has operationName)
-       2) Gen state (may be starting without operationName)
-       ========================= */
     const pending = loadPendingOp();
     const genState = loadGenState();
 
